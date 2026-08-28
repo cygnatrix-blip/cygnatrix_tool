@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+@layer base {
+  * {
+    @apply border-ink-200/70 dark:border-ink-800;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-white text-ink-900 antialiased dark:bg-ink-950 dark:text-ink-100;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4 {
+    @apply font-semibold tracking-tight text-ink-900 dark:text-white;
+    text-wrap: balance;
+  }
+  a {
+    @apply underline-offset-2;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white dark:ring-offset-ink-950;
+  }
+  ::selection {
+    @apply bg-brand-200 text-ink-900;
+  }
+}
+
+@layer components {
+  .prose-content {
+    @apply max-w-prose text-[15px] leading-7 text-ink-700 dark:text-ink-300;
+  }
+  .prose-content p {
+    @apply mb-4;
+  }
+  .prose-content h2 {
+    @apply mb-3 mt-8 text-xl;
+  }
+  .prose-content h3 {
+    @apply mb-2 mt-6 text-lg;
+  }
+  .prose-content ul {
+    @apply mb-4 list-disc space-y-1.5 pl-5;
+  }
+  .card {
+    @apply rounded-2xl border border-ink-200 bg-white shadow-card transition dark:border-ink-800 dark:bg-ink-900;
+  }
+  .card-hover {
+    @apply hover:-translate-y-1 hover:border-brand-300 hover:shadow-card-hover dark:hover:border-brand-600;
+  }
+  /* Alternating section background for visual rhythm on long pages. */
+  .section-muted {
+    @apply bg-ink-50/70 dark:bg-ink-900/40;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-400;
+  }
+}
+
+/* Respect reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* AdSense containers must never collapse — reserve height to protect CLS. */
+.ad-reserve {
+  min-height: 100px;
+}
+@media (min-width: 768px) {
+  .ad-reserve {
+    min-height: 120px;
+  }
+}
