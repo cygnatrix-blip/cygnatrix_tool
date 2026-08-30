@@ -76,6 +76,21 @@ const nextConfig = {
   async headers() {
     return [
       { source: '/:path*', headers: securityHeaders },
+      // HTML / RSC payloads: Next's default is `s-maxage=31536000`, which makes a CDN
+      // (Hostinger's included) serve a page for a YEAR. After a redeploy the old cached
+      // HTML keeps requesting build chunks that no longer exist → ChunkLoadError /
+      // "Refused to execute script" / 404 on /_next/static/chunks/…. Force the CDN to
+      // revalidate pages quickly. The immutable rule below wins for hashed build assets.
+      {
+        source: '/:path((?!_next/static/).*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, s-maxage=60, stale-while-revalidate=300, must-revalidate',
+          },
+        ],
+      },
+      // Content-hashed build assets never change — cache them hard (rule order: this wins).
       {
         source: '/_next/static/:path*',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
