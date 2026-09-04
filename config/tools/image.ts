@@ -303,4 +303,63 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['compress-image', 'jpg-to-png', 'png-to-jpg', 'resize-image'],
   },
+  {
+    ...base,
+    id: 'heic-to-jpg',
+    name: 'HEIC to JPG',
+    slug: 'heic-to-jpg',
+    path: '/image/heic-to-jpg',
+    icon: 'image',
+    toolType: 'converter',
+    featured: true,
+    popular: false,
+    sortOrder: 6,
+    updatedAt: '2026-08-28',
+    shortDescription: 'Convert iPhone HEIC/HEIF photos to widely-supported JPG.',
+    description:
+      'Convert HEIC or HEIF photos from an iPhone into JPG images that open everywhere. Batch convert, control quality, and choose whether to keep EXIF metadata.',
+    keywords: ['heic to jpg', 'heic to jpeg', 'iphone photo converter', 'heif to jpg', 'convert heic'],
+    seoTitle: 'HEIC to JPG — Convert iPhone Photos Online Free',
+    seoDescription:
+      'Free online HEIC to JPG converter. Convert iPhone HEIC/HEIF photos to JPG in your browser, in batches, with quality control and an EXIF preserve/strip choice. No upload.',
+    content: {
+      howItWorks: [
+        { title: 'Add your HEIC photos', body: 'Select one or many .heic or .heif files, typically from an iPhone.' },
+        { title: 'Set quality and EXIF', body: 'Choose the JPG quality and whether to keep the original EXIF metadata.' },
+        { title: 'Convert and download', body: 'Save each JPG individually, or all of them together as a ZIP.' },
+      ],
+      features: [
+        'Batch conversion',
+        'Adjustable JPG quality',
+        'Preserve or strip EXIF metadata',
+        'Download individually or as a ZIP',
+        'Runs entirely in your browser',
+      ],
+      sections: [
+        {
+          heading: 'Why HEIC needs converting',
+          paragraphs: [
+            'iPhones save photos as HEIC by default because it compresses better than JPG at the same quality. The trade-off is compatibility — many Windows apps, older Android devices and websites either can’t open HEIC at all or handle it poorly.',
+            'Converting to JPG trades a little file size for near-universal compatibility, which is usually the right call whenever you are sharing a photo outside Apple’s ecosystem.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Input', value: 'IMG_4821.HEIC — 2.4 MB' },
+          { label: 'Quality', value: '85' },
+        ],
+        result: [{ label: 'Output', value: 'IMG_4821.jpg — ~2.6 MB, opens everywhere' }],
+        walkthrough:
+          'The HEIC image is decoded in your browser and re-encoded as a JPG at quality 85. File size is similar to the original — the benefit here is compatibility, not compression.',
+      },
+    },
+    faq: [
+      { q: 'Will I lose photo quality converting from HEIC?', a: 'At quality 85 and above the difference is generally invisible. HEIC is a more efficient format, so a same-quality JPG is often a little larger, not smaller.' },
+      { q: 'What happens to my photo’s date, location and camera info?', a: 'By default nothing is carried over, for privacy. Tick "preserve EXIF" before converting if you want that metadata kept — this is a best-effort feature and may not work for every photo.' },
+      { q: 'Can I convert a whole camera roll at once?', a: `Yes, up to ${30} photos per batch. Download them together as a ZIP.` },
+      { q: 'Are my photos uploaded anywhere?', a: 'No. Conversion happens entirely in your browser.' },
+    ],
+    relatedTools: ['compress-image', 'jpg-to-png', 'webp-converter', 'resize-image'],
+  },
 ];

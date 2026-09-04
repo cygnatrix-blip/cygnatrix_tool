@@ -314,4 +314,237 @@ export const PDF_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['pdf-to-word', 'compress-pdf', 'split-pdf', 'jpg-to-png'],
   },
+  {
+    ...base,
+    id: 'image-to-pdf',
+    name: 'Image to PDF',
+    slug: 'image-to-pdf',
+    path: '/pdf/image-to-pdf',
+    icon: 'file-plus',
+    featured: true,
+    popular: false,
+    sortOrder: 6,
+    updatedAt: '2026-08-28',
+    shortDescription: 'Combine JPG, PNG or WebP photos into a single PDF.',
+    description:
+      'Turn one or more images into a PDF document. Drag to set the page order, choose A4, Letter or a page sized to fit each photo, pick orientation and margins.',
+    keywords: ['image to pdf', 'jpg to pdf', 'png to pdf', 'photos to pdf', 'convert images to pdf'],
+    seoTitle: 'Image to PDF — Convert JPG & PNG to PDF Online Free',
+    seoDescription:
+      'Free online tool to combine JPG, PNG or WebP images into one PDF. Reorder pages, choose A4/Letter/fit-to-image, set orientation and margins. No upload, no sign-up.',
+    content: {
+      howItWorks: [
+        { title: 'Add your images', body: 'Drop in one or more photos or scans. Add as many as you need.' },
+        { title: 'Set the order and layout', body: 'Drag to reorder, then choose page size, orientation and margins.' },
+        { title: 'Create the PDF', body: 'Each image becomes one page, built in your browser and downloaded instantly.' },
+      ],
+      features: [
+        'Multiple images per PDF, in the order you choose',
+        'A4, Letter or fit-to-image page sizing',
+        'Portrait or landscape orientation',
+        'Adjustable margins',
+        'Works with JPG, PNG and WebP',
+        '100% private — files never leave your device',
+      ],
+      sections: [
+        {
+          heading: 'Choosing a page size',
+          paragraphs: [
+            'A4 and Letter are the standard choices for documents you plan to print or send formally — each photo is centred and scaled to fit within your chosen margin.',
+            'Fit to image keeps every page sized to match its photo’s own proportions, which looks best for a PDF of scans or screenshots that will only be viewed on screen.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Images', value: '3 photos, various sizes' },
+          { label: 'Page size', value: 'A4, portrait, 10mm margin' },
+        ],
+        result: [{ label: 'Output', value: 'images.pdf — 3 pages, each photo centred on an A4 page' }],
+        walkthrough:
+          'Each photo is drawn onto its own A4 page, scaled to fit inside a 10mm margin while keeping its original aspect ratio, then centred.',
+      },
+    },
+    faq: [
+      { q: 'Can I mix JPG and PNG images in one PDF?', a: 'Yes. Every image is normalised to a consistent format internally, so you can mix JPG, PNG and WebP freely in the same document.' },
+      { q: 'Will my photos lose quality?', a: 'Images are embedded at high quality (92%) with no resizing beyond fitting the page, so quality loss is minimal.' },
+      { q: 'Can I change the order after adding images?', a: 'Yes, use the up/down arrows on each file to reorder before creating the PDF.' },
+      { q: 'Are my images uploaded?', a: 'No. The PDF is assembled entirely in your browser.' },
+    ],
+    relatedTools: ['merge-pdf', 'pdf-to-jpg', 'compress-pdf', 'organize-pdf'],
+  },
+  {
+    ...base,
+    id: 'rotate-pdf',
+    name: 'Rotate PDF',
+    slug: 'rotate-pdf',
+    path: '/pdf/rotate-pdf',
+    icon: 'rotate-cw',
+    featured: false,
+    popular: false,
+    sortOrder: 7,
+    updatedAt: '2026-08-28',
+    shortDescription: 'Rotate one page or every page of a PDF, with a live preview.',
+    description:
+      'Fix sideways or upside-down pages. Rotate a single page or the whole document by 90, 180 or 270 degrees and preview the result before saving.',
+    keywords: ['rotate pdf', 'turn pdf page', 'fix pdf orientation', 'rotate pdf pages online'],
+    seoTitle: 'Rotate PDF — Turn PDF Pages Online Free',
+    seoDescription:
+      'Free online tool to rotate PDF pages 90, 180 or 270 degrees. Rotate a single page or the whole document with a live thumbnail preview. No upload, no sign-up.',
+    content: {
+      howItWorks: [
+        { title: 'Upload a PDF', body: 'Every page renders as a thumbnail so you can see the current orientation.' },
+        { title: 'Rotate pages', body: 'Rotate individual pages or use "rotate all" for the whole document. The preview updates instantly.' },
+        { title: 'Save', body: 'Download the corrected PDF with your rotations applied.' },
+      ],
+      features: [
+        'Rotate a single page or every page at once',
+        '90°, 180° or 270° turns',
+        'Live thumbnail preview before saving',
+        'Preserves page content and quality',
+        'Entirely browser-based',
+      ],
+      sections: [
+        {
+          heading: 'Why pages end up sideways',
+          paragraphs: [
+            'Scanners and phone cameras often save a page in the orientation it was physically fed or held, not the orientation it should be read in — the PDF viewer then displays it sideways or upside down.',
+            'Rotating in the PDF itself (rather than just how your viewer displays it) fixes this permanently for anyone who opens the file.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Input', value: 'scan.pdf — page 3 upside down' },
+          { label: 'Action', value: 'Rotate page 3 by 180°' },
+        ],
+        result: [{ label: 'Output', value: 'rotated.pdf — page 3 now reads correctly' }],
+        walkthrough:
+          'Page 3’s stored rotation is adjusted by 180 degrees; every PDF viewer will now display it right-side up without changing the underlying content.',
+      },
+    },
+    faq: [
+      { q: 'Can I rotate just one page?', a: 'Yes — each page thumbnail has its own rotate-left and rotate-right buttons.' },
+      { q: 'Does rotating reduce quality?', a: 'No. Rotation only changes the page’s display orientation metadata; the content itself is untouched.' },
+      { q: 'Can I undo a rotation before saving?', a: 'Yes, keep clicking rotate on that page to cycle back, or refresh and start again before you download.' },
+      { q: 'Is my file uploaded?', a: 'No. Rotation happens entirely in your browser.' },
+    ],
+    relatedTools: ['organize-pdf', 'split-pdf', 'merge-pdf', 'compress-pdf'],
+  },
+  {
+    ...base,
+    id: 'organize-pdf',
+    name: 'Organize PDF',
+    slug: 'organize-pdf',
+    path: '/pdf/organize-pdf',
+    icon: 'layout-grid',
+    featured: true,
+    popular: false,
+    sortOrder: 8,
+    updatedAt: '2026-08-28',
+    shortDescription: 'Reorder, delete or extract pages with drag-and-drop thumbnails.',
+    description:
+      'See every page as a thumbnail, drag pages into a new order, remove the ones you don’t need, or tick a selection to pull out into a brand-new PDF.',
+    keywords: ['organize pdf', 'reorder pdf pages', 'delete pdf pages', 'rearrange pdf', 'pdf page organizer'],
+    seoTitle: 'Organize PDF — Reorder, Delete & Extract Pages Online Free',
+    seoDescription:
+      'Free online PDF organizer. Reorder pages, delete pages, or extract a selection into a new PDF using drag-and-drop thumbnails. No upload, no sign-up.',
+    content: {
+      howItWorks: [
+        { title: 'Upload a PDF', body: 'Every page appears as a thumbnail in its current order.' },
+        { title: 'Reorder, delete or select', body: 'Move pages with the arrows, remove pages with the ✕, or tick pages to extract.' },
+        { title: 'Save or extract', body: 'Save the reordered document, or extract just the pages you ticked into a separate file.' },
+      ],
+      features: [
+        'Drag-style reordering via simple controls',
+        'Delete pages you don’t need',
+        'Extract a selection into a brand-new PDF',
+        'Visual thumbnails for every page',
+        'One tool, three actions — no need to switch pages',
+      ],
+      sections: [
+        {
+          heading: 'One page, three jobs',
+          paragraphs: [
+            'Organize PDF replaces three separate tasks — reordering, deleting and extracting — with one visual workspace. Every action works on the same set of page thumbnails, so you can combine them: drop pages you don’t need, reorder what’s left, and pull out a selection, all before downloading.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Input', value: 'report.pdf — 10 pages' },
+          { label: 'Action', value: 'Remove page 4, move page 10 to the front' },
+        ],
+        result: [{ label: 'Output', value: 'organized.pdf — 9 pages in the new order' }],
+        walkthrough:
+          'Page 4 is removed from the working set and page 10 is dragged to position 1; saving builds a new 9-page PDF in exactly that order.',
+      },
+    },
+    faq: [
+      { q: 'Does this change my original file?', a: 'No. Nothing is modified until you click Save or Extract — up to that point you’re only arranging a working copy in your browser.' },
+      { q: 'What is the difference between Save and Extract?', a: 'Save keeps every page currently in your working set, in your chosen order. Extract ignores the working set order and instead pulls out only the pages you’ve ticked, in their original order, into a separate file.' },
+      { q: 'Can I reorder and delete in the same pass?', a: 'Yes — arrange pages and remove the ones you don’t want, then click Save once.' },
+      { q: 'Is my file uploaded?', a: 'No. Everything happens locally in your browser.' },
+    ],
+    relatedTools: ['split-pdf', 'merge-pdf', 'rotate-pdf', 'compress-pdf'],
+  },
+  {
+    ...base,
+    id: 'protect-pdf',
+    name: 'Protect / Unlock PDF',
+    slug: 'protect-pdf',
+    path: '/pdf/protect-pdf',
+    icon: 'lock',
+    featured: true,
+    popular: false,
+    sortOrder: 9,
+    updatedAt: '2026-08-28',
+    shortDescription: 'Add an open password to a PDF, or remove one you already know.',
+    description:
+      'Protect a PDF with a password so it can’t be opened without it, or remove a password you already know from a protected file. Standard 128-bit encryption, opens in every PDF reader.',
+    keywords: ['protect pdf', 'password protect pdf', 'unlock pdf', 'remove pdf password', 'encrypt pdf', 'pdf password remover'],
+    seoTitle: 'Protect / Unlock PDF — Add or Remove a PDF Password Free',
+    seoDescription:
+      'Free online tool to password-protect a PDF or remove a known password. Standard 128-bit encryption compatible with every PDF reader. Cannot crack unknown passwords. No upload.',
+    content: {
+      howItWorks: [
+        { title: 'Choose Add or Remove', body: 'Pick whether you want to protect a PDF or unlock one you already have the password for.' },
+        { title: 'Upload and enter the password', body: 'Set a new password to protect the file, or enter the current one to remove it.' },
+        { title: 'Download', body: 'Your protected or unlocked PDF is ready immediately.' },
+      ],
+      features: [
+        'Add a password required to open the PDF',
+        'Remove a password you already know',
+        'Standard 128-bit encryption, opens in every reader',
+        'Clear about its limits — no password cracking',
+        'Processed entirely in your browser',
+      ],
+      sections: [
+        {
+          heading: 'What this tool will not do',
+          paragraphs: [
+            'This is not a password-recovery or password-cracking tool. Removing a password requires knowing it — the tool checks your password against the file’s own security details and only proceeds if it is correct.',
+            'It also does not yet support PDFs protected with the newer AES-256 (PDF 2.0) encryption used by some recent Adobe Acrobat exports; those need a desktop PDF reader to remove the password.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Action', value: 'Add a password' },
+          { label: 'Input', value: 'contract.pdf' },
+          { label: 'Password', value: 'chosen by you' },
+        ],
+        result: [{ label: 'Output', value: 'protected.pdf — requires the password to open' }],
+        walkthrough:
+          'The PDF is re-saved with standard 128-bit encryption tied to your chosen password. Any PDF reader will now prompt for it before opening the file.',
+      },
+    },
+    faq: [
+      { q: 'Can this remove a password if I don’t know it?', a: 'No, and it never will — that would make it a password-cracking tool, not a convenience one. You must know the current password to remove it.' },
+      { q: 'Which PDF readers can open a file I protect here?', a: 'Any of them — Adobe Acrobat, Preview, browser PDF viewers, mobile apps. The 128-bit encryption used is the universal standard.' },
+      { q: 'What if my PDF uses AES-256 encryption?', a: 'That newer PDF 2.0 encryption type isn’t supported yet. You’ll see a clear message if this happens; a desktop PDF reader with your password will still be able to remove it.' },
+      { q: 'Is my password sent anywhere?', a: 'No. Both protecting and unlocking happen entirely in your browser — your password and file never leave your device.' },
+    ],
+    relatedTools: ['compress-pdf', 'merge-pdf', 'organize-pdf', 'split-pdf'],
+  },
 ];

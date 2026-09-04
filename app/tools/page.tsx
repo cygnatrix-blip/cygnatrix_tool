@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ToolGrid } from '@/components/cards/ToolGrid';
 import { SectionHeading } from '@/components/ui/primitives';
 import { CATEGORY_LIST } from '@/config/categories';
-import { getToolsByCategory } from '@/config/tools';
+import { ACTIVE_TOOLS, getToolsByCategory } from '@/config/tools';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { pageCrumbs } from '@/lib/seo/breadcrumbs';
 
@@ -12,8 +12,7 @@ export const dynamic = 'force-static';
 
 export const metadata: Metadata = buildMetadata({
   title: 'All Tools — A–Z Index',
-  description:
-    'The complete list of free Cygnatrix Tools: 5 PDF tools, 8 finance calculators and 5 image tools, grouped by category. All browser-based, all free, no sign-up.',
+  description: `The complete list of ${ACTIVE_TOOLS.length} free Cygnatrix Tools: ${getToolsByCategory('pdf').length} PDF tools, ${getToolsByCategory('finance').length} finance calculators and ${getToolsByCategory('image').length} image tools, grouped by category. All browser-based, all free, no sign-up.`,
   path: '/tools',
 });
 

@@ -58,7 +58,7 @@ export const CATEGORIES: Record<CategorySlug, CategoryConfig> = {
       },
       {
         q: 'Do my files get uploaded to a server?',
-        a: 'No. All five PDF tools run entirely in your browser. Your file is read into memory on your own device, processed there, and the result is offered as a download. It is never transmitted to us.',
+        a: 'No. Every PDF tool runs entirely in your browser. Your file is read into memory on your own device, processed there, and the result is offered as a download. It is never transmitted to us.',
       },
       {
         q: 'Is there a file size limit?',
@@ -164,7 +164,7 @@ export const CATEGORIES: Record<CategorySlug, CategoryConfig> = {
     icon: 'image',
     intro: [
       'Images are usually the heaviest thing on a web page and the most common reason an email bounces or an upload is rejected.',
-      'These five tools fix that in seconds. They use the same image engine built into your browser, so processing is fast, private and produces predictable results.',
+      'These tools fix that in seconds. They use the same image engine built into your browser, so processing is fast, private and produces predictable results.',
     ],
     helpfulContent: [
       {

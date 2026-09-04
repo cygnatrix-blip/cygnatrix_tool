@@ -1,6 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
+import { ACTIVE_TOOLS } from '@/config/tools';
 
 /** Opens the shared search dialog (mounted once in the Header) via a window event. */
 export function openSearch() {
@@ -17,7 +18,7 @@ export function SearchTrigger({ variant = 'button' }: { variant?: 'button' | 'in
         className="group flex w-full items-center gap-3 rounded-2xl border border-ink-200 bg-white px-4 py-3.5 text-left shadow-card transition hover:border-brand-300 hover:shadow-card-hover dark:border-ink-700 dark:bg-ink-900"
       >
         <Search className="h-5 w-5 shrink-0 text-ink-400 transition group-hover:text-brand-500" aria-hidden="true" />
-        <span className="text-[15px] text-ink-500 dark:text-ink-400">Search 18 tools…</span>
+        <span className="text-[15px] text-ink-500 dark:text-ink-400">Search {ACTIVE_TOOLS.length} tools…</span>
         <span className="ml-auto hidden items-center gap-1 text-[11px] text-ink-400 sm:flex">
           <kbd className="rounded border border-ink-200 px-1.5 py-0.5 dark:border-ink-700">/</kbd>
           <kbd className="rounded border border-ink-200 px-1.5 py-0.5 dark:border-ink-700">⌘K</kbd>

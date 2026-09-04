@@ -19,6 +19,10 @@ import {
   Calculator,
   Image as ImageIcon,
   Wrench,
+  FilePlus,
+  RotateCw,
+  LayoutGrid,
+  Lock,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -42,6 +46,10 @@ const MAP: Record<string, LucideIcon> = {
   'file-text': FileText,
   calculator: Calculator,
   image: ImageIcon,
+  'file-plus': FilePlus,
+  'rotate-cw': RotateCw,
+  'layout-grid': LayoutGrid,
+  lock: Lock,
 };
 
 export function ToolIcon({ name, className }: { name: string; className?: string }) {

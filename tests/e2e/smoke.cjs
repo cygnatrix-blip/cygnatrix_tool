@@ -120,9 +120,11 @@ function ensureFixtures() {
     '/', '/pdf', '/finance', '/image', '/tools', '/about', '/contact',
     '/privacy-policy', '/terms', '/cookie-policy', '/disclaimer',
     '/pdf/merge-pdf', '/pdf/split-pdf', '/pdf/compress-pdf', '/pdf/pdf-to-word', '/pdf/pdf-to-jpg',
+    '/pdf/image-to-pdf', '/pdf/rotate-pdf', '/pdf/organize-pdf', '/pdf/protect-pdf',
     '/finance/emi-calculator', '/finance/sip-calculator', '/finance/fd-calculator', '/finance/rd-calculator',
     '/finance/gst-calculator', '/finance/loan-calculator', '/finance/cagr-calculator', '/finance/salary-calculator',
     '/image/compress-image', '/image/resize-image', '/image/jpg-to-png', '/image/png-to-jpg', '/image/webp-converter',
+    '/image/heic-to-jpg',
   ];
 
   console.log('\n## Pages load (no JS errors, exactly one H1)');
@@ -163,6 +165,7 @@ function ensureFixtures() {
     ['/image/jpg-to-png', ['sample.jpg'], 'convert \\d+ image', 'converted \\d+ image'],
     ['/image/png-to-jpg', ['sample.png'], 'convert \\d+ image', 'converted \\d+ image'],
     ['/image/webp-converter', ['sample.jpg'], 'convert \\d+ image', 'converted \\d+ image'],
+    ['/pdf/image-to-pdf', ['sample.jpg'], 'create pdf from', 'ready'],
   ];
   for (const [route, files, btn, ok] of fileTests) {
     const p = await open();
@@ -180,6 +183,101 @@ function ensureFixtures() {
     await wait(3500);
     const produced = await p.evaluate((re) => new RegExp(re, 'i').test(document.body.innerText), ok);
     check(route, listed && clicked && produced && p._errs.length === 0, p._errs[0] || `listed=${listed} clicked=${clicked} produced=${produced}`);
+    await p.close();
+  }
+
+  console.log('\n## Thumbnail-based PDF tools (Rotate / Organize)');
+  {
+    const p = await open();
+    await p.goto(BASE + '/pdf/rotate-pdf', { waitUntil: 'networkidle0' });
+    await wait(500);
+    const fi = await p.$('input[type="file"]');
+    await fi.uploadFile(path.join(FIX, 'sample.pdf'));
+    await wait(1500); // thumbnails render via pdf.js
+    const clickedRotate = await p.evaluate(() => {
+      const b = document.querySelector('button[aria-label*="Rotate page 1 right"]');
+      if (b) { b.click(); return true; }
+      return false;
+    });
+    const clickedSave = await p.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => /save rotated pdf/i.test(x.textContent));
+      if (b) { b.click(); return true; }
+      return false;
+    });
+    await wait(2500);
+    const ready = await p.evaluate(() => /rotated pdf is ready/i.test(document.body.innerText));
+    check('/pdf/rotate-pdf', clickedRotate && clickedSave && ready && p._errs.length === 0, p._errs[0] || `rotate=${clickedRotate} save=${clickedSave} ready=${ready}`);
+    await p.close();
+  }
+  {
+    const p = await open();
+    await p.goto(BASE + '/pdf/organize-pdf', { waitUntil: 'networkidle0' });
+    await wait(500);
+    const fi = await p.$('input[type="file"]');
+    await fi.uploadFile(path.join(FIX, 'sample.pdf'));
+    await wait(1500);
+    const clickedSave = await p.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => /save \d+ pages? as new pdf/i.test(x.textContent));
+      if (b) { b.click(); return true; }
+      return false;
+    });
+    await wait(2500);
+    const ready = await p.evaluate(() => /pdf is ready/i.test(document.body.innerText));
+    check('/pdf/organize-pdf', clickedSave && ready && p._errs.length === 0, p._errs[0] || `save=${clickedSave} ready=${ready}`);
+    await p.close();
+  }
+
+  console.log('\n## Protect / Unlock PDF (full round trip through the real UI)');
+  {
+    const p = await open();
+    await p.goto(BASE + '/pdf/protect-pdf', { waitUntil: 'networkidle0' });
+    await wait(500);
+    const fi = await p.$('input[type="file"]');
+    await fi.uploadFile(path.join(FIX, 'sample.pdf'));
+    await wait(500);
+    await p.type('#pw', 'e2eTestPass1');
+    await p.type('#pw2', 'e2eTestPass1');
+    await p.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => /protect pdf/i.test(x.textContent));
+      b?.click();
+    });
+    await wait(2000);
+    const protectedReady = await p.evaluate(() => /password-protected pdf is ready/i.test(document.body.innerText));
+    check('/pdf/protect-pdf (add password)', protectedReady && p._errs.length === 0, p._errs[0] || 'protect step did not complete');
+
+    if (protectedReady) {
+      // Download the protected file, then feed it back in and unlock it — a full round trip through the UI.
+      const client = await p.target().createCDPSession();
+      const dlDir = path.join(FIX, 'dl');
+      fs.mkdirSync(dlDir, { recursive: true });
+      await client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dlDir });
+      await p.evaluate(() => {
+        const b = [...document.querySelectorAll('button')].find((x) => /download protected\.pdf/i.test(x.textContent));
+        b?.click();
+      });
+      await wait(1500);
+      const downloaded = fs.existsSync(path.join(dlDir, 'protected.pdf'));
+      if (downloaded) {
+        await p.evaluate(() => {
+          const b = [...document.querySelectorAll('button')].find((x) => /remove a password/i.test(x.textContent));
+          b?.click();
+        });
+        await wait(300);
+        const fi2 = await p.$('input[type="file"]');
+        await fi2.uploadFile(path.join(dlDir, 'protected.pdf'));
+        await wait(500);
+        await p.type('#pw', 'e2eTestPass1');
+        await p.evaluate(() => {
+          const b = [...document.querySelectorAll('button')].find((x) => /unlock pdf/i.test(x.textContent));
+          b?.click();
+        });
+        await wait(2000);
+        const unlockedReady = await p.evaluate(() => /unlocked pdf is ready/i.test(document.body.innerText));
+        check('/pdf/protect-pdf (remove password, correct)', unlockedReady, 'unlock of our own protected output failed');
+      } else {
+        check('/pdf/protect-pdf (download)', false, 'protected.pdf did not download');
+      }
+    }
     await p.close();
   }
 

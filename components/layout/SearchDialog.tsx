@@ -175,7 +175,7 @@ export function SearchDialog({ index }: { index: ToolIndexEntry[] }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onInputKey}
-                placeholder="Search 18 tools…"
+                placeholder={`Search ${index.length} tools…`}
                 aria-label="Search tools"
                 className="h-14 w-full appearance-none border-0 bg-transparent text-base text-ink-900 outline-none ring-0 focus:outline-none focus:ring-0 placeholder:text-ink-400 dark:text-white [&::-webkit-search-cancel-button]:hidden"
               />
