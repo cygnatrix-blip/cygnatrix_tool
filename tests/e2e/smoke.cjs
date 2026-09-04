@@ -124,7 +124,7 @@ function ensureFixtures() {
     '/finance/emi-calculator', '/finance/sip-calculator', '/finance/fd-calculator', '/finance/rd-calculator',
     '/finance/gst-calculator', '/finance/loan-calculator', '/finance/cagr-calculator', '/finance/salary-calculator',
     '/image/compress-image', '/image/resize-image', '/image/jpg-to-png', '/image/png-to-jpg', '/image/webp-converter',
-    '/image/heic-to-jpg',
+    '/image/heic-to-jpg', '/image/compress-to-size',
   ];
 
   console.log('\n## Pages load (no JS errors, exactly one H1)');
@@ -183,6 +183,31 @@ function ensureFixtures() {
     await wait(3500);
     const produced = await p.evaluate((re) => new RegExp(re, 'i').test(document.body.innerText), ok);
     check(route, listed && clicked && produced && p._errs.length === 0, p._errs[0] || `listed=${listed} clicked=${clicked} produced=${produced}`);
+    await p.close();
+  }
+
+  console.log('\n## Compress to exact size (Web Worker + OffscreenCanvas)');
+  {
+    const p = await open();
+    await p.goto(BASE + '/image/compress-to-size', { waitUntil: 'networkidle0' });
+    await wait(500);
+    const fi = await p.$('input[type="file"]');
+    await fi.uploadFile(path.join(FIX, 'sample.jpg'));
+    await wait(500);
+    // pick the "50 KB" quick-pick chip
+    const pickedChip = await p.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === '50 KB');
+      if (b) { b.click(); return true; }
+      return false;
+    });
+    const clicked = await p.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => /compress \d+ images? to 50 KB/i.test(x.textContent));
+      if (b) { b.click(); return true; }
+      return false;
+    });
+    await wait(4000); // worker round trip
+    const produced = await p.evaluate(() => /quality \d+%/.test(document.body.innerText) && /processed\./i.test(document.body.innerText));
+    check('/image/compress-to-size', pickedChip && clicked && produced && p._errs.length === 0, p._errs[0] || `chip=${pickedChip} clicked=${clicked} produced=${produced}`);
     await p.close();
   }
 

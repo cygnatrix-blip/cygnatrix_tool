@@ -362,4 +362,70 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['compress-image', 'jpg-to-png', 'webp-converter', 'resize-image'],
   },
+  {
+    ...base,
+    id: 'compress-to-size',
+    name: 'Compress Image to Exact Size',
+    slug: 'compress-to-size',
+    path: '/image/compress-to-size',
+    icon: 'file-image',
+    toolType: 'file',
+    featured: true,
+    popular: true,
+    sortOrder: 7,
+    updatedAt: '2026-08-28',
+    shortDescription: 'Hit an exact file size in KB — for forms that demand it.',
+    description:
+      'Tell it a target size — like 50 KB for a government form — and it finds the right quality automatically. No guessing with a slider, no repeated re-uploads.',
+    keywords: ['compress image to 50kb', 'compress image to 100kb', 'reduce image size to kb', 'exact file size compressor', 'image size reducer kb'],
+    seoTitle: 'Compress Image to Exact KB — 20KB, 50KB, 100KB & More',
+    seoDescription:
+      'Free tool to compress a JPG or WebP to an exact target file size — 20 KB, 50 KB, 100 KB, 200 KB, 500 KB, 1 MB or a custom value. Automatic, in your browser, no sign-up.',
+    content: {
+      howItWorks: [
+        { title: 'Add your image', body: 'Drop in one or more photos.' },
+        { title: 'Pick a target size', body: 'Choose a quick-pick chip (20 KB–1 MB) or type a custom target, plus an optional minimum.' },
+        { title: 'Get an exact match', body: 'The tool searches automatically and tells you exactly what it did — no slider guessing.' },
+      ],
+      features: [
+        'Targets an exact KB size, not a vague quality level',
+        'Quick-pick chips: 20KB, 50KB, 100KB, 200KB, 500KB, 1MB',
+        'Optional minimum size for forms with a size range',
+        'Runs in a Web Worker — the page never freezes, even on large photos',
+        'Tells you exactly what changed: dimensions, quality and final size',
+        'JPG or WebP output',
+      ],
+      sections: [
+        {
+          heading: 'How the search works',
+          paragraphs: [
+            'Most compressors make you drag a quality slider and check the result yourself, again and again. This tool automates that: it binary-searches the JPEG/WebP quality setting, testing a handful of values until it finds the highest quality that still fits under your target size.',
+            'If even the lowest quality is still too big — common with very small targets like 20 KB on a large photo — it also reduces the image dimensions in small steps and searches again, until it fits or it has tried as much as it reasonably can.',
+          ],
+        },
+        {
+          heading: 'Why a minimum size matters',
+          paragraphs: [
+            'Some forms (competitive exam applications are a classic example) reject a file for being too small as well as too large — for instance, "between 20 KB and 50 KB". Set a minimum and the tool will nudge the quality back up if its first result lands below it, without ever going over your maximum.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Input', value: 'photo.jpg — 1024×768, 1.4 MB' },
+          { label: 'Target', value: '100 KB' },
+        ],
+        result: [{ label: 'Output', value: '1024×768 → 800×600, quality 72%, 96 KB' }],
+        walkthrough:
+          'Quality alone at full size couldn’t reach 100 KB, so the tool reduced the dimensions once and re-searched quality, landing at 96 KB — just under the target — at quality 72%.',
+      },
+    },
+    faq: [
+      { q: 'Why not just use a quality slider?', a: 'A slider makes you guess and check repeatedly. This tool does that searching for you and stops exactly when it finds the best quality that still fits your target size.' },
+      { q: 'What happens if the target is impossible to hit?', a: 'For an extremely small target on a highly detailed image, even the lowest quality and smallest reasonable size may not fit. The tool tries its best across several downscale steps and clearly marks the result if it couldn’t fully meet your target.' },
+      { q: 'Does resizing distort my photo?', a: 'No. When the tool needs to shrink dimensions to hit a target, it always scales proportionally — width and height shrink together.' },
+      { q: 'Can I set both a minimum and maximum size?', a: 'Yes — enter a target (the maximum) and an optional minimum. This exactly matches forms that specify a size range like "20 KB to 50 KB".' },
+    ],
+    relatedTools: ['compress-image', 'resize-image', 'webp-converter', 'jpg-to-png'],
+  },
 ];
