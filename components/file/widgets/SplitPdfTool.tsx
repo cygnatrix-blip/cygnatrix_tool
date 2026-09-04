@@ -77,7 +77,8 @@ export function SplitPdfTool() {
       setOutputs(result);
       track('tool_completed', { toolSlug: 'split-pdf', category: 'pdf', meta: { mode, parts: result.length } });
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Something went wrong while splitting your file. Please try again.');
+      const { describePdfLoadError } = await import('@/lib/pdf/pdfjs');
+      setErr(describePdfLoadError(e, 'Something went wrong while splitting your file. Please try again.'));
       track('tool_failed', { toolSlug: 'split-pdf', category: 'pdf' });
     } finally {
       setBusy(false);

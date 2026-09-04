@@ -45,7 +45,8 @@ export function CompressPdfTool() {
       setResult({ blob: bytesToBlob(r.bytes, 'application/pdf'), original: r.originalSize, size: r.newSize, rasterised: r.rasterised });
       track('tool_completed', { toolSlug: 'compress-pdf', category: 'pdf', meta: { level, saved: Math.max(0, r.originalSize - r.newSize) } });
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Something went wrong while compressing your file. Please try again.');
+      const { describePdfLoadError } = await import('@/lib/pdf/pdfjs');
+      setErr(describePdfLoadError(e, 'Something went wrong while compressing your file. Please try again.'));
       track('tool_failed', { toolSlug: 'compress-pdf', category: 'pdf' });
     } finally {
       setBusy(false);

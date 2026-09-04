@@ -55,8 +55,13 @@ export function RotatePdfTool() {
         const pages = await pdfToImages(buf, { dpi: 55, quality: 0.7, mime: 'image/jpeg' });
         if (cancelled) return;
         setThumbs(pages.map((p) => ({ pageNumber: p.pageNumber, url: URL.createObjectURL(p.blob) })));
-      } catch {
-        if (!cancelled) setError('This PDF could not be read. It may be password-protected or damaged.');
+      } catch (e) {
+        if (!cancelled) {
+          // eslint-disable-next-line no-console
+          console.error('rotate-pdf: failed to render thumbnails', e);
+          const { describePdfLoadError } = await import('@/lib/pdf/pdfjs');
+          setError(describePdfLoadError(e));
+        }
       } finally {
         if (!cancelled) setLoadingThumbs(false);
       }

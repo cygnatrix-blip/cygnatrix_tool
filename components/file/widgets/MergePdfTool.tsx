@@ -44,7 +44,8 @@ export function MergePdfTool() {
       setOutput(bytesToBlob(bytes, 'application/pdf'));
       track('tool_completed', { toolSlug: 'merge-pdf', category: 'pdf', meta: { files: sources.length } });
     } catch (e) {
-      ft.setError(e instanceof Error ? e.message : 'Something went wrong while merging your files. Please try again.');
+      const { describePdfLoadError } = await import('@/lib/pdf/pdfjs');
+      ft.setError(describePdfLoadError(e, 'Something went wrong while merging your files. Please try again.'));
       track('tool_failed', { toolSlug: 'merge-pdf', category: 'pdf' });
     } finally {
       setBusy(false);

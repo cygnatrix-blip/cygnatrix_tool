@@ -43,7 +43,8 @@ export function PdfToWordTool() {
       setResult({ blob: r.blob, isScanned: r.isScanned, words: r.wordCount });
       track('tool_completed', { toolSlug: 'pdf-to-word', category: 'pdf', meta: { words: r.wordCount, scanned: r.isScanned } });
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Something went wrong while converting your file. Please try again.');
+      const { describePdfLoadError } = await import('@/lib/pdf/pdfjs');
+      setErr(describePdfLoadError(e, 'Something went wrong while converting your file. Please try again.'));
       track('tool_failed', { toolSlug: 'pdf-to-word', category: 'pdf' });
     } finally {
       setBusy(false);

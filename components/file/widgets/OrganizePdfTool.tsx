@@ -54,8 +54,13 @@ export function OrganizePdfTool() {
         const rendered = await pdfToImages(buf, { dpi: 55, quality: 0.7, mime: 'image/jpeg' });
         if (cancelled) return;
         setPages(rendered.map((p) => ({ original: p.pageNumber, url: URL.createObjectURL(p.blob), selected: false })));
-      } catch {
-        if (!cancelled) setError('This PDF could not be read. It may be password-protected or damaged.');
+      } catch (e) {
+        if (!cancelled) {
+          // eslint-disable-next-line no-console
+          console.error('organize-pdf: failed to render thumbnails', e);
+          const { describePdfLoadError } = await import('@/lib/pdf/pdfjs');
+          setError(describePdfLoadError(e));
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

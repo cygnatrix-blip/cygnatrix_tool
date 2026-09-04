@@ -54,7 +54,8 @@ export function PdfToJpgTool() {
       setPages(rendered);
       track('tool_completed', { toolSlug: 'pdf-to-jpg', category: 'pdf', meta: { pages: rendered.length, dpi } });
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Something went wrong while converting your file. Please try again.');
+      const { describePdfLoadError } = await import('@/lib/pdf/pdfjs');
+      setErr(describePdfLoadError(e, 'Something went wrong while converting your file. Please try again.'));
       track('tool_failed', { toolSlug: 'pdf-to-jpg', category: 'pdf' });
     } finally {
       setBusy(false);
