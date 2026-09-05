@@ -26,6 +26,19 @@ describe('calculateSalary', () => {
     expect(r.incomeTaxAnnual).toBe(0);
   });
 
+  it('defaults to FY 2025-26, with FY 2024-25 still selectable', () => {
+    const latest = calculateSalary({ ctcAnnual: 1_300_000, regime: 'new' });
+    const prior = calculateSalary({ ctcAnnual: 1_300_000, regime: 'new', financialYear: '2024-25' });
+    expect(latest.assumptions[0]).toContain('2025-26');
+    expect(prior.assumptions[0]).toContain('2024-25');
+    // The wider FY 2025-26 rebate means less (or equal) tax at the same CTC.
+    expect(latest.incomeTaxAnnual).toBeLessThanOrEqual(prior.incomeTaxAnnual);
+  });
+
+  it('rejects an unknown financial year', () => {
+    expect(() => calculateSalary({ ctcAnnual: 1_000_000, financialYear: '2099-00' as never })).toThrow();
+  });
+
   it('lets PF be switched off', () => {
     const withPf = calculateSalary({ ctcAnnual: 1_000_000, employeePfEnabled: true });
     const withoutPf = calculateSalary({ ctcAnnual: 1_000_000, employeePfEnabled: false });
@@ -49,17 +62,17 @@ describe('calculateSalary', () => {
   });
 });
 
-describe('incomeTaxForTaxableIncome', () => {
-  it('is zero within the 87A rebate limit (new regime)', () => {
-    expect(incomeTaxForTaxableIncome(700_000, 'new')).toBe(0);
+describe('incomeTaxForTaxableIncome (default FY = 2025-26)', () => {
+  it('is zero within the new-regime 87A rebate limit of ₹12L', () => {
+    expect(incomeTaxForTaxableIncome(1_200_000, 'new')).toBe(0);
   });
 
-  it('applies slab rates with cess above the rebate limit (new regime)', () => {
-    // 12,00,000 taxable: 5% of 4L + 10% of 3L + 15% of 2L = 20000+30000+30000 = 80000, +4% cess
-    expect(incomeTaxForTaxableIncome(1_200_000, 'new')).toBeCloseTo(83_200, 0);
+  it('taxes above ₹12L in the new regime, past the marginal-relief band', () => {
+    // 15,00,000 taxable: 5% of 4L + 10% of 4L + 15% of 3L = 20k+40k+45k = 1,05,000, +4% cess.
+    expect(incomeTaxForTaxableIncome(1_500_000, 'new')).toBeCloseTo(109_200, 0);
   });
 
-  it('is monotonic in income', () => {
+  it('is monotonic in income under the old regime', () => {
     let prev = -1;
     for (const inc of [0, 3e5, 5e5, 8e5, 12e5, 2e6, 5e6]) {
       const tax = incomeTaxForTaxableIncome(inc, 'old');

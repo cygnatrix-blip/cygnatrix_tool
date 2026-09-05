@@ -111,6 +111,8 @@ export interface SalaryInput {
   otherMonthlyDeductions?: number;
   employeePfEnabled?: boolean;
   regime?: 'new' | 'old';
+  /** Financial year for tax slabs; defaults to the latest in config/india-payroll.ts. */
+  financialYear?: '2025-26' | '2024-25';
 }
 
 export type AssetClass = 'equity' | 'other';

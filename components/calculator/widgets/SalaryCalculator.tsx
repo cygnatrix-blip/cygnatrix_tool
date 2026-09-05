@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { FinancialYear } from '@/config/india-payroll';
 import { calculateSalary } from '@/lib/finance/salary';
 import { formatCurrency, formatCurrencyCompact } from '@/lib/format';
 import { CalculatorShell, NumberField, ResultStat, CalcError, SegmentedControl } from '@/components/calculator/shell';
@@ -15,6 +16,7 @@ export function SalaryCalculator() {
   const [ptMonthly, setPtMonthly] = useState(200);
   const [regime, setRegime] = useState<'new' | 'old'>('new');
   const [pf, setPf] = useState<'on' | 'off'>('on');
+  const [fy, setFy] = useState<FinancialYear>('2025-26');
 
   const result = useCalc(
     'salary-calculator',
@@ -26,9 +28,10 @@ export function SalaryCalculator() {
         monthlyProfessionalTax: ptMonthly,
         regime,
         employeePfEnabled: pf === 'on',
+        financialYear: fy,
       }),
-    [ctc, basicPct, hraPct, ptMonthly, regime, pf],
-    () => ({ ctc, basicPct, hraPct, regime, pf }),
+    [ctc, basicPct, hraPct, ptMonthly, regime, pf, fy],
+    () => ({ ctc, basicPct, hraPct, regime, pf, fy }),
   );
 
   return (
@@ -39,6 +42,15 @@ export function SalaryCalculator() {
           <NumberField label="Basic (% of CTC)" suffix="%" value={basicPct} onChange={setBasicPct} min={20} max={60} step={1} slider />
           <NumberField label="HRA (% of basic)" suffix="%" value={hraPct} onChange={setHraPct} min={0} max={100} step={1} slider />
           <NumberField label="Professional tax / month" prefix="₹" value={ptMonthly} onChange={setPtMonthly} min={0} max={250} step={10} />
+          <SegmentedControl
+            label="Financial year"
+            value={fy}
+            onChange={setFy}
+            options={[
+              { value: '2025-26', label: 'FY 2025-26' },
+              { value: '2024-25', label: 'FY 2024-25' },
+            ]}
+          />
           <SegmentedControl
             label="Tax regime"
             value={regime}

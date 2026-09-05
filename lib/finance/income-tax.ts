@@ -1,11 +1,19 @@
-import { PAYROLL_CONFIG, incomeTaxForTaxableIncome, type TaxRegime } from '@/config/india-payroll';
-import { assertNumber, round } from './shared';
+import {
+  PAYROLL_CONFIG,
+  incomeTaxForTaxableIncome,
+  LATEST_FY,
+  type TaxRegime,
+  type FinancialYear,
+} from '@/config/india-payroll';
+import { assertNumber, CalculationError, round } from './shared';
 
 export interface IncomeTaxInput {
   /** Gross annual income before standard deduction. */
   annualIncome: number;
-  /** Old-regime-only deductions: 80C, 80D, home loan interest, etc., combined. */
+  /** Old-regime-only deductions: 80C, 80D, home loan interest, HRA exemption, etc., combined. */
   oldRegimeDeductions?: number;
+  /** Financial year to apply. Defaults to the latest. */
+  financialYear?: FinancialYear;
 }
 
 export interface RegimeBreakdown {
@@ -19,17 +27,23 @@ export interface RegimeBreakdown {
 }
 
 export interface IncomeTaxResult {
+  financialYear: FinancialYear;
   old: RegimeBreakdown;
   new: RegimeBreakdown;
   betterRegime: TaxRegime | 'equal';
   annualSavings: number;
 }
 
-function computeRegime(annualIncome: number, regime: TaxRegime, oldRegimeDeductions: number): RegimeBreakdown {
-  const standardDeduction = PAYROLL_CONFIG.standardDeduction[regime];
+function computeRegime(
+  annualIncome: number,
+  regime: TaxRegime,
+  oldRegimeDeductions: number,
+  fy: FinancialYear,
+): RegimeBreakdown {
+  const standardDeduction = PAYROLL_CONFIG.standardDeduction[fy][regime];
   const otherDeductions = regime === 'old' ? Math.max(0, oldRegimeDeductions) : 0;
   const taxableIncome = Math.max(0, annualIncome - standardDeduction - otherDeductions);
-  const incomeTax = incomeTaxForTaxableIncome(taxableIncome, regime);
+  const incomeTax = incomeTaxForTaxableIncome(taxableIncome, regime, fy);
   return {
     regime,
     standardDeduction,
@@ -51,11 +65,16 @@ export function calculateIncomeTax(input: IncomeTaxInput): IncomeTaxResult {
   const oldRegimeDeductions = input.oldRegimeDeductions ?? 0;
   assertNumber(oldRegimeDeductions, 'Old regime deductions', { min: 0, max: input.annualIncome });
 
-  const old = computeRegime(input.annualIncome, 'old', oldRegimeDeductions);
-  const nw = computeRegime(input.annualIncome, 'new', oldRegimeDeductions);
+  const fy = input.financialYear ?? LATEST_FY;
+  if (!PAYROLL_CONFIG.incomeTax[fy]) {
+    throw new CalculationError(`Unknown financial year "${fy}".`);
+  }
+
+  const old = computeRegime(input.annualIncome, 'old', oldRegimeDeductions, fy);
+  const nw = computeRegime(input.annualIncome, 'new', oldRegimeDeductions, fy);
 
   const diff = round(old.incomeTax - nw.incomeTax, 2);
   const betterRegime: TaxRegime | 'equal' = diff > 0 ? 'new' : diff < 0 ? 'old' : 'equal';
 
-  return { old, new: nw, betterRegime, annualSavings: Math.abs(diff) };
+  return { financialYear: fy, old, new: nw, betterRegime, annualSavings: Math.abs(diff) };
 }

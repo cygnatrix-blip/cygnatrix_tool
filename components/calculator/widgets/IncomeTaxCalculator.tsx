@@ -1,8 +1,9 @@
 'use client';
 
+import type { FinancialYear } from '@/config/india-payroll';
 import { calculateIncomeTax } from '@/lib/finance/income-tax';
 import { formatCurrency, formatCurrencyCompact } from '@/lib/format';
-import { CalculatorShell, NumberField, ResultStat, CalcError } from '@/components/calculator/shell';
+import { CalculatorShell, NumberField, ResultStat, CalcError, SegmentedControl } from '@/components/calculator/shell';
 import { DonutChart } from '@/components/charts/DonutChart';
 import { SectionHeading } from '@/components/ui/primitives';
 import { useCalc } from '@/lib/hooks/useCalc';
@@ -10,20 +11,33 @@ import { useShareableState } from '@/lib/hooks/useShareableState';
 import { cn } from '@/lib/cn';
 
 export function IncomeTaxCalculator() {
-  const [state, setState] = useShareableState({ income: 1_200_000, deductions: 150_000 });
-  const { income, deductions } = state;
+  const [state, setState] = useShareableState({
+    income: 1_275_000,
+    deductions: 150_000,
+    fy: '2025-26' as FinancialYear,
+  });
+  const { income, deductions, fy } = state;
 
   const result = useCalc(
     'income-tax-calculator',
-    () => calculateIncomeTax({ annualIncome: income, oldRegimeDeductions: deductions }),
-    [income, deductions],
-    () => ({ income, deductions }),
+    () => calculateIncomeTax({ annualIncome: income, oldRegimeDeductions: deductions, financialYear: fy }),
+    [income, deductions, fy],
+    () => ({ income, deductions, fy }),
   );
 
   return (
     <CalculatorShell
       form={
         <>
+          <SegmentedControl
+            label="Financial year"
+            value={fy}
+            onChange={(v) => setState({ fy: v })}
+            options={[
+              { value: '2025-26', label: 'FY 2025-26' },
+              { value: '2024-25', label: 'FY 2024-25' },
+            ]}
+          />
           <NumberField
             label="Annual income"
             prefix="₹"
@@ -31,7 +45,7 @@ export function IncomeTaxCalculator() {
             onChange={(v) => setState({ income: v })}
             min={0}
             max={100_000_000}
-            step={50_000}
+            step={25_000}
             slider
           />
           <NumberField
@@ -52,10 +66,19 @@ export function IncomeTaxCalculator() {
           <>
             <div className="rounded-xl border border-brand-300 bg-brand-50 p-4 text-sm dark:border-brand-800 dark:bg-brand-950/40">
               {result.data.betterRegime === 'equal' ? (
-                <p className="font-semibold text-brand-800 dark:text-brand-200">Both regimes result in the same tax.</p>
+                <p className="font-semibold text-brand-800 dark:text-brand-200">
+                  Both regimes result in the same tax for FY {result.data.financialYear}.
+                </p>
               ) : (
                 <p className="font-semibold text-brand-800 dark:text-brand-200">
-                  The {result.data.betterRegime} regime saves you {formatCurrency(result.data.annualSavings)} a year.
+                  For FY {result.data.financialYear}, the {result.data.betterRegime} regime saves you{' '}
+                  {formatCurrency(result.data.annualSavings)} a year.
+                </p>
+              )}
+              {result.data.new.incomeTax === 0 && result.data.new.taxableIncome > 0 && (
+                <p className="mt-1 text-xs text-brand-700 dark:text-brand-300">
+                  New regime tax is nil here — the Section 87A rebate covers taxable income up to{' '}
+                  {fy === '2025-26' ? '₹12,00,000' : '₹7,00,000'}.
                 </p>
               )}
             </div>

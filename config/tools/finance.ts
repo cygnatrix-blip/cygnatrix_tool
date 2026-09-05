@@ -333,25 +333,26 @@ export const FINANCE_TOOLS: ToolConfig[] = [
     featured: false,
     popular: true,
     sortOrder: 5,
+    updatedAt: '2026-09-05',
     shortDescription: 'Add or remove GST and split it into CGST and SGST.',
     description:
-      'Calculate GST on any amount. Add GST to a base price, or extract the GST already included in a total. See the CGST/SGST split or IGST for inter-state supply.',
-    keywords: ['gst calculator', 'gst india', 'cgst sgst calculator', 'add gst', 'remove gst', 'reverse gst', 'igst calculator'],
+      'Calculate GST on any amount using the current two-slab structure (5% & 18%, plus 40% on luxury/sin goods) or the pre-22-Sep-2025 rates. Add GST to a base price or extract GST from a total, with the CGST/SGST split or IGST.',
+    keywords: ['gst calculator', 'gst india', 'gst 2.0', 'cgst sgst calculator', 'add gst', 'remove gst', 'reverse gst', 'new gst rates'],
     seoTitle: 'GST Calculator — Add or Remove GST, CGST & SGST Split',
     seoDescription:
-      'Free India GST calculator. Add GST to a net price or back out GST from a gross amount at 0.25%, 3%, 5%, 12%, 18% or 28%. Shows base amount, GST, CGST, SGST, IGST and total.',
+      'Free India GST calculator with the GST 2.0 rates (5%, 18% and 40%) plus the pre-22-Sep-2025 slabs. Add GST to a net price or back it out of a gross amount. Shows base, GST, CGST, SGST, IGST and total.',
     content: {
       howItWorks: [
         { title: 'Enter the amount', body: 'The price you are working with.' },
         { title: 'Choose exclusive or inclusive', body: 'Exclusive = the amount is before GST. Inclusive = GST is already in the amount and should be extracted.' },
-        { title: 'Pick the GST rate', body: 'Select the slab. The base amount, GST, CGST/SGST split and total update instantly.' },
+        { title: 'Pick the rate structure and rate', body: 'Use the current (from 22 Sep 2025) slabs or the earlier ones, then select the rate. The base, GST, CGST/SGST split and total update instantly.' },
       ],
       features: [
         'Add GST (exclusive) or remove GST (inclusive)',
-        'CGST and SGST split for intra-state supply',
-        'Single IGST for inter-state supply',
-        'All standard Indian slabs, plus a custom rate',
-        'Instant, in-browser calculation',
+        'Current GST 2.0 slabs (5%, 18%, 40%) and the pre-22-Sep-2025 slabs (5%, 12%, 18%, 28%)',
+        'Special rates retained: 3% (gold/silver), 0.25% and 1.5% (diamond trade)',
+        'CGST and SGST split for intra-state supply; single IGST for inter-state',
+        'Any custom rate, plus instant in-browser calculation',
       ],
       formula: {
         expression: 'Exclusive: GST = A × R ÷ 100.  Inclusive: Base = A × 100 ÷ (100 + R)',
@@ -376,6 +377,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       },
       sections: [
         {
+          heading: 'What changed in GST 2.0 (from 22 September 2025)',
+          paragraphs: [
+            'The 2025 rationalisation collapsed the four-slab structure into two main rates — 5% (merit) and 18% (standard) — plus a 40% demerit rate for luxury and sin goods. Most 12% items (packaged foods, utensils, many medical items) moved to 5%; most 28% items (ACs, TVs, refrigerators, small cars, cement) dropped to 18%; high-end cars, aerated drinks, online gaming and tobacco moved to 40%.',
+            'The old 28%-plus-compensation-cess treatment is now folded into the flat 40% rate for most goods, so there is no separate cess to add (tobacco is an exception). Special rates are unchanged — 3% on gold and silver, 0.25% and 1.5% within the diamond trade.',
+          ],
+        },
+        {
           heading: 'A common invoicing mistake',
           paragraphs: [
             'A frequent error is applying the GST rate to a price that already includes GST, as if it were exclusive — this overcharges the customer by effectively taxing the tax. If a supplier tells you "the price is ₹1,180 including GST", that 1,180 is the inclusive amount; use inclusive mode to correctly extract the ₹1,000 base and ₹180 GST rather than adding another 18% on top of 1,180.',
@@ -387,11 +395,11 @@ export const FINANCE_TOOLS: ToolConfig[] = [
     faq: [
       { q: 'What is the difference between CGST, SGST and IGST?', a: 'For a sale within the same state, GST is split equally into Central GST and State GST. For a sale across state lines, a single Integrated GST is charged at the full rate instead.' },
       { q: 'How do I remove GST from a price that already includes it?', a: 'Choose “inclusive”. The calculator divides by (100 + rate) and multiplies by 100 to find the pre-GST base, then shows the GST portion.' },
-      { q: 'Which GST rate applies to my product?', a: 'GST rates depend on the HSN/SAC classification of the goods or service. Common slabs are 5%, 12%, 18% and 28%, with 0.25% and 3% for specific items. Check the official rate finder for your product.' },
-      { q: 'Is the rate configuration easy to update?', a: 'Yes. Rates live in one place in our code, and you can also type any custom rate directly into the calculator.' },
+      { q: 'Which GST rate applies to my product?', a: 'It depends on the item\'s HSN/SAC classification. Since 22 September 2025 the main slabs are 5% and 18%, with 40% for specified luxury and sin goods. Check the official rate finder for your specific item.' },
+      { q: 'Why does the calculator have a "rate structure" toggle?', a: 'So you can compute GST on invoices dated before 22 September 2025 — which still used the 12% and 28% slabs — as well as current ones. Switch it to "Before 22 Sep 2025" to bring back the older rate chips.' },
+      { q: 'Do I still need to add compensation cess separately?', a: 'For most goods, no — under GST 2.0 the old 28%-plus-cess treatment was consolidated into the flat 40% rate. Tobacco and a few notified items are exceptions that still carry a separate cess, which this calculator does not compute.' },
       { q: 'Does this calculate GST for services as well as goods?', a: 'Yes — the calculation itself is identical for goods and services; only the applicable rate differs, based on the specific service\'s SAC classification.' },
       { q: 'Can I use this to reverse-calculate GST paid on a purchase for input tax credit records?', a: 'Yes — inclusive mode extracts exactly the base amount and GST component from a purchase invoice total, which is what you need when recording input tax credit.' },
-      { q: 'What is the 0.25% and 3% slab used for?', a: 'These are concessional rates for specific categories — 0.25% mainly applies to rough precious and semi-precious stones, and 3% to gold, silver and jewellery.' },
     ],
     relatedTools: ['salary-calculator', 'emi-calculator', 'loan-calculator', 'cagr-calculator'],
   },
@@ -566,24 +574,25 @@ export const FINANCE_TOOLS: ToolConfig[] = [
     featured: true,
     popular: true,
     sortOrder: 8,
+    updatedAt: '2026-09-05',
     shortDescription: 'Estimate in-hand salary from CTC with PF, tax and deductions.',
     description:
-      'Break an annual CTC into basic, HRA, allowances and employer PF, then subtract employee PF, professional tax and income tax to estimate monthly take-home pay.',
+      'Break an annual CTC into basic, HRA, allowances and employer PF, then subtract employee PF, professional tax and income tax (FY 2025-26 or FY 2024-25, new or old regime) to estimate monthly take-home pay.',
     keywords: ['salary calculator', 'in hand salary', 'ctc to take home', 'take home salary india', 'net salary calculator', 'ctc breakup'],
     seoTitle: 'Salary Calculator India — CTC to In-Hand Take-Home Pay',
     seoDescription:
-      'Free India salary calculator. Convert annual CTC to estimated monthly in-hand salary with a full breakup: basic, HRA, special allowance, employee & employer PF, professional tax and income tax (new or old regime).',
+      'Free India salary calculator. Convert annual CTC to estimated monthly in-hand salary with a full breakup: basic, HRA, special allowance, employee & employer PF, professional tax and income tax (FY 2025-26 or FY 2024-25, new or old regime).',
     content: {
       howItWorks: [
         { title: 'Enter your annual CTC', body: 'The total cost to company from your offer letter.' },
-        { title: 'Adjust the assumptions (optional)', body: 'Set the basic %, HRA %, professional tax, tax regime and whether PF applies.' },
+        { title: 'Adjust the assumptions (optional)', body: 'Set the financial year, basic %, HRA %, professional tax, tax regime and whether PF applies.' },
         { title: 'Read the take-home estimate', body: 'The calculator shows the full CTC breakup and your estimated monthly and annual in-hand salary.' },
       ],
       features: [
         'CTC → gross → in-hand breakdown',
         'Basic, HRA and special allowance split',
         'Employee and employer Provident Fund',
-        'Professional tax and income tax (new & old regime)',
+        'Income tax for FY 2025-26 or FY 2024-25, new or old regime',
         'Every assumption listed on screen',
         'Rules kept in one dated config file for easy updates',
       ],
@@ -596,23 +605,24 @@ export const FINANCE_TOOLS: ToolConfig[] = [
           { sym: 'Employee PF', meaning: '12% of Basic' },
         ],
         notes: [
-          'Income tax uses the FY 2024-25 slabs with standard deduction and the 87A rebate.',
+          'Income tax uses the selected financial year\'s slabs with the standard deduction, 87A rebate and marginal relief. FY 2025-26 is the default.',
           'This is an estimate — it excludes HRA exemption, 80C/80D and other personal exemptions.',
         ],
       },
       example: {
         inputs: [
+          { label: 'Financial year', value: 'FY 2025-26' },
           { label: 'Annual CTC', value: '₹12,00,000' },
           { label: 'Basic', value: '40% of CTC' },
           { label: 'Regime', value: 'New' },
         ],
         result: [
-          { label: 'Gross (annual)', value: '≈ ₹11,42,000' },
-          { label: 'Total deductions', value: '≈ ₹1,15,000' },
-          { label: 'In-hand (monthly)', value: '≈ ₹85,600' },
+          { label: 'Gross (annual)', value: '≈ ₹11,42,400' },
+          { label: 'Total deductions', value: '≈ ₹60,000' },
+          { label: 'In-hand (monthly)', value: '≈ ₹90,200' },
         ],
         walkthrough:
-          'Basic = ₹4.8L, HRA = ₹2.4L, employer PF = ₹57,600, so gross ≈ ₹11.42L. Deduct employee PF ₹57,600, professional tax ₹2,500 and estimated income tax, leaving roughly ₹85,600 per month.',
+          'Basic = ₹4.8L, HRA = ₹2.4L, employer PF = ₹57,600, so gross ≈ ₹11.42L. Taxable income after the ₹75,000 standard deduction is about ₹10.67L, which is within the new regime\'s ₹12L Section 87A rebate for FY 2025-26 — so income tax is nil. Only employee PF (₹57,600) and professional tax (₹2,400) are deducted, leaving roughly ₹90,200 per month.',
       },
       sections: [
         {
@@ -634,7 +644,8 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'Is this the exact salary I will receive?', a: 'No — it is a planning estimate. It uses standard assumptions for the CTC split and a simplified tax calculation. Your offer letter and first payslip are the authoritative figures.' },
       { q: 'New regime or old regime — which does it use?', a: 'You choose. The new regime is the default. The old regime allows more deductions but has higher slab rates; the calculator applies the standard deduction for whichever you pick.' },
       { q: 'Can I turn off Provident Fund?', a: 'Yes. Some roles and salary levels are outside mandatory PF. Toggle it off and the calculator removes both the employee deduction and the employer contribution.' },
-      { q: 'How is this kept up to date with tax changes?', a: 'All slabs, PF rates and the professional tax figure live in a single dated configuration file. When the Budget changes a rule, that one file is updated and every result stays correct.' },
+      { q: 'How is this kept up to date with tax changes?', a: 'All slabs, PF rates and the professional tax figure live in a single dated configuration file. When the Budget changes a rule, that one file is updated and every result stays correct. It currently carries FY 2025-26 (the default) and FY 2024-25.' },
+      { q: 'Why does my in-hand jump when I switch to FY 2025-26?', a: 'The February 2025 Budget widened the new regime\'s Section 87A rebate to cover taxable income up to ₹12 lakh. For a mid-range salary that often takes the income tax deduction to zero, which is why the in-hand figure rises compared with FY 2024-25.' },
       { q: 'Does this include HRA exemption in the old regime calculation?', a: 'No — for a precise old-regime figure, work out your HRA exemption separately with our HRA Exemption Calculator and treat it as an additional deduction on top of what this calculator shows.' },
     ],
     relatedTools: ['gst-calculator', 'emi-calculator', 'sip-calculator', 'loan-calculator'],
@@ -649,54 +660,57 @@ export const FINANCE_TOOLS: ToolConfig[] = [
     featured: true,
     popular: true,
     sortOrder: 9,
-    shortDescription: 'Compare old vs new tax regime side by side for FY 2024-25.',
+    updatedAt: '2026-09-05',
+    shortDescription: 'Compare the old and new tax regime side by side, FY 2025-26.',
     description:
-      'Enter your annual income and old-regime deductions to see income tax under both regimes side by side, with the standard deduction, taxable income, effective rate and which regime saves you more.',
-    keywords: ['income tax calculator', 'old vs new tax regime', 'income tax india', 'new tax regime calculator', 'tax slabs fy 2024-25', 'income tax comparison'],
-    seoTitle: 'Income Tax Calculator — Old vs New Regime Comparison',
+      'Enter your annual income and old-regime deductions to see income tax under both regimes side by side for FY 2025-26 (FY 2024-25 also selectable), with the standard deduction, 87A rebate, marginal relief, taxable income, effective rate and which regime saves you more.',
+    keywords: ['income tax calculator', 'old vs new tax regime', 'income tax india', 'new tax regime calculator', 'income tax slabs fy 2025-26', 'income tax comparison'],
+    seoTitle: 'Income Tax Calculator — Old vs New Regime (FY 2025-26)',
     seoDescription:
-      'Free India income tax calculator. Compare tax payable under the old and new regimes side by side for FY 2024-25, including standard deduction, 87A rebate, cess and which regime saves you more.',
+      'Free India income tax calculator for FY 2025-26 (and FY 2024-25). Compare tax under the old and new regimes side by side with the standard deduction, Section 87A rebate up to ₹12L, marginal relief, 4% cess and which regime saves you more.',
     content: {
       howItWorks: [
+        { title: 'Pick the financial year', body: 'FY 2025-26 is the default; switch to FY 2024-25 if you are reconciling last year\'s return.' },
         { title: 'Enter your annual income', body: 'Gross income before any deduction.' },
-        { title: 'Enter old-regime deductions', body: 'Combine 80C, 80D, home loan interest and any other old-regime-only deductions into one figure.' },
-        { title: 'Compare the two regimes', body: 'Tax, effective rate and in-hand income appear for both the old and new regime side by side, with the cheaper one highlighted.' },
+        { title: 'Enter old-regime deductions', body: 'Combine 80C, 80D, home loan interest, HRA exemption and any other old-regime-only deductions into one figure. Then compare the two regimes side by side.' },
       ],
       features: [
+        'FY 2025-26 and FY 2024-25 slabs, both selectable',
         'Old and new regime shown side by side',
         'Standard deduction applied automatically for each regime',
-        'Section 87A rebate handled correctly',
+        'Section 87A rebate — including the new regime\'s ₹12L limit for FY 2025-26 — plus marginal relief',
         '4% health & education cess included',
-        'Highlights which regime saves you money, and by how much',
-        'Tax slabs kept in one dated config file for easy updates',
+        'Slabs kept in one dated config file so a Budget change is a one-file edit',
       ],
       formula: {
-        expression: 'Tax = Σ(slab band × slab rate) on taxable income, × 1.04 for cess',
+        expression: 'Tax = min(Σ(slab band × slab rate), marginal relief) − 87A rebate, then × 1.04 for cess',
         where: [
           { sym: 'Taxable income', meaning: 'Annual income − standard deduction − (old regime only) other deductions' },
-          { sym: 'Slabs', meaning: 'Progressive bands defined for each regime for the financial year' },
+          { sym: '87A rebate', meaning: 'Makes tax nil up to ₹12,00,000 taxable (new regime, FY 2025-26) or ₹5,00,000 (old regime)' },
+          { sym: 'Marginal relief', meaning: 'Just above the new-regime rebate limit, caps tax at the income exceeding it' },
         ],
-        notes: ['Rebate under Section 87A makes tax nil below a taxable-income threshold that differs by regime.'],
+        notes: ['Surcharge on incomes above ₹50 lakh is not modelled.'],
       },
       example: {
         inputs: [
-          { label: 'Annual income', value: '₹12,00,000' },
+          { label: 'Financial year', value: 'FY 2025-26' },
+          { label: 'Annual income', value: '₹12,75,000' },
           { label: 'Old regime deductions', value: '₹1,50,000' },
         ],
         result: [
-          { label: 'Old regime tax', value: '≈ ₹96,000' },
-          { label: 'New regime tax', value: '≈ ₹83,200' },
-          { label: 'Better regime', value: 'New — saves ≈ ₹12,800' },
+          { label: 'New regime tax', value: '₹0 (87A rebate)' },
+          { label: 'Old regime tax', value: '≈ ₹1,40,400' },
+          { label: 'Better regime', value: 'New — saves ≈ ₹1,40,400' },
         ],
         walkthrough:
-          'Old regime taxable income = 12,00,000 − 50,000 standard deduction − 1,50,000 deductions = 10,00,000. New regime taxable income = 12,00,000 − 75,000 = 11,25,000. Applying each regime\'s slabs and 4% cess gives the two tax figures compared above.',
+          'New regime: ₹12,75,000 − ₹75,000 standard deduction = ₹12,00,000 taxable, which is exactly at the FY 2025-26 Section 87A rebate limit, so tax is nil. Old regime: ₹12,75,000 − ₹50,000 − ₹1,50,000 = ₹10,75,000 taxable → ₹12,500 (5% of ₹2.5L) + ₹1,00,000 (20% of ₹5L) + ₹22,500 (30% of ₹75,000) = ₹1,35,000, plus 4% cess ≈ ₹1,40,400.',
       },
       sections: [
         {
-          heading: 'Which regime should you pick?',
+          heading: 'Which regime should you pick for FY 2025-26?',
           paragraphs: [
-            'The new regime has lower slab rates and a higher standard deduction but does not allow 80C, 80D, HRA exemption or home loan interest deductions. The old regime has higher rates but rewards those deductions.',
-            'As a rule of thumb: if your old-regime deductions comfortably exceed roughly ₹3–4 lakh, the old regime often wins at middle incomes. Below that, the new regime usually comes out ahead. Run both numbers here rather than guessing.',
+            'The Budget of February 2025 made the new regime the clear default for most salaried people: with the ₹4,00,000 tax-free slab, a ₹75,000 standard deduction and the Section 87A rebate extended to ₹12,00,000 of taxable income, a salaried person earning up to about ₹12,75,000 pays no tax at all under the new regime.',
+            'The old regime can still win if your genuine deductions are large — a full ₹1.5 lakh under 80C, ₹2 lakh of home loan interest, 80D health premiums and a substantial HRA exemption can together exceed ₹4–5 lakh, at which point the old regime\'s outcome may be lower despite its higher rates. Run both here rather than assuming.',
           ],
         },
         {
@@ -706,14 +720,20 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'Work out each of these separately — this site\'s HRA Exemption Calculator handles the HRA piece — and add them together before entering the total here, rather than guessing a round number.',
           ],
         },
+        {
+          heading: 'What "marginal relief" means near ₹12 lakh',
+          paragraphs: [
+            'Without it, someone with ₹12,10,000 taxable under the new regime would jump from ₹0 tax to over ₹61,000 — far more than the ₹10,000 of extra income. Marginal relief caps the tax in that band at the amount of income above ₹12 lakh, tapering back to normal slab tax by about ₹12,70,000. The calculator applies it automatically.',
+          ],
+        },
       ],
     },
     faq: [
-      { q: 'Which financial year do these slabs apply to?', a: 'FY 2024-25, as announced in the July 2024 Budget. Slabs are reviewed each Budget and this calculator is updated when they change.' },
+      { q: 'Which financial years does this cover?', a: 'FY 2025-26 (AY 2026-27) by default, with the slabs from the February 2025 Budget, and FY 2024-25 (AY 2025-26) as a selectable option. When a future Budget changes the slabs, the calculator is updated.' },
+      { q: 'Is it true that income up to ₹12 lakh is tax-free now?', a: 'Under the new regime for FY 2025-26, taxable income up to ₹12,00,000 attracts no tax thanks to the enhanced Section 87A rebate — with the ₹75,000 standard deduction, that is a salary near ₹12,75,000. It does not apply to the old regime or to capital gains.' },
       { q: 'Can I switch regimes every year?', a: 'Salaried individuals can choose either regime each financial year. Those with business income have restrictions on switching back after opting out once.' },
       { q: 'Does this include HRA exemption calculation?', a: 'No — HRA exemption is a separate old-regime deduction. Use the HRA Exemption Calculator to work that out, then add it to "old regime deductions" here.' },
-      { q: 'Is this exact enough to file my return?', a: 'It is a planning estimate using standard slabs and the standard deduction. Your actual liability may include other income, TDS credits and exemptions this calculator does not model — verify with a tax professional or the official portal before filing.' },
-      { q: 'Does this calculator handle income above ₹50 lakh, where surcharge applies?', a: 'No — surcharge on high incomes is not modelled here; this calculator covers the base slab tax and cess only, which is accurate for most salaried incomes but understates liability at very high income levels.' },
+      { q: 'Is this exact enough to file my return?', a: 'It is a planning estimate using standard slabs, the standard deduction, the 87A rebate and marginal relief. Your actual liability may include other income, TDS credits, surcharge above ₹50 lakh and exemptions this calculator does not model — verify with a tax professional or the official portal before filing.' },
     ],
     relatedTools: ['salary-calculator', 'hra-exemption-calculator', 'gratuity-calculator', 'capital-gains-calculator'],
   },

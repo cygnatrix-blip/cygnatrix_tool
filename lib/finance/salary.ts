@@ -1,6 +1,6 @@
 import type { SalaryInput, SalaryResult } from '@/types/finance';
-import { PAYROLL_CONFIG, incomeTaxForTaxableIncome, type TaxRegime } from '@/config/india-payroll';
-import { assertNumber, round } from './shared';
+import { PAYROLL_CONFIG, incomeTaxForTaxableIncome, LATEST_FY, type TaxRegime } from '@/config/india-payroll';
+import { assertNumber, CalculationError, round } from './shared';
 
 /**
  * Estimate in-hand salary from CTC using common Indian payroll conventions.
@@ -15,6 +15,10 @@ export function calculateSalary(input: SalaryInput): SalaryResult {
   assertNumber(input.ctcAnnual, 'Annual CTC', { min: 1, max: 1e11 });
 
   const regime: TaxRegime = input.regime ?? 'new';
+  const fy = input.financialYear ?? LATEST_FY;
+  if (!PAYROLL_CONFIG.incomeTax[fy]) {
+    throw new CalculationError(`Unknown financial year "${fy}".`);
+  }
   const basicPct = input.basicPctOfCtc ?? PAYROLL_CONFIG.defaults.basicPctOfCtc;
   const hraPct = input.hraPctOfBasic ?? PAYROLL_CONFIG.defaults.hraPctOfBasic;
   const pfEnabled = input.employeePfEnabled ?? true;
@@ -43,10 +47,10 @@ export function calculateSalary(input: SalaryInput): SalaryResult {
   );
 
   // Taxable income (simplified): gross − standard deduction − employee PF (old regime only).
-  const standardDeduction = PAYROLL_CONFIG.standardDeduction[regime];
+  const standardDeduction = PAYROLL_CONFIG.standardDeduction[fy][regime];
   const pfDeductionForTax = regime === 'old' ? employeePf : 0;
   const taxableIncome = Math.max(0, gross - standardDeduction - pfDeductionForTax);
-  const incomeTax = incomeTaxForTaxableIncome(taxableIncome, regime);
+  const incomeTax = incomeTaxForTaxableIncome(taxableIncome, regime, fy);
 
   const otherDeductions = (input.otherMonthlyDeductions ?? 0) * 12;
 
@@ -54,7 +58,7 @@ export function calculateSalary(input: SalaryInput): SalaryResult {
   const inHandAnnual = gross - totalDeductions;
 
   const assumptions = [
-    `Financial year ${PAYROLL_CONFIG.financialYear}, ${regime === 'new' ? 'new' : 'old'} tax regime.`,
+    `Financial year ${fy}, ${regime === 'new' ? 'new' : 'old'} tax regime.`,
     `Basic = ${basicPct}% of CTC; HRA = ${hraPct}% of basic; special allowance balances the rest.`,
     `Provident Fund = ${PAYROLL_CONFIG.providentFund.ratePct}% of basic for both employee and employer${
       PAYROLL_CONFIG.providentFund.applyCeilingByDefault ? ' (capped at the ₹15,000 wage ceiling)' : ''

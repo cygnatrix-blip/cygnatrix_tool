@@ -3,24 +3,26 @@
 import { useState } from 'react';
 import { calculateGst } from '@/lib/finance/gst';
 import type { GstMode } from '@/types/finance';
+import { GST_CONFIG, type GstRegime } from '@/config/gst';
 import { formatCurrency } from '@/lib/format';
 import { CalculatorShell, NumberField, ResultStat, CalcError, SegmentedControl } from '@/components/calculator/shell';
 import { SectionHeading } from '@/components/ui/primitives';
 import { useCalc } from '@/lib/hooks/useCalc';
-
-const RATES = [0.25, 3, 5, 12, 18, 28];
 
 export function GstCalculator() {
   const [amount, setAmount] = useState(1000);
   const [rate, setRate] = useState(18);
   const [mode, setMode] = useState<GstMode>('exclusive');
   const [scope, setScope] = useState<'intra' | 'inter'>('intra');
+  const [regime, setRegime] = useState<GstRegime>('current');
+
+  const rates = GST_CONFIG[regime].rates;
 
   const result = useCalc(
     'gst-calculator',
     () => calculateGst({ amount, ratePct: rate, mode, interState: scope === 'inter' }),
     [amount, rate, mode, scope],
-    () => ({ amount, rate, mode, scope }),
+    () => ({ amount, rate, mode, scope, regime }),
   );
 
   return (
@@ -37,10 +39,22 @@ export function GstCalculator() {
               { value: 'inclusive', label: 'Remove GST' },
             ]}
           />
+          <SegmentedControl
+            label="Rate structure"
+            value={regime}
+            onChange={(v) => {
+              setRegime(v);
+              if (!GST_CONFIG[v].rates.includes(rate as never)) setRate(18);
+            }}
+            options={[
+              { value: 'current', label: GST_CONFIG.current.label },
+              { value: 'legacy', label: GST_CONFIG.legacy.label },
+            ]}
+          />
           <div className="mb-5">
             <span className="mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-200">GST rate</span>
             <div className="flex flex-wrap gap-2">
-              {RATES.map((r) => (
+              {rates.map((r) => (
                 <button
                   key={r}
                   type="button"
