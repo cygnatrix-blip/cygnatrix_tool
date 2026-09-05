@@ -83,7 +83,7 @@ export const FILE_LIMITS = {
   },
   image: {
     maxFileSizeMB: 25,
-    maxFiles: 30,
+    maxFiles: 100,
     processingTimeoutMs: 60_000,
   },
 } as const;

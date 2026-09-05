@@ -66,7 +66,7 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     faq: [
       { q: 'Does compressing reduce the image dimensions?', a: 'No. Only the file size changes. Use the Image Resizer if you also want fewer pixels — combining both gives the smallest files.' },
       { q: 'Is compression lossless?', a: 'For JPG and WebP it is lossy — you trade a little detail for a much smaller file, and you control how much. For PNG the tool applies lossless optimisation only.' },
-      { q: 'Can I compress many images at once?', a: 'Yes, up to 30 files per batch. Each is processed independently and you can download them together.' },
+      { q: 'Can I compress many images at once?', a: 'Yes, up to 100 files per batch. Each is processed independently and you can download them together.' },
       { q: 'Do you keep my photos?', a: 'No. Compression happens entirely in your browser using a background Web Worker. Nothing is uploaded or stored.' },
     ],
     relatedTools: ['resize-image', 'webp-converter', 'jpg-to-png', 'png-to-jpg'],
@@ -180,7 +180,7 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     faq: [
       { q: 'Will the PNG look better than the JPG?', a: 'No — it will look identical. PNG preserves exactly what is in the JPG; it does not undo compression that already happened. The benefit is no further loss from here on.' },
       { q: 'Why is the PNG so much bigger?', a: 'PNG is lossless, so it stores full colour information for every pixel. Photos, which have millions of subtly different colours, do not compress well as PNG.' },
-      { q: 'Can I convert many JPGs at once?', a: 'Yes, up to 30 per batch, with a ZIP download.' },
+      { q: 'Can I convert many JPGs at once?', a: 'Yes, up to 100 per batch, with a ZIP download.' },
       { q: 'Are my images uploaded?', a: 'No. Conversion is done entirely by your browser.' },
     ],
     relatedTools: ['png-to-jpg', 'webp-converter', 'compress-image', 'resize-image'],
@@ -357,7 +357,7 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     faq: [
       { q: 'Will I lose photo quality converting from HEIC?', a: 'At quality 85 and above the difference is generally invisible. HEIC is a more efficient format, so a same-quality JPG is often a little larger, not smaller.' },
       { q: 'What happens to my photo’s date, location and camera info?', a: 'By default nothing is carried over, for privacy. Tick "preserve EXIF" before converting if you want that metadata kept — this is a best-effort feature and may not work for every photo.' },
-      { q: 'Can I convert a whole camera roll at once?', a: `Yes, up to ${30} photos per batch. Download them together as a ZIP.` },
+      { q: 'Can I convert a whole camera roll at once?', a: `Yes, up to ${100} photos per batch. Download them together as a ZIP.` },
       { q: 'Are my photos uploaded anywhere?', a: 'No. Conversion happens entirely in your browser.' },
     ],
     relatedTools: ['compress-image', 'jpg-to-png', 'webp-converter', 'resize-image'],

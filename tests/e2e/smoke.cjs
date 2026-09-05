@@ -161,7 +161,7 @@ function ensureFixtures() {
     ['/pdf/pdf-to-word', ['sample.pdf'], 'convert to word', 'extracted|download .*docx|no text layer'],
     ['/pdf/pdf-to-jpg', ['sample.pdf'], 'convert to jpg', 'converted|download all'],
     ['/image/compress-image', ['sample.jpg'], 'compress \\d+ image', 'saved|review the savings'],
-    ['/image/resize-image', ['sample.png'], 'resize image', 'resized to'],
+    ['/image/resize-image', ['sample.png', 'sample.jpg'], 'resize \\d+ images?', 'resized \\d+ image'],
     ['/image/jpg-to-png', ['sample.jpg'], 'convert \\d+ image', 'converted \\d+ image'],
     ['/image/png-to-jpg', ['sample.png'], 'convert \\d+ image', 'converted \\d+ image'],
     ['/image/webp-converter', ['sample.jpg'], 'convert \\d+ image', 'converted \\d+ image'],

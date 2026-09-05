@@ -198,7 +198,7 @@ export const CATEGORIES: Record<CategorySlug, CategoryConfig> = {
       },
       {
         q: 'Is there a limit on how many images I can process?',
-        a: `You can process up to ${30} images at once, each up to ${25} MB. There is no daily limit.`,
+        a: `You can process up to ${100} images at once, each up to ${25} MB. There is no daily limit.`,
       },
     ],
     sortOrder: 3,
