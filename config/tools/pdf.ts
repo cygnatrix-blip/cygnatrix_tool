@@ -49,6 +49,17 @@ export const PDF_TOOLS: ToolConfig[] = [
             'Because the merge happens locally, page text, form fields and bookmarks from each source file are carried into the result rather than being flattened into images.',
           ],
         },
+        {
+          heading: 'If a merge fails partway through',
+          paragraphs: [
+            'A merge usually fails for one of two reasons: one of the source files is corrupted or was never really a PDF (a renamed image, or a download that was cut off), or the combined document has grown large enough that your browser tab is running low on memory — far more likely on an older phone than a desktop.',
+            'If a specific file is the problem, remove it from the list and merge the rest; the file causing the error is often the smallest one relative to its page count, a common sign of a broken export. If it is a memory issue instead, merge in two smaller batches and then merge those two results together.',
+          ],
+          bullets: [
+            'Corrupted or fake-PDF file: remove it and re-export it from its original source.',
+            'Large combined size on mobile: merge in two batches, then merge the batches.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -66,6 +77,7 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'Will merging change the quality of my pages?', a: 'No. Pages are copied as-is. Text stays selectable and images keep their original resolution.' },
       { q: 'Can I merge password-protected PDFs?', a: 'You need to remove the password first. Encrypted files cannot be read without it, and this tool does not attempt to bypass protection.' },
       { q: 'Does the merged file keep bookmarks and links?', a: 'Internal page structure and most links are preserved. Some complex interactive features may not carry over.' },
+      { q: 'Can I merge PDFs on my phone?', a: 'Yes — the tool works the same in a mobile browser as on desktop, including picking files from your camera roll or a cloud drive app. Very large merges just take a little longer on a phone\'s more limited memory.' },
     ],
     relatedTools: ['split-pdf', 'compress-pdf', 'pdf-to-word', 'pdf-to-jpg'],
   },
@@ -108,6 +120,13 @@ export const PDF_TOOLS: ToolConfig[] = [
             'Pages outside the document are ignored, and overlapping ranges are handled gracefully.',
           ],
         },
+        {
+          heading: 'Common problems when splitting',
+          paragraphs: [
+            'The most frequent mistake is off-by-one counting: page numbers here always refer to position in the file (page 1 is the first page you see), not any page number printed on the page itself, which can differ if a document has a cover page or starts its printed numbering later.',
+            'If you are trying to separate a batch of scanned documents that were fed through a scanner as one long file, first check whether the page count per document is consistent — most scanners produce a predictable number of pages per item, which makes writing the range list much faster than counting individually.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -127,6 +146,10 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'Can I remove pages instead of extracting them?', a: 'Yes — select or list all the pages you want to keep. The pages you leave out are effectively removed from the output.' },
       { q: 'What is the maximum page count?', a: 'Up to 500 pages per document. Larger files usually still work but may be slow on mobile.' },
       { q: 'Are the split files watermarked?', a: 'No. There are no watermarks anywhere on Cygnatrix Tools.' },
+      { q: 'Can I preview a page before deciding to include it?', a: 'Thumbnails are shown for the whole document before you split, so you can check page content and orientation before finalising your ranges or selection.' },
+      { q: 'Can I split a PDF and then merge some of the results back together?', a: 'Yes — split off the files you need, then use Merge PDF to recombine any subset of them in a new order, all still without leaving your browser.' },
+      { q: 'Is there a fee for splitting more than a few pages?', a: 'No. There is no file-count, page-count or usage limit anywhere on Cygnatrix Tools — split as many documents as you like, as often as you like, for free.' },
+      { q: 'Will the split files be named automatically?', a: 'Yes — each output file is named after the original document with its page range appended, so you can easily tell them apart without opening each one individually.' },
     ],
     relatedTools: ['merge-pdf', 'compress-pdf', 'pdf-to-jpg', 'pdf-to-word'],
   },
@@ -173,6 +196,13 @@ export const PDF_TOOLS: ToolConfig[] = [
             'Limited results: text-only reports, PDFs already optimised for web.',
           ],
         },
+        {
+          heading: 'Choosing between the three levels',
+          paragraphs: [
+            'Light only strips metadata and rewrites the file structure — it never touches images, so it is the safest choice when the document must stay pixel-perfect and text must remain selectable, at the cost of a smaller size reduction.',
+            'Balanced and Strong both rasterise image-heavy pages at a lower resolution; Strong pushes the DPI and JPEG quality further down for a smaller file. If the compressed result looks too soft, step back one level rather than assuming compression itself is the problem — the three levels exist precisely so you can trade size against sharpness.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -193,6 +223,8 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'Will the text stay selectable?', a: 'In Light mode, yes. In Balanced and Strong mode, image-heavy pages may be rasterised, which can turn selectable text into an image. The tool tells you when this happens.' },
       { q: 'Is my file uploaded for compression?', a: 'No. All rendering and re-encoding happens on your device.' },
       { q: 'Can I compress a PDF that is already small?', a: 'You can, but expect minimal change. The before/after comparison will make the trade-off obvious.' },
+      { q: 'What if the compressed file is still too big for my email limit?', a: 'Try the Strong level, or, if the document mainly contains large images, compress those images individually first with our image compressor before assembling them into a PDF.' },
+      { q: 'Does compression run more than once if I try different levels?', a: 'Yes — you can try Light, Balanced and Strong on the same upload one after another and compare the results before choosing which one to download.' },
     ],
     relatedTools: ['merge-pdf', 'split-pdf', 'pdf-to-jpg', 'pdf-to-word'],
   },
@@ -239,6 +271,13 @@ export const PDF_TOOLS: ToolConfig[] = [
             'Not supported: scanned pages, handwriting, text embedded in graphics.',
           ],
         },
+        {
+          heading: 'After converting: what to check first',
+          paragraphs: [
+            'Open the .docx and skim the paragraph breaks first — since the converter infers structure from position and font size rather than reading explicit formatting tags, an unusual layout (a two-column CV, a form with boxes) can occasionally merge two lines that were meant to stay separate, or split one that should have stayed together.',
+            'Headings are the next thing worth a quick check: the tool promotes noticeably larger text to a heading style, which works well for documents with a clear title hierarchy but can occasionally catch a large pull-quote or a page number styled in big text. Both are quick manual fixes once you\'re in Word.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -254,6 +293,7 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'My scanned PDF came out as a blank or image-only document. Why?', a: 'A scanned PDF contains no text, only an image of text. Converting it needs OCR, which this browser-based tool does not perform. You will see a warning when the tool detects a scan.' },
       { q: 'Is the .docx compatible with Google Docs?', a: 'Yes. The output is a standard Office Open XML file that opens in Word, Google Docs, LibreOffice and Pages.' },
       { q: 'Are my documents uploaded?', a: 'No. Text extraction and .docx generation both happen in your browser.' },
+      { q: 'Can I convert just a few pages instead of the whole PDF?', a: 'Not directly — split out the pages you need first with our Split PDF tool, then convert that smaller file to Word.' },
     ],
     relatedTools: ['pdf-to-jpg', 'merge-pdf', 'split-pdf', 'compress-pdf'],
   },
@@ -295,6 +335,13 @@ export const PDF_TOOLS: ToolConfig[] = [
             'For printing or archiving, choose 300 DPI. The images will be several times larger but will hold up when enlarged.',
           ],
         },
+        {
+          heading: 'Common problems and how to fix them',
+          paragraphs: [
+            'If a page comes out with a white background where the PDF had transparency, that is expected — JPG has no transparency channel, so any transparent area is filled with white during rendering. If you need to keep transparency, there isn\'t a way around this within JPG; it is a format limitation, not a bug.',
+            'On mobile browsers, converting a very long document (100+ pages) at 300 DPI and downloading it as one ZIP can be slow or run low on memory. Converting the document in two smaller page ranges, one after another, usually finishes far faster and more reliably than one huge batch.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -311,6 +358,10 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'Why are large pages slow to convert?', a: 'Higher DPI means far more pixels to render and encode. A 300 DPI A4 page is about 8.7 megapixels. Reduce the DPI if speed matters more than print quality.' },
       { q: 'Does this work for a 200-page PDF?', a: 'Yes, up to our 500-page limit, though rendering every page at high DPI on a phone will take time and memory. Convert in batches if needed.' },
       { q: 'Are my pages uploaded to convert them?', a: 'No. Rendering happens entirely in your browser.' },
+      { q: 'Can I convert only some pages instead of the whole document?', a: 'Yes — the page selection lets you tick individual pages or type a range, so you only get images for the pages you actually need.' },
+      { q: 'Can I use the JPGs I get for social media or a presentation?', a: 'Yes — at 150 DPI or higher, the images look sharp on screen and are a common way to share individual PDF pages where the recipient can\'t or won\'t open a PDF.' },
+      { q: 'Will the image dimensions match the original page size?', a: 'Yes, proportionally — an A4 page at 150 DPI renders to roughly 1240×1754 pixels, scaling up or down consistently with whatever DPI you choose.' },
+      { q: 'Can I rename the downloaded images?', a: 'Yes, once downloaded they are ordinary JPG files on your device — rename them however your workflow needs, the tool has no control over that after download.' },
     ],
     relatedTools: ['pdf-to-word', 'compress-pdf', 'split-pdf', 'jpg-to-png'],
   },
@@ -354,6 +405,13 @@ export const PDF_TOOLS: ToolConfig[] = [
             'Fit to image keeps every page sized to match its photo’s own proportions, which looks best for a PDF of scans or screenshots that will only be viewed on screen.',
           ],
         },
+        {
+          heading: 'Common problems with phone photos',
+          paragraphs: [
+            'Photos taken in mixed portrait and landscape orientation are the most frequent source of an odd-looking PDF — on a fixed page size, a landscape photo gets shrunk down much smaller than a portrait one to fit within the same page, leaving a lot of empty margin around it. Fit to image avoids this entirely by letting each page match its own photo\'s shape.',
+            'If a scanned or photographed document reads sideways once combined into the PDF, rotate the source image itself (most phone gallery apps can do this in a couple of taps) before adding it here — this tool lays out images as given and does not auto-detect or correct orientation.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -370,6 +428,10 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'Will my photos lose quality?', a: 'Images are embedded at high quality (92%) with no resizing beyond fitting the page, so quality loss is minimal.' },
       { q: 'Can I change the order after adding images?', a: 'Yes, use the up/down arrows on each file to reorder before creating the PDF.' },
       { q: 'Are my images uploaded?', a: 'No. The PDF is assembled entirely in your browser.' },
+      { q: 'Can I add more images after I have already added some?', a: 'Yes — keep dropping in more files at any point before you create the PDF; new images are appended to the end of the current order and can then be dragged into place.' },
+      { q: 'What is the maximum number of images I can combine?', a: 'Up to 100 images per PDF. That covers everything from a single scanned form to a full multi-page document photographed page by page.' },
+      { q: 'Does the tool add its own branding or watermark to the PDF?', a: 'No. The only thing embedded is your own images, laid out on the page size and margin you chose.' },
+      { q: 'Can I use screenshots as well as photos?', a: 'Yes — any JPG, PNG or WebP file works, screenshots included, so this also doubles as a quick way to turn a set of screenshots into one shareable document.' },
     ],
     relatedTools: ['merge-pdf', 'pdf-to-jpg', 'compress-pdf', 'organize-pdf'],
   },
@@ -412,6 +474,17 @@ export const PDF_TOOLS: ToolConfig[] = [
             'Rotating in the PDF itself (rather than just how your viewer displays it) fixes this permanently for anyone who opens the file.',
           ],
         },
+        {
+          heading: 'Mixed-orientation scans',
+          paragraphs: [
+            'A very common case is a multi-page scan where most pages read correctly but one or two — often a landscape table or diagram inserted into an otherwise portrait document — come out sideways. Rather than rotating the whole document, use the per-page rotate buttons so the correctly-oriented pages are left untouched and only the sideways ones are fixed.',
+            'If a whole batch scanned upside down (a common result of feeding paper into a scanner the wrong way round), "rotate all" by 180 degrees fixes every page in one action instead of clicking through each thumbnail individually.',
+          ],
+          bullets: [
+            'One or two pages wrong: rotate those pages individually.',
+            'Every page wrong the same way: use "rotate all" once.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -428,6 +501,11 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'Does rotating reduce quality?', a: 'No. Rotation only changes the page’s display orientation metadata; the content itself is untouched.' },
       { q: 'Can I undo a rotation before saving?', a: 'Yes, keep clicking rotate on that page to cycle back, or refresh and start again before you download.' },
       { q: 'Is my file uploaded?', a: 'No. Rotation happens entirely in your browser.' },
+      { q: 'Will the rotated PDF print correctly?', a: 'Yes. Because the rotation is saved into the page itself rather than just how one viewer happens to display it, printing from any application respects the corrected orientation.' },
+      { q: 'Does rotating affect selectable text or form fields?', a: 'No — rotation only changes the page\'s orientation metadata. Text stays selectable and any form fields keep working exactly as before.' },
+      { q: 'What angle should I use for a page that\'s 90 degrees off?', a: 'Rotate it 90 degrees in whichever direction makes it read correctly — try one direction on the thumbnail first, and switch to the other if it goes the wrong way.' },
+      { q: 'Does this work on large, multi-hundred-page PDFs?', a: 'Yes, up to the 500-page limit shared by our PDF tools. Thumbnail rendering for a very large document takes a moment longer, but rotation itself is instant.' },
+      { q: 'Does the rotated file keep the same filename?', a: 'The download uses a clear "rotated" suffix by default so you can tell it apart from the original — rename it after download if you prefer to keep the original name.' },
     ],
     relatedTools: ['organize-pdf', 'split-pdf', 'merge-pdf', 'compress-pdf'],
   },
@@ -469,6 +547,13 @@ export const PDF_TOOLS: ToolConfig[] = [
             'Organize PDF replaces three separate tasks — reordering, deleting and extracting — with one visual workspace. Every action works on the same set of page thumbnails, so you can combine them: drop pages you don’t need, reorder what’s left, and pull out a selection, all before downloading.',
           ],
         },
+        {
+          heading: 'Fixing a double-sided scan that came out interleaved',
+          paragraphs: [
+            'A common scanning problem: feeding a double-sided document through a single-sided scanner produces all the front pages first, followed by all the back pages in reverse order (page 1, 2, 3 … then the last back page, second-to-last, and so on). The thumbnail view makes this pattern easy to spot, and reordering pages into the correct sequence — front 1, back 1, front 2, back 2 — turns the scan into a properly readable document.',
+            'For a large document, do this once and save the corrected order; there is no need to repeat the fix every time you reopen the file.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -485,6 +570,10 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'What is the difference between Save and Extract?', a: 'Save keeps every page currently in your working set, in your chosen order. Extract ignores the working set order and instead pulls out only the pages you’ve ticked, in their original order, into a separate file.' },
       { q: 'Can I reorder and delete in the same pass?', a: 'Yes — arrange pages and remove the ones you don’t want, then click Save once.' },
       { q: 'Is my file uploaded?', a: 'No. Everything happens locally in your browser.' },
+      { q: 'What is the difference between this and Split PDF?', a: 'Split PDF is built around ranges and producing multiple output files at once. Organize PDF is built around a single visual working copy where you can reorder, delete and extract together before saving one result.' },
+      { q: 'Can I undo a mistake before saving?', a: 'Refreshing the page resets the working copy back to the original file order, since nothing is written until you click Save or Extract — so a mistake mid-way through never affects your actual file.' },
+      { q: 'Can I extract pages in a different order than they originally appeared?', a: 'Extract always keeps the pages you\'ve ticked in their original document order. If you need a different order, reorder the pages first and then use Save instead.' },
+      { q: 'How many pages can I organize at once?', a: 'Up to 500 pages per document, the same ceiling shared across all of our PDF tools.' },
     ],
     relatedTools: ['split-pdf', 'merge-pdf', 'rotate-pdf', 'compress-pdf'],
   },
@@ -527,6 +616,13 @@ export const PDF_TOOLS: ToolConfig[] = [
             'It also does not yet support PDFs protected with the newer AES-256 (PDF 2.0) encryption used by some recent Adobe Acrobat exports; those need a desktop PDF reader to remove the password.',
           ],
         },
+        {
+          heading: 'Choosing a password worth using',
+          paragraphs: [
+            'A PDF open-password is only as strong as the password itself — a short or common word defeats the purpose of encrypting the file at all. Aim for at least 10–12 characters mixing letters, numbers and a symbol, and avoid anything guessable from your name, birthday or the document\'s own subject.',
+            'Write the password down somewhere safe before you protect the file: this tool has no password-recovery feature by design, and neither does the encryption standard it uses — if the password is lost, the document is permanently inaccessible.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -544,6 +640,9 @@ export const PDF_TOOLS: ToolConfig[] = [
       { q: 'Which PDF readers can open a file I protect here?', a: 'Any of them — Adobe Acrobat, Preview, browser PDF viewers, mobile apps. The 128-bit encryption used is the universal standard.' },
       { q: 'What if my PDF uses AES-256 encryption?', a: 'That newer PDF 2.0 encryption type isn’t supported yet. You’ll see a clear message if this happens; a desktop PDF reader with your password will still be able to remove it.' },
       { q: 'Is my password sent anywhere?', a: 'No. Both protecting and unlocking happen entirely in your browser — your password and file never leave your device.' },
+      { q: 'Can I change a PDF\'s password to a new one?', a: 'Yes — unlock it with the current password first, then run it back through Add with the new password you want.' },
+      { q: 'Does protecting a PDF also stop copying or printing?', a: 'This tool sets an open password only — the file cannot be viewed at all without it. It does not set the separate "permissions" restrictions some PDFs use to limit copying or printing once already open.' },
+      { q: 'Can I protect the same PDF more than once with different passwords for different people?', a: 'Not at the same time — a PDF has one open password. To share different copies with different recipients, protect separate copies of the file with a different password each.' },
     ],
     relatedTools: ['compress-pdf', 'merge-pdf', 'organize-pdf', 'split-pdf'],
   },

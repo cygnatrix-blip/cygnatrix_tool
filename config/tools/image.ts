@@ -49,6 +49,13 @@ export const IMAGE_TOOLS: ToolConfig[] = [
             'PNG screenshots and graphics compress less because PNG is already lossless. For big savings on those, convert to WebP with our converter instead.',
           ],
         },
+        {
+          heading: 'Quality slider vs an exact target size',
+          paragraphs: [
+            'The quality slider is the right tool when you just want "smaller, without looking worse" and don\'t care about the exact final number of kilobytes — move it until the preview still looks good, then download.',
+            'If a form or portal instead demands a precise size range (a maximum, or a maximum and minimum together), switch to target-size mode, or use our dedicated Compress Image to Exact Size tool, which automates the trial and error of hitting that number exactly.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -68,6 +75,10 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'Is compression lossless?', a: 'For JPG and WebP it is lossy — you trade a little detail for a much smaller file, and you control how much. For PNG the tool applies lossless optimisation only.' },
       { q: 'Can I compress many images at once?', a: 'Yes, up to 100 files per batch. Each is processed independently and you can download them together.' },
       { q: 'Do you keep my photos?', a: 'No. Compression happens entirely in your browser using a background Web Worker. Nothing is uploaded or stored.' },
+      { q: 'Why does the same quality number give different file sizes for different photos?', a: 'A busy, detailed photo (foliage, crowds, textures) needs more data to describe than a simple one (a plain background, a logo), so the same quality setting produces a larger file for the busier image. This is normal.' },
+      { q: 'Can I compare quality settings before committing?', a: 'Yes — the live preview updates as you move the slider, so you can check the visual trade-off before downloading anything.' },
+      { q: 'What image formats can I upload?', a: 'JPG, JPEG, PNG and WebP are all accepted as input, and the tool keeps the same format on output unless you choose target-size mode with a different output format.' },
+      { q: 'Is there a file size limit?', a: 'Very large source files (well over 50 MB) may be slow to process on an older phone, but there is no artificial cap — the practical limit is your device\'s own memory.' },
     ],
     relatedTools: ['resize-image', 'webp-converter', 'jpg-to-png', 'png-to-jpg'],
   },
@@ -111,6 +122,17 @@ export const IMAGE_TOOLS: ToolConfig[] = [
             'Enlarging beyond the original size cannot invent detail that was never captured, so a small image scaled up will look soft. For print, start from the highest-resolution original you have.',
           ],
         },
+        {
+          heading: 'Pixels, percentage or exact dimensions — which to use',
+          paragraphs: [
+            'Use exact pixel dimensions when a form or platform states a specific requirement, like a 1200×630 social share image or a 300×400 ID photo — type the numbers directly and let aspect lock handle the other one.',
+            'Use percentage scaling when you just want a proportionally smaller (or larger) version of what you already have, without needing to calculate the exact resulting pixel count yourself — 50% halves both dimensions in one step.',
+          ],
+          bullets: [
+            'Exact pixels: matching a stated requirement.',
+            'Percentage: quick proportional scaling.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -127,6 +149,10 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'What is the best size for web images?', a: 'Match the display size. A full-width hero is usually 1600–2000px wide; a blog image 800–1200px; a thumbnail 300–400px. Resize down to what you actually need, then compress.' },
       { q: 'Does it change the file format?', a: 'No, the output keeps the input format. To change format as well, use one of our converters afterwards.' },
       { q: 'Is my image uploaded?', a: 'No. Resizing uses the browser’s canvas and never sends your file anywhere.' },
+      { q: 'Can I resize many images to the same dimensions at once?', a: 'Yes — add all your files, set the size once, and every image resizes to those dimensions (or that percentage) in one batch, downloadable together as a ZIP.' },
+      { q: 'Does resizing reduce file size too?', a: 'Usually yes, since fewer pixels means less data to encode — but resizing and compressing are separate controls. For the smallest possible file, resize down to what you need and then run it through our Image Compressor.' },
+      { q: 'Can I resize an image and change its format at the same time?', a: 'Not in a single step here — resize first, then run the result through the relevant converter (JPG to PNG, PNG to JPG or WebP Converter) for the format change.' },
+      { q: 'Why does my resized image look slightly different in colour?', a: 'It shouldn\'t — resizing uses the browser\'s own canvas scaling, which preserves colour data faithfully. If a difference is visible, check whether your image viewer is applying its own colour profile handling differently between the two files.' },
     ],
     relatedTools: ['compress-image', 'webp-converter', 'png-to-jpg', 'jpg-to-png'],
   },
@@ -169,6 +195,12 @@ export const IMAGE_TOOLS: ToolConfig[] = [
             'Note that the JPG has already discarded some detail — converting to PNG locks in the current quality but cannot restore what the JPG compression removed. The PNG will also usually be larger.',
           ],
         },
+        {
+          heading: 'PNG vs WebP for lossless needs',
+          paragraphs: [
+            'PNG is the safest choice when a specific tool, printer or older platform explicitly requires it — support for PNG is close to universal, going back decades. If compatibility isn\'t the concern and you just want a smaller lossless file, WebP\'s lossless mode typically beats PNG on file size for the same image while still avoiding any further quality loss.',
+          ],
+        },
       ],
       example: {
         inputs: [{ label: 'Input', value: 'photo.jpg — 2.1 MB, 3000×2000' }],
@@ -182,6 +214,12 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'Why is the PNG so much bigger?', a: 'PNG is lossless, so it stores full colour information for every pixel. Photos, which have millions of subtly different colours, do not compress well as PNG.' },
       { q: 'Can I convert many JPGs at once?', a: 'Yes, up to 100 per batch, with a ZIP download.' },
       { q: 'Are my images uploaded?', a: 'No. Conversion is done entirely by your browser.' },
+      { q: 'Does converting to PNG add transparency to my photo?', a: 'No — a JPG has no transparency to begin with, so the resulting PNG is fully opaque, just like the source. PNG only preserves transparency that already exists.' },
+      { q: 'Will the converted PNG open in every image editor?', a: 'Yes. PNG is one of the most widely supported image formats, opening in every mainstream editor, browser and operating system without exception.' },
+      { q: 'Does this tool add compression artefacts of its own?', a: 'No — PNG output is always lossless here, so no additional artefacts are introduced during the conversion step itself.' },
+      { q: 'Can I convert a JPG that already has a transparent-looking edge?', a: 'A JPG can never actually contain transparency, so what looks like a transparent edge is really a matched background colour — the PNG will preserve that same solid colour, not real transparency.' },
+      { q: 'Does this tool resize my image during conversion?', a: 'No — the output PNG keeps the exact same pixel dimensions as the input JPG. Use the Image Resizer separately if you also want to change the size.' },
+      { q: 'Can I convert many JPGs to PNG with different settings each?', a: 'The conversion itself has no per-file settings to vary — every file in a batch is converted the same way, from JPG to lossless PNG.' },
     ],
     relatedTools: ['png-to-jpg', 'webp-converter', 'compress-image', 'resize-image'],
   },
@@ -224,6 +262,13 @@ export const IMAGE_TOOLS: ToolConfig[] = [
             'If preserving transparency matters, convert to WebP instead — it keeps the alpha channel and is still much smaller than PNG.',
           ],
         },
+        {
+          heading: 'When PNG to JPG is the right move',
+          paragraphs: [
+            'Screenshots, scanned documents and photos saved as PNG are the classic case — PNG stores every pixel losslessly, which is great for sharp lines and text but wasteful for photographic detail with millions of subtly different colours. Converting those to JPG typically shrinks the file dramatically with no visible loss at a sensible quality setting.',
+            'Keep the source as PNG (or convert to WebP instead) if the image has fine text you plan to zoom into closely, or transparency you still need after conversion — both are things a JPG cannot represent.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -241,6 +286,11 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'How much smaller will the JPG be?', a: 'For photos and detailed graphics, typically 70–95% smaller. For simple flat-colour logos the saving is smaller and WebP or PNG-8 may be better.' },
       { q: 'Can I choose a background other than white?', a: 'Yes. Pick any colour with the background control before converting.' },
       { q: 'Is my file uploaded?', a: 'No. The conversion runs in your browser.' },
+      { q: 'Can I batch-convert PNGs with different backgrounds needed?', a: 'The background colour applies to the whole batch in one pass. For different colours per image, run the tool again with each colour on the relevant files.' },
+      { q: 'What quality setting should I use by default?', a: '85–92 is a good starting point for most photos — high enough that quality loss is essentially invisible, while still meaningfully smaller than the PNG original.' },
+      { q: 'What happens to a PNG that has no transparency at all?', a: 'It converts the same way — the background colour setting simply has nothing to fill, since there are no transparent pixels to replace.' },
+      { q: 'Does this tool change the image dimensions?', a: 'No — only the format, background handling and compression change. Pixel dimensions stay exactly as they were in the source PNG.' },
+      { q: 'Can I preview the result before downloading?', a: 'Yes — a preview of the converted JPG, including the chosen background colour where it applies, is shown before you commit to downloading.' },
     ],
     relatedTools: ['jpg-to-png', 'webp-converter', 'compress-image', 'resize-image'],
   },
@@ -284,6 +334,12 @@ export const IMAGE_TOOLS: ToolConfig[] = [
             'Every current browser supports WebP, so it is a safe default for any website where you control the image tags. Keep a JPG or PNG fallback only if you must support very old software.',
           ],
         },
+        {
+          heading: 'When to convert away from WebP',
+          paragraphs: [
+            'Some platforms and older editing software still don\'t accept WebP uploads directly — a print shop, an older design tool, or a form that explicitly asks for JPG or PNG. Converting WebP back to one of those formats here takes a few seconds and avoids re-exporting from the original source.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -300,6 +356,12 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'Is WebP lossy or lossless?', a: 'It can be either. Converting from JPG uses lossy WebP with a quality setting. Converting from PNG can use lossless WebP to keep every pixel and the transparency.' },
       { q: 'Can I convert WebP back to JPG or PNG?', a: 'Yes. Choose JPG or PNG as the target format. Going WebP → JPG drops transparency; WebP → PNG keeps it.' },
       { q: 'Will more format combinations be added?', a: 'The converter is built around a from/to model, so new pairs (such as AVIF) can be added without redesigning the tool.' },
+      { q: 'Does converting to WebP always shrink the file?', a: 'Almost always for photos at an equivalent quality. Very simple images (flat icons, tiny graphics) occasionally see little difference, since there is little redundancy left for any format to compress further.' },
+      { q: 'Can I batch-convert a mix of JPG and PNG files at once?', a: 'Yes — add files of different formats together and each one converts to your chosen target, regardless of what it started as.' },
+      { q: 'Does WebP support animation like GIF?', a: 'The WebP format itself does, but this converter handles still images only — animated WebP or GIF conversion is not currently supported.' },
+      { q: 'Is there a quality setting for lossless WebP conversion?', a: 'Lossless mode has no quality slider by definition — it keeps every pixel exactly, so there is nothing to trade off. The quality control only applies to lossy JPG-to-WebP and WebP-to-JPG conversions.' },
+      { q: 'Is my file kept anywhere after converting?', a: 'No — nothing is uploaded, stored or logged. The conversion happens entirely in your browser and the file exists only on your own device.' },
+      { q: 'Does converting a photo to WebP and back to JPG lose extra quality?', a: 'Yes, a little — each lossy re-encode discards a small amount of additional detail, the same as re-saving any JPG repeatedly. Keep an original copy if you might need to go back and forth.' },
     ],
     relatedTools: ['compress-image', 'jpg-to-png', 'png-to-jpg', 'resize-image'],
   },
@@ -343,6 +405,13 @@ export const IMAGE_TOOLS: ToolConfig[] = [
             'Converting to JPG trades a little file size for near-universal compatibility, which is usually the right call whenever you are sharing a photo outside Apple’s ecosystem.',
           ],
         },
+        {
+          heading: 'Common situations where this comes up',
+          paragraphs: [
+            'The most frequent trigger is emailing or uploading an iPhone photo to a website, form or older Windows program that rejects HEIC outright with an unhelpful "unsupported file type" error — converting first avoids the back-and-forth of figuring out why the upload failed.',
+            'It also comes up when sharing photos with someone on Android or an older Windows PC without HEIC support installed; JPG guarantees they can simply open the file without installing anything extra.',
+          ],
+        },
       ],
       example: {
         inputs: [
@@ -359,6 +428,11 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'What happens to my photo’s date, location and camera info?', a: 'By default nothing is carried over, for privacy. Tick "preserve EXIF" before converting if you want that metadata kept — this is a best-effort feature and may not work for every photo.' },
       { q: 'Can I convert a whole camera roll at once?', a: `Yes, up to ${100} photos per batch. Download them together as a ZIP.` },
       { q: 'Are my photos uploaded anywhere?', a: 'No. Conversion happens entirely in your browser.' },
+      { q: 'Can I convert HEIC to a format other than JPG?', a: 'This tool targets JPG specifically since it is the most universally compatible choice. For WebP or PNG, convert the resulting JPG through our WebP Converter or JPG to PNG tool.' },
+      { q: 'Does this work for HEIC videos too?', a: 'No — this converts still HEIC/HEIF images only. Live Photos and HEVC video clips are not supported.' },
+      { q: 'Why does my HEIC file look rotated after converting?', a: 'This shouldn\'t happen — the converter reads the photo\'s stored orientation and applies it during conversion. If you do see this, try re-exporting the HEIC from your phone and converting again.' },
+      { q: 'Does this reduce my photo\'s resolution?', a: 'No — the converted JPG keeps the same pixel dimensions as the original HEIC. Only the file format and, depending on your quality setting, the compression change.' },
+      { q: 'My iPhone photo is actually saved as JPG already — do I need this tool?', a: 'No — if your iPhone\'s camera format setting is already "Most Compatible" rather than "High Efficiency", your photos are already JPG and this tool has nothing to convert.' },
     ],
     relatedTools: ['compress-image', 'jpg-to-png', 'webp-converter', 'resize-image'],
   },
@@ -425,6 +499,9 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'What happens if the target is impossible to hit?', a: 'For an extremely small target on a highly detailed image, even the lowest quality and smallest reasonable size may not fit. The tool tries its best across several downscale steps and clearly marks the result if it couldn’t fully meet your target.' },
       { q: 'Does resizing distort my photo?', a: 'No. When the tool needs to shrink dimensions to hit a target, it always scales proportionally — width and height shrink together.' },
       { q: 'Can I set both a minimum and maximum size?', a: 'Yes — enter a target (the maximum) and an optional minimum. This exactly matches forms that specify a size range like "20 KB to 50 KB".' },
+      { q: 'Does this work for a signature scan as well as a photo?', a: 'Yes — the same target-size search works on any JPG or WebP image, signatures included, though a simple signature scan usually reaches a small target with better visual quality than a detailed photo would.' },
+      { q: 'How long does the search take?', a: 'Typically well under a second per image for common target sizes, since the whole binary search runs locally in a Web Worker without any network round-trip.' },
+      { q: 'Which output format should I choose, JPG or WebP?', a: 'JPG is the safer default since virtually every form and portal accepts it. Choose WebP only if you\'ve confirmed the destination accepts it — it can sometimes reach a target size with slightly better visual quality.' },
     ],
     relatedTools: ['compress-image', 'resize-image', 'webp-converter', 'jpg-to-png'],
   },
@@ -491,6 +568,9 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'Can I use this for an exam that isn’t listed?', a: 'Not yet with an exact preset, but you can use our general Compress Image to Exact Size and Image Resizer tools with the dimensions and size range from your own notification.' },
       { q: 'Why does it say "couldn’t hit every requirement"?', a: 'This happens on rare, very restrictive size ranges where the required pixel dimensions can’t be compressed into the target range without visibly damaging the image. The tool always shows you the closest possible result rather than silently failing.' },
       { q: 'Is my photo uploaded anywhere?', a: 'No. Cropping, resizing, cleanup and compression all happen in your browser.' },
+      { q: 'What if my photo doesn\'t fit the required aspect ratio?', a: 'The crop tool lets you pan and zoom freely within the locked aspect ratio, so you choose exactly what part of your photo fills the frame rather than being forced into an automatic, possibly awkward crop.' },
+      { q: 'Can I redo the photo and signature separately?', a: 'Yes — each has its own crop and result step, so you can retake or re-crop just the signature without redoing the photo, or the other way around.' },
+      { q: 'What image formats can I upload for the photo and signature?', a: 'JPG, PNG or WebP for either one — the tool normalises both internally before cropping and compressing to the exam\'s required format.' },
     ],
     relatedTools: ['passport-photo', 'compress-to-size', 'resize-image', 'compress-image'],
   },
@@ -556,6 +636,10 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'What paper size should I print the sheet on?', a: 'A standard 4×6 inch photo print, available at almost any pharmacy, photo kiosk or home printer with photo paper.' },
       { q: 'Can I add more sizes later?', a: 'Yes — passport sizes are defined in one small config file, so adding a new country’s standard is a quick addition.' },
       { q: 'Is my photo uploaded anywhere?', a: 'No. Cropping, resizing and print-sheet generation all happen in your browser.' },
+      { q: 'Can I make a passport photo for a country not listed?', a: 'Use the closest matching standard\'s dimensions as a starting point, or crop with our general Image Resizer to your country\'s specific millimetre or pixel requirement.' },
+      { q: 'Will the background always be pure white?', a: 'Yes — the standards here call for a plain white background, so the tool always renders one regardless of your original photo\'s background, provided your subject is reasonably separated from it.' },
+      { q: 'Can I download just one copy instead of the full sheet?', a: 'Yes — the single cropped photo is available as its own download alongside the print sheet, so you can use whichever your application actually needs.' },
+      { q: 'Why 300 DPI specifically?', a: '300 DPI is the standard resolution photo labs and passport authorities expect for a genuinely print-quality photo — lower resolutions can look visibly soft once printed at actual passport-photo size.' },
     ],
     relatedTools: ['exam-photo-signature', 'compress-to-size', 'resize-image', 'compress-image'],
   },
