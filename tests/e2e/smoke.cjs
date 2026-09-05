@@ -124,7 +124,7 @@ function ensureFixtures() {
     '/finance/emi-calculator', '/finance/sip-calculator', '/finance/fd-calculator', '/finance/rd-calculator',
     '/finance/gst-calculator', '/finance/loan-calculator', '/finance/cagr-calculator', '/finance/salary-calculator',
     '/image/compress-image', '/image/resize-image', '/image/jpg-to-png', '/image/png-to-jpg', '/image/webp-converter',
-    '/image/heic-to-jpg', '/image/compress-to-size',
+    '/image/heic-to-jpg', '/image/compress-to-size', '/image/exam-photo-signature',
   ];
 
   console.log('\n## Pages load (no JS errors, exactly one H1)');
@@ -208,6 +208,41 @@ function ensureFixtures() {
     await wait(4000); // worker round trip
     const produced = await p.evaluate(() => /quality \d+%/.test(document.body.innerText) && /processed\./i.test(document.body.innerText));
     check('/image/compress-to-size', pickedChip && clicked && produced && p._errs.length === 0, p._errs[0] || `chip=${pickedChip} clicked=${clicked} produced=${produced}`);
+    await p.close();
+  }
+
+  console.log('\n## Exam Photo & Signature Tool (preset picker, crop, pass/fail)');
+  {
+    const p = await open();
+    await p.goto(BASE + '/image/exam-photo-signature', { waitUntil: 'networkidle0' });
+    await wait(500);
+    const pickedPreset = await p.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => /example — banking po/i.test(x.textContent));
+      if (b) { b.click(); return true; }
+      return false;
+    });
+    await wait(500);
+    const inputs = await p.$$('input[type="file"]');
+    const hasBothInputs = inputs.length === 2;
+    if (hasBothInputs) {
+      await inputs[0].uploadFile(path.join(FIX, 'sample.jpg'));
+      await inputs[1].uploadFile(path.join(FIX, 'sample.png'));
+    }
+    await wait(800); // crop frame mounts + reports an initial crop rect
+    const clickedBoth = await p.evaluate(() => {
+      const buttons = [...document.querySelectorAll('button')].filter((x) => /^process (photo|signature)$/i.test(x.textContent.trim()));
+      buttons.forEach((b) => b.click());
+      return buttons.length === 2;
+    });
+    await wait(2000);
+    const bodyText = await p.evaluate(() => document.body.innerText);
+    const sawResults = /width/i.test(bodyText) && /file size/i.test(bodyText);
+    const sawZip = /download both as zip/i.test(bodyText);
+    check(
+      '/image/exam-photo-signature',
+      pickedPreset && hasBothInputs && clickedBoth && sawResults && sawZip && p._errs.length === 0,
+      p._errs[0] || `preset=${pickedPreset} inputs=${hasBothInputs} processed=${clickedBoth} results=${sawResults} zip=${sawZip}`,
+    );
     await p.close();
   }
 

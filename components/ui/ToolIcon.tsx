@@ -23,6 +23,7 @@ import {
   RotateCw,
   LayoutGrid,
   Lock,
+  IdCard,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -50,6 +51,7 @@ const MAP: Record<string, LucideIcon> = {
   'rotate-cw': RotateCw,
   'layout-grid': LayoutGrid,
   lock: Lock,
+  'id-card': IdCard,
 };
 
 export function ToolIcon({ name, className }: { name: string; className?: string }) {

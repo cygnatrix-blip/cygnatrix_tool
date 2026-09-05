@@ -428,4 +428,70 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['compress-image', 'resize-image', 'webp-converter', 'jpg-to-png'],
   },
+  {
+    ...base,
+    id: 'exam-photo-signature',
+    name: 'Exam Photo & Signature Tool',
+    slug: 'exam-photo-signature',
+    path: '/image/exam-photo-signature',
+    icon: 'id-card',
+    toolType: 'file',
+    featured: true,
+    popular: true,
+    sortOrder: 8,
+    updatedAt: '2026-08-28',
+    shortDescription: 'Crop, resize and compress your photo and signature to an exam’s exact spec.',
+    description:
+      'Pick your exam, upload a photo and a signature, and get back files already matching the required dimensions, file size range and format — no manual cropping or trial-and-error compression.',
+    keywords: ['exam photo size', 'signature size for exam', 'photo resizer for exam form', 'ibps photo size', 'ssc photo signature size', 'exam application photo'],
+    seoTitle: 'Exam Photo & Signature Resizer — Exact Size for Any Form',
+    seoDescription:
+      'Free tool to crop, resize and compress your photo and signature to match an exam or form’s exact requirements — dimensions, DPI and file size range. Pass/fail check included, no upload.',
+    content: {
+      howItWorks: [
+        { title: 'Pick your exam', body: 'Search for it or browse by category. Each preset lists its exact photo and signature requirements.' },
+        { title: 'Crop your photo and signature', body: 'Drag to position and zoom to fit the required aspect ratio exactly.' },
+        { title: 'Get a pass/fail result', body: 'The tool automatically finds the right quality to land inside the required size range and shows you a clear pass or fail against every requirement.' },
+      ],
+      features: [
+        'Searchable exam picker, grouped by category',
+        'Crop locked to the exact required aspect ratio',
+        'Automatic compression to hit an exact file-size range',
+        'Signature background whitening for photographed signatures on paper',
+        'Clear pass/fail check against width, height and file size',
+        'Download individually or as a ZIP',
+      ],
+      sections: [
+        {
+          heading: 'Why exam photo requirements are so specific',
+          paragraphs: [
+            'Exam portals validate uploads with strict, automated checks — a photo one pixel outside the required dimensions, or a few KB over the size limit, can be rejected outright, sometimes at the worst possible moment near a deadline.',
+            'This tool does the fiddly part for you: it crops to the exact aspect ratio, resizes to the exact pixel dimensions, and searches for the JPEG quality that lands your file inside the required size range — then tells you plainly whether it succeeded.',
+          ],
+        },
+        {
+          heading: 'About the signature cleanup',
+          paragraphs: [
+            'A signature photographed or scanned on paper usually picks up an off-white or gray background from the paper and lighting. The cleanup pass estimates that background tone and stretches it toward pure white while keeping the ink dark, which is what most forms expect from a signature image.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Exam', value: 'Example — Banking PO (sample spec)' },
+          { label: 'Photo requirement', value: '200×230px, 20–50 KB' },
+        ],
+        result: [{ label: 'Photo result', value: '200×230px, 41 KB — passes' }],
+        walkthrough:
+          'The uploaded photo is cropped to a 200:230 aspect ratio using the position you chose, resized to exactly 200×230 pixels, then compressed to land inside the 20–50 KB range.',
+      },
+    },
+    faq: [
+      { q: 'Where do the exam specs come from?', a: 'Each preset lists the notification it was verified against and the date it was checked. Requirements can change between notification cycles, so always cross-check against the current official notification before submitting — every preset says this explicitly.' },
+      { q: 'Can I use this for an exam that isn’t listed?', a: 'Not yet with an exact preset, but you can use our general Compress Image to Exact Size and Image Resizer tools with the dimensions and size range from your own notification.' },
+      { q: 'Why does it say "couldn’t hit every requirement"?', a: 'This happens on rare, very restrictive size ranges where the required pixel dimensions can’t be compressed into the target range without visibly damaging the image. The tool always shows you the closest possible result rather than silently failing.' },
+      { q: 'Is my photo uploaded anywhere?', a: 'No. Cropping, resizing, cleanup and compression all happen in your browser.' },
+    ],
+    relatedTools: ['compress-to-size', 'resize-image', 'compress-image', 'jpg-to-png'],
+  },
 ];
