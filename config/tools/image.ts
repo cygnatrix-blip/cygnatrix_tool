@@ -492,6 +492,71 @@ export const IMAGE_TOOLS: ToolConfig[] = [
       { q: 'Why does it say "couldn’t hit every requirement"?', a: 'This happens on rare, very restrictive size ranges where the required pixel dimensions can’t be compressed into the target range without visibly damaging the image. The tool always shows you the closest possible result rather than silently failing.' },
       { q: 'Is my photo uploaded anywhere?', a: 'No. Cropping, resizing, cleanup and compression all happen in your browser.' },
     ],
-    relatedTools: ['compress-to-size', 'resize-image', 'compress-image', 'jpg-to-png'],
+    relatedTools: ['passport-photo', 'compress-to-size', 'resize-image', 'compress-image'],
+  },
+  {
+    ...base,
+    id: 'passport-photo',
+    name: 'Passport Photo Maker',
+    slug: 'passport-photo',
+    path: '/image/passport-photo',
+    icon: 'camera',
+    toolType: 'file',
+    featured: true,
+    popular: true,
+    sortOrder: 9,
+    updatedAt: '2026-08-28',
+    shortDescription: 'Crop to India, US or Schengen passport photo standards, plus a printable sheet.',
+    description:
+      'Crop your photo to the exact passport or visa photo standard — India (35×45mm), US (2×2in) or Schengen (35×45mm) — at 300 DPI on a white background, then generate a 4×6in print sheet with multiple copies and cut guides.',
+    keywords: ['passport photo maker', 'passport size photo online', 'us visa photo size', 'schengen visa photo', 'passport photo 4x6 sheet', 'passport photo print'],
+    seoTitle: 'Passport Photo Maker — India, US & Schengen + Print Sheet',
+    seoDescription:
+      'Free passport and visa photo maker. Crop to the exact India (35×45mm), US (2×2in) or Schengen (35×45mm) standard at 300 DPI, then print multiple copies on one 4×6in sheet with cut guides.',
+    content: {
+      howItWorks: [
+        { title: 'Choose your photo standard', body: 'India, US or Schengen — each maps to the exact required pixel size at 300 DPI.' },
+        { title: 'Crop your photo', body: 'Drag to position and zoom to fit the required aspect ratio exactly, on a white background.' },
+        { title: 'Download or print', body: 'Save the single photo, or generate a 4×6in sheet tiled with as many copies as fit, complete with cut guides.' },
+      ],
+      features: [
+        'India (35×45mm), US (2×2in) and Schengen (35×45mm) presets',
+        '300 DPI output for genuine print quality',
+        'Crop locked to the exact required aspect ratio',
+        '4×6in print sheet with multiple copies and dashed cut guides',
+        'White background, standard JPEG output',
+        'Runs entirely in your browser',
+      ],
+      sections: [
+        {
+          heading: 'Why print a sheet instead of one photo',
+          paragraphs: [
+            'Passport applications and photo studios both typically ask for more than one print. Rather than pay per print or crop the same photo six times, this tool tiles as many copies as fit on a standard 4×6in photo print size — the size almost every pharmacy and photo kiosk print machine accepts — with light dashed guides so you can cut them apart cleanly.',
+          ],
+        },
+        {
+          heading: 'A note on photo studio requirements',
+          paragraphs: [
+            'This tool handles the sizing, DPI and print layout precisely. It does not attempt to verify facial positioning, expression, or lighting rules that passport authorities also require (like head size within the frame or a truly neutral expression) — take the source photo against a plain, well-lit background and check your country’s official photo guidelines before submitting.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Standard', value: 'India (35×45mm)' },
+          { label: 'Output', value: '413×531px at 300 DPI' },
+        ],
+        result: [{ label: 'Print sheet', value: '6 copies tiled on one 4×6in sheet' }],
+        walkthrough:
+          'The cropped photo is resized to exactly 413×531 pixels, then tiled six times on a 1200×1800 pixel (4×6in at 300 DPI) sheet with a small gap and a dashed cut line around each copy.',
+      },
+    },
+    faq: [
+      { q: 'Will this photo be accepted for my passport application?', a: 'It gets the size, DPI and background right, but passport authorities also check things like head position and expression that this tool can’t verify. Always check your country’s official photo guidelines as well.' },
+      { q: 'What paper size should I print the sheet on?', a: 'A standard 4×6 inch photo print, available at almost any pharmacy, photo kiosk or home printer with photo paper.' },
+      { q: 'Can I add more sizes later?', a: 'Yes — passport sizes are defined in one small config file, so adding a new country’s standard is a quick addition.' },
+      { q: 'Is my photo uploaded anywhere?', a: 'No. Cropping, resizing and print-sheet generation all happen in your browser.' },
+    ],
+    relatedTools: ['exam-photo-signature', 'compress-to-size', 'resize-image', 'compress-image'],
   },
 ];

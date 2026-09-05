@@ -124,7 +124,7 @@ function ensureFixtures() {
     '/finance/emi-calculator', '/finance/sip-calculator', '/finance/fd-calculator', '/finance/rd-calculator',
     '/finance/gst-calculator', '/finance/loan-calculator', '/finance/cagr-calculator', '/finance/salary-calculator',
     '/image/compress-image', '/image/resize-image', '/image/jpg-to-png', '/image/png-to-jpg', '/image/webp-converter',
-    '/image/heic-to-jpg', '/image/compress-to-size', '/image/exam-photo-signature',
+    '/image/heic-to-jpg', '/image/compress-to-size', '/image/exam-photo-signature', '/image/passport-photo',
   ];
 
   console.log('\n## Pages load (no JS errors, exactly one H1)');
@@ -242,6 +242,36 @@ function ensureFixtures() {
       '/image/exam-photo-signature',
       pickedPreset && hasBothInputs && clickedBoth && sawResults && sawZip && p._errs.length === 0,
       p._errs[0] || `preset=${pickedPreset} inputs=${hasBothInputs} processed=${clickedBoth} results=${sawResults} zip=${sawZip}`,
+    );
+    await p.close();
+  }
+
+  console.log('\n## Passport Photo Maker (crop, process, print sheet)');
+  {
+    const p = await open();
+    await p.goto(BASE + '/image/passport-photo', { waitUntil: 'networkidle0' });
+    await wait(500);
+    const fi = await p.$('input[type="file"]');
+    await fi.uploadFile(path.join(FIX, 'sample.jpg'));
+    await wait(800);
+    const clickedProcess = await p.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => /create .* photo$/i.test(x.textContent.trim()));
+      if (b) { b.click(); return true; }
+      return false;
+    });
+    await wait(2000);
+    const photoReady = await p.evaluate(() => /photo ready/i.test(document.body.innerText));
+    const clickedSheet = await p.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => /create 4×6in print sheet/i.test(x.textContent));
+      if (b) { b.click(); return true; }
+      return false;
+    });
+    await wait(2000);
+    const sheetReady = await p.evaluate(() => /print sheet ready/i.test(document.body.innerText));
+    check(
+      '/image/passport-photo',
+      clickedProcess && photoReady && clickedSheet && sheetReady && p._errs.length === 0,
+      p._errs[0] || `processed=${clickedProcess} photoReady=${photoReady} sheetClicked=${clickedSheet} sheetReady=${sheetReady}`,
     );
     await p.close();
   }
