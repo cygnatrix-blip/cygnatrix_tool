@@ -72,6 +72,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'The amortization schedule shows this crossover point — the month where you finally start paying off more principal than interest.',
           ],
         },
+        {
+          heading: 'Prepayment: the biggest lever you have',
+          paragraphs: [
+            'Because early instalments are mostly interest, a prepayment made early in the loan removes far more future interest than the same amount paid later — every rupee of principal cleared sooner stops accruing interest for every remaining month of the loan.',
+            'To see exactly how much a specific lump sum or extra monthly payment would save on your own loan, use our Home Loan Prepayment Calculator, which runs the full month-by-month comparison rather than a rough estimate.',
+          ],
+        },
       ],
     },
     faq: [
@@ -79,6 +86,8 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'Is the EMI fixed for the whole loan?', a: 'For a fixed-rate loan, yes. For a floating-rate loan the EMI (or the tenure) changes whenever your lender revises the rate. Re-run the calculator with the new rate to see the effect.' },
       { q: 'Does this include processing fees or insurance?', a: 'No. It calculates the pure loan EMI. Add any one-time fees separately.' },
       { q: 'What if my interest rate is 0%?', a: 'The calculator handles it — the EMI becomes simply the loan amount divided by the number of months.' },
+      { q: 'How much EMI can I actually afford?', a: 'A common rule of thumb is keeping total EMIs (across all loans) under 40-50% of your monthly take-home pay, though your own comfortable limit depends on your other expenses and savings goals.' },
+      { q: 'Does a shorter tenure always mean a much higher EMI?', a: 'Not proportionally — halving the tenure roughly doubles the principal repaid each month, but since less interest accrues overall, the EMI increase is usually somewhat less than double.' },
     ],
     relatedTools: ['loan-calculator', 'sip-calculator', 'fd-calculator', 'salary-calculator'],
   },
@@ -144,6 +153,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'Use a conservative return (say 10–11% for equity) for planning, and treat the result as a range rather than a precise figure.',
           ],
         },
+        {
+          heading: 'SIP vs a lump sum',
+          paragraphs: [
+            'A SIP\'s real advantage isn\'t a higher return than investing a lump sum — over a full market cycle a lump sum invested at the start often wins mathematically. Its advantage is discipline and rupee-cost averaging: you buy more units when prices are low and fewer when they are high, automatically, without trying to time the market.',
+            'If you already have a lump sum available today, a SIP is not automatically the better choice for it — it mainly matters for money you don\'t have yet, i.e. future income you plan to invest as it arrives.',
+          ],
+        },
       ],
     },
     faq: [
@@ -151,6 +167,7 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'What return rate should I use?', a: 'For diversified equity funds, 10–12% is a common long-term planning assumption. For hybrid funds use 8–10%, and for debt funds 6–7%. Past performance does not guarantee future returns.' },
       { q: 'What does the annual step-up do?', a: 'It increases your monthly investment by a fixed percentage each year, modelling the common practice of investing more as your income grows. It significantly raises the final value.' },
       { q: 'Does this account for exit load or capital gains tax?', a: 'No. The projection is before costs and taxes. Factor those in separately when planning.' },
+      { q: 'Is there a version of this with a fixed annual step-up amount instead of a percentage?', a: 'Our dedicated Step-up SIP Calculator lets you set a custom step-up percentage and compares it directly against an equivalent flat SIP.' },
     ],
     relatedTools: ['emi-calculator', 'cagr-calculator', 'fd-calculator', 'rd-calculator'],
   },
@@ -207,12 +224,26 @@ export const FINANCE_TOOLS: ToolConfig[] = [
         walkthrough:
           'Quarterly compounding means f = 4 and 20 periods over 5 years, each adding 7 ÷ 4 = 1.75%. ₹1,00,000 × 1.0175^20 ≈ ₹1,41,478.',
       },
+      sections: [
+        {
+          heading: 'Cumulative vs non-cumulative FDs',
+          paragraphs: [
+            'This calculator assumes a cumulative FD, where interest compounds and is paid out only at maturity along with the principal — the common default when you "book an FD" without specifying otherwise.',
+            'A non-cumulative FD instead pays out interest periodically (monthly, quarterly or annually) as income, rather than letting it compound. The maturity value works out lower than a cumulative FD at the same rate, because the paid-out interest no longer earns interest on itself — but it suits someone who wants a regular income stream rather than a lump sum later.',
+          ],
+        },
+      ],
     },
     faq: [
       { q: 'Does this calculate TDS on FD interest?', a: 'No. Banks deduct TDS if interest exceeds the annual threshold and you have not submitted Form 15G/15H. The calculator shows gross interest; subtract applicable tax yourself.' },
       { q: 'Which compounding frequency should I choose?', a: 'Use whatever your bank states. Cumulative FDs in India almost always compound quarterly.' },
       { q: 'Is the FD rate fixed for the whole term?', a: 'Yes. Once booked, the rate is locked for the tenure regardless of later rate changes — that is the point of a fixed deposit.' },
       { q: 'What about premature withdrawal?', a: 'Breaking an FD early usually attracts a penalty (often 0.5–1% lower rate). This calculator assumes the deposit runs to maturity.' },
+      { q: 'Is FD interest taxed the same as my salary?', a: 'FD interest is added to your total income and taxed at your income-tax slab rate, unlike some investments that get concessional capital-gains treatment.' },
+      { q: 'How does an FD compare to a recurring deposit?', a: 'An FD needs the full amount upfront and earns interest on the whole sum from day one. An RD lets you build up savings monthly instead, but each instalment only earns interest from when it\'s deposited — use our RD Calculator to compare directly.' },
+      { q: 'Do senior citizens get a better FD rate?', a: 'Yes, most Indian banks offer an additional 0.25-0.75% over the standard rate for senior citizens — check with your specific bank for their exact senior citizen premium.' },
+      { q: 'Can I have multiple FDs instead of one large one?', a: 'Yes, and it can help with liquidity — splitting a large sum into several smaller FDs with staggered maturity dates (a strategy called laddering) means you always have one maturing soon if you need funds, without breaking the others early.' },
+      { q: 'What happens automatically when an FD matures?', a: 'Depending on the instructions given at booking, the bank either credits the maturity amount to your linked account or auto-renews the FD for the same tenure at the then-current rate — check which option your account is set to.' },
     ],
     relatedTools: ['rd-calculator', 'sip-calculator', 'cagr-calculator', 'emi-calculator'],
   },
@@ -269,12 +300,26 @@ export const FINANCE_TOOLS: ToolConfig[] = [
         walkthrough:
           'The first ₹5,000 earns interest for all 24 months; the last earns it for one. Compounding each instalment quarterly and summing gives a maturity of roughly ₹1.29 lakh.',
       },
+      sections: [
+        {
+          heading: 'RD as a savings discipline, not just a return',
+          paragraphs: [
+            'The appeal of an RD is rarely the interest rate alone — it is the fixed monthly commitment that builds a savings habit, similar to a SIP but with a guaranteed rather than market-linked outcome. It suits a short, defined savings goal (a deposit for a trip, an appliance, a wedding expense) more than long-term wealth building.',
+            'For a longer horizon where you can tolerate market ups and downs, a SIP into a mutual fund has historically outpaced RD returns by a wide margin, at the cost of not being guaranteed.',
+          ],
+        },
+      ],
     },
     faq: [
       { q: 'Why is RD interest lower than an FD for the same amount?', a: 'In an RD your money goes in gradually, so on average it is invested for about half the tenure. An FD puts the whole sum to work from day one.' },
       { q: 'Is TDS deducted on RD interest?', a: 'Yes, banks apply TDS on RD interest above the annual threshold, the same as FDs. The calculator shows gross interest.' },
       { q: 'What if I miss a monthly instalment?', a: 'Banks usually charge a small penalty and the maturity value drops. This calculator assumes every instalment is paid on time.' },
       { q: 'Can the monthly amount change during the RD?', a: 'No. A standard RD has a fixed monthly instalment set when you open it.' },
+      { q: 'Can I close an RD before its term ends?', a: 'Yes, most banks allow premature closure, usually with a reduced interest rate applied similar to premature FD withdrawal. Check your bank\'s specific terms.' },
+      { q: 'Is there a minimum or maximum tenure for an RD?', a: 'Most Indian banks offer RDs from 6 months up to 10 years, though the exact range varies by bank.' },
+      { q: 'Can I increase my monthly deposit partway through the RD?', a: 'No — a standard RD locks in the monthly amount at opening. To invest more, open a second RD alongside the first rather than trying to modify the existing one.' },
+      { q: 'Is RD interest better than keeping money in a savings account?', a: 'Almost always yes — RD rates are typically 2-4 percentage points higher than a standard savings account rate, since you\'re committing to a fixed monthly deposit rather than keeping funds instantly withdrawable.' },
+      { q: 'Do post offices in India also offer recurring deposits?', a: 'Yes — India Post offers its own RD scheme alongside bank RDs, often with a comparable or slightly different rate and a standard 5-year tenure; compare both before committing.' },
     ],
     relatedTools: ['fd-calculator', 'sip-calculator', 'emi-calculator', 'cagr-calculator'],
   },
@@ -329,12 +374,24 @@ export const FINANCE_TOOLS: ToolConfig[] = [
         walkthrough:
           'GST = 1000 × 18 ÷ 100 = ₹180, split equally into CGST ₹90 and SGST ₹90. The invoice total becomes ₹1,180. To reverse: 1180 × 100 ÷ 118 = ₹1,000 base.',
       },
+      sections: [
+        {
+          heading: 'A common invoicing mistake',
+          paragraphs: [
+            'A frequent error is applying the GST rate to a price that already includes GST, as if it were exclusive — this overcharges the customer by effectively taxing the tax. If a supplier tells you "the price is ₹1,180 including GST", that 1,180 is the inclusive amount; use inclusive mode to correctly extract the ₹1,000 base and ₹180 GST rather than adding another 18% on top of 1,180.',
+            'This mix-up is easy to make when copying a rate calculation from an exclusive-pricing template onto an inclusive quote, so it is worth double-checking which mode matches how the price was actually quoted before finalising an invoice.',
+          ],
+        },
+      ],
     },
     faq: [
       { q: 'What is the difference between CGST, SGST and IGST?', a: 'For a sale within the same state, GST is split equally into Central GST and State GST. For a sale across state lines, a single Integrated GST is charged at the full rate instead.' },
       { q: 'How do I remove GST from a price that already includes it?', a: 'Choose “inclusive”. The calculator divides by (100 + rate) and multiplies by 100 to find the pre-GST base, then shows the GST portion.' },
       { q: 'Which GST rate applies to my product?', a: 'GST rates depend on the HSN/SAC classification of the goods or service. Common slabs are 5%, 12%, 18% and 28%, with 0.25% and 3% for specific items. Check the official rate finder for your product.' },
       { q: 'Is the rate configuration easy to update?', a: 'Yes. Rates live in one place in our code, and you can also type any custom rate directly into the calculator.' },
+      { q: 'Does this calculate GST for services as well as goods?', a: 'Yes — the calculation itself is identical for goods and services; only the applicable rate differs, based on the specific service\'s SAC classification.' },
+      { q: 'Can I use this to reverse-calculate GST paid on a purchase for input tax credit records?', a: 'Yes — inclusive mode extracts exactly the base amount and GST component from a purchase invoice total, which is what you need when recording input tax credit.' },
+      { q: 'What is the 0.25% and 3% slab used for?', a: 'These are concessional rates for specific categories — 0.25% mainly applies to rough precious and semi-precious stones, and 3% to gold, silver and jewellery.' },
     ],
     relatedTools: ['salary-calculator', 'emi-calculator', 'loan-calculator', 'cagr-calculator'],
   },
@@ -400,13 +457,22 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'Making a prepayment reduces the balance immediately, which cuts every future interest charge — the schedule is a good way to see how much a lump-sum prepayment early in the loan would save.',
           ],
         },
+        {
+          heading: 'Comparing loan offers properly',
+          paragraphs: [
+            'When comparing two loan offers, the headline interest rate alone can mislead — a lower rate with a longer tenure can cost more in total interest than a higher rate over a shorter one. Run each offer through this calculator with its actual rate and tenure and compare the total repayment figure, not just the rate.',
+            'Also watch for a processing fee quoted separately from the interest rate; a 1-2% one-time fee on a large loan is a real cost that a rate comparison alone won\'t surface.',
+          ],
+        },
       ],
     },
     faq: [
       { q: 'How is this different from the EMI Calculator?', a: 'It uses the same formula and engine. The Loan Calculator leads with the total cost of borrowing and the schedule; the EMI Calculator leads with the monthly figure. Use whichever framing you prefer.' },
-      { q: 'Can I model prepayments?', a: 'Not yet in a single run, but you can re-run the calculator with the reduced balance and a shorter tenure to approximate the effect of a prepayment.' },
+      { q: 'Can I model prepayments?', a: 'Not yet in a single run, but you can re-run the calculator with the reduced balance and a shorter tenure to approximate the effect of a prepayment — or use our dedicated Home Loan Prepayment Calculator for an exact month-by-month comparison.' },
       { q: 'Does it handle floating rates?', a: 'It calculates for one fixed rate. If your rate changes, re-run with the new rate and remaining tenure.' },
       { q: 'Are fees included?', a: 'No. Processing fees, insurance and stamp duty are separate one-time costs.' },
+      { q: 'Can I use this for a car or personal loan, not just a home loan?', a: 'Yes — the calculation is identical for any fixed-rate instalment loan, regardless of what it is used for.' },
+      { q: 'What is a good interest rate to expect?', a: 'It varies heavily by loan type and your credit profile — home loans in India are typically the cheapest (often 8-9.5%), personal loans the most expensive (10-24%), with car and other secured loans in between.' },
     ],
     relatedTools: ['emi-calculator', 'sip-calculator', 'fd-calculator', 'gst-calculator'],
   },
@@ -470,6 +536,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'CAGR converts that into a yearly rate so investments held for different lengths of time can be compared fairly. It is the number fund fact-sheets quote.',
           ],
         },
+        {
+          heading: 'Using CAGR to compare different investments',
+          paragraphs: [
+            'CAGR\'s main practical use is putting two investments of different durations on the same footing — a stock that doubled in 4 years and one that doubled in 8 years both had a 100% absolute return, but very different CAGRs (roughly 19% vs 9%), which is the number that actually reflects which one grew faster per year.',
+            'Be cautious comparing CAGR across very different risk levels though — a higher CAGR on a volatile stock isn\'t directly comparable to a lower CAGR on a stable bond fund without also considering how much the value fluctuated along the way.',
+          ],
+        },
       ],
     },
     faq: [
@@ -477,6 +550,9 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'Can CAGR be negative?', a: 'Yes. If the final value is below the initial value, the CAGR is negative — the investment shrank at that compounded rate each year.' },
       { q: 'Does CAGR account for additional investments made along the way?', a: 'No. CAGR is for a single lump sum. For regular contributions use XIRR (not covered here) or our SIP calculator for projections.' },
       { q: 'What period should I use for stock or fund comparison?', a: 'Use the same period for every option you compare — 3, 5 or 10 years are standard. Short periods are heavily influenced by market timing.' },
+      { q: 'Can I use CAGR to project a future value?', a: 'Yes, informally — applying a past or assumed CAGR forward gives a projection, though it carries the same caveat as any SIP projection: real returns vary and past performance is not a guarantee.' },
+      { q: 'Does the calculator accept fractional years, like 2.5?', a: 'Yes — enter any positive number of years, including fractions, which is useful when comparing investments held for an odd number of months rather than whole years.' },
+      { q: 'What is considered a "good" CAGR for equity investments?', a: 'Broad Indian equity indices have historically delivered roughly 12-15% CAGR over long periods, though any single stock or fund can vary widely above or below that.' },
     ],
     relatedTools: ['sip-calculator', 'fd-calculator', 'rd-calculator', 'emi-calculator'],
   },
@@ -546,6 +622,12 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'Income tax on a payslip also reflects your investment declarations (80C, 80D, home loan interest, HRA rent proof). This calculator deliberately ignores those so it gives a conservative baseline; your real take-home is usually a little higher once exemptions are applied.',
           ],
         },
+        {
+          heading: 'Negotiating an offer using CTC breakdown',
+          paragraphs: [
+            'When comparing two job offers, the same CTC figure can produce quite different in-hand pay depending on how much sits in basic vs allowances vs employer PF — a higher basic percentage means higher employer PF (which you don\'t receive monthly) but also a higher HRA base, which matters if you pay rent. Run both offers through this calculator with their actual structures rather than just comparing the headline CTC number.',
+          ],
+        },
       ],
     },
     faq: [
@@ -553,6 +635,7 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'New regime or old regime — which does it use?', a: 'You choose. The new regime is the default. The old regime allows more deductions but has higher slab rates; the calculator applies the standard deduction for whichever you pick.' },
       { q: 'Can I turn off Provident Fund?', a: 'Yes. Some roles and salary levels are outside mandatory PF. Toggle it off and the calculator removes both the employee deduction and the employer contribution.' },
       { q: 'How is this kept up to date with tax changes?', a: 'All slabs, PF rates and the professional tax figure live in a single dated configuration file. When the Budget changes a rule, that one file is updated and every result stays correct.' },
+      { q: 'Does this include HRA exemption in the old regime calculation?', a: 'No — for a precise old-regime figure, work out your HRA exemption separately with our HRA Exemption Calculator and treat it as an additional deduction on top of what this calculator shows.' },
     ],
     relatedTools: ['gst-calculator', 'emi-calculator', 'sip-calculator', 'loan-calculator'],
   },
@@ -616,6 +699,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'As a rule of thumb: if your old-regime deductions comfortably exceed roughly ₹3–4 lakh, the old regime often wins at middle incomes. Below that, the new regime usually comes out ahead. Run both numbers here rather than guessing.',
           ],
         },
+        {
+          heading: 'Building your "old regime deductions" figure',
+          paragraphs: [
+            'This single input is meant to combine everything the old regime allows that the new regime doesn\'t: Section 80C investments (up to ₹1.5 lakh — PF, ELSS, life insurance premiums, etc.), 80D health insurance premiums, home loan interest under Section 24(b), and your HRA exemption if you pay rent.',
+            'Work out each of these separately — this site\'s HRA Exemption Calculator handles the HRA piece — and add them together before entering the total here, rather than guessing a round number.',
+          ],
+        },
       ],
     },
     faq: [
@@ -623,6 +713,7 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'Can I switch regimes every year?', a: 'Salaried individuals can choose either regime each financial year. Those with business income have restrictions on switching back after opting out once.' },
       { q: 'Does this include HRA exemption calculation?', a: 'No — HRA exemption is a separate old-regime deduction. Use the HRA Exemption Calculator to work that out, then add it to "old regime deductions" here.' },
       { q: 'Is this exact enough to file my return?', a: 'It is a planning estimate using standard slabs and the standard deduction. Your actual liability may include other income, TDS credits and exemptions this calculator does not model — verify with a tax professional or the official portal before filing.' },
+      { q: 'Does this calculator handle income above ₹50 lakh, where surcharge applies?', a: 'No — surcharge on high incomes is not modelled here; this calculator covers the base slab tax and cess only, which is accurate for most salaried incomes but understates liability at very high income levels.' },
     ],
     relatedTools: ['salary-calculator', 'hra-exemption-calculator', 'gratuity-calculator', 'capital-gains-calculator'],
   },
@@ -688,6 +779,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'If you have a choice, prepay as early in the loan as you can, and check whether your lender charges a prepayment penalty (most floating-rate home loans in India do not, by RBI mandate).',
           ],
         },
+        {
+          heading: 'Prepay the loan, or invest the money instead?',
+          paragraphs: [
+            'This is really a comparison between your loan\'s interest rate and what you could realistically earn investing that same money — if your home loan costs 8.5% and you\'re confident of a 12% long-term SIP return, investing may build more wealth over time, even though prepaying feels safer.',
+            'There is no universally correct answer: prepaying guarantees a return equal to your loan rate with zero risk, while investing carries market risk for a potentially higher return. Many people split the difference — prepaying a moderate amount for peace of mind while still investing the rest.',
+          ],
+        },
       ],
     },
     faq: [
@@ -695,6 +793,7 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'Are there prepayment charges?', a: 'By RBI rules, floating-rate home loans to individuals cannot carry a prepayment penalty. Fixed-rate loans and other loan types may still charge one — check your loan agreement.' },
       { q: 'What if I want to prepay more than once?', a: 'Run the calculator again using the reduced balance and remaining tenure as your new starting point to model a second prepayment.' },
       { q: 'Is a lump sum or extra-monthly prepayment better?', a: 'A lump sum applied early saves the most per rupee, but a smaller recurring extra payment is often easier to sustain. Try both here with the amounts you can realistically afford.' },
+      { q: 'Does prepaying affect my home loan tax deduction under Section 80C or 24(b)?', a: 'It reduces the interest and principal you pay in future years, which in turn reduces the deduction available on those components going forward — factor this in if the tax benefit is significant to you.' },
     ],
     relatedTools: ['emi-calculator', 'loan-calculator', 'sip-calculator', 'income-tax-calculator'],
   },
@@ -758,6 +857,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'Because the step-up compounds every year, even a modest 5–10% annual increase produces a meaningfully larger corpus than holding the SIP flat for the whole period — the comparison chart here makes the gap concrete.',
           ],
         },
+        {
+          heading: 'When a step-up isn\'t the right fit',
+          paragraphs: [
+            'A step-up SIP commits you to increasing contributions every year regardless of what actually happens to your income — if a raise doesn\'t materialise in a given year, or an unexpected expense comes up, forcing the step-up can create financial strain rather than the intended discipline.',
+            'It works best when tied loosely to an expected, fairly reliable income trajectory rather than a rigid promise; most fund houses let you pause or adjust a step-up SIP mandate if your circumstances change.',
+          ],
+        },
       ],
     },
     faq: [
@@ -765,6 +871,7 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'What step-up percentage is realistic?', a: 'Many investors tie it to their expected annual salary increment — commonly 8–12% in India. Use whatever you can realistically commit to increasing each year.' },
       { q: 'Are returns guaranteed?', a: 'No. As with any SIP projection, the return is an assumption for illustration; actual mutual fund returns are market-linked and vary year to year.' },
       { q: 'Does this account for taxes or exit load?', a: 'No, the projection is before costs and capital gains tax. Use the Capital Gains Calculator separately to estimate tax on withdrawal.' },
+      { q: 'Can I set up a step-up SIP with my actual mutual fund provider?', a: 'Yes — most Indian AMCs and investment platforms offer a step-up SIP mandate option; this calculator is for planning the numbers before you set it up.' },
     ],
     relatedTools: ['sip-calculator', 'swp-calculator', 'capital-gains-calculator', 'cagr-calculator'],
   },
@@ -832,6 +939,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'Debt funds, gold, unlisted shares and property don\'t attract STT, use a 24-month threshold instead, and — for short-term holdings — are taxed at your regular income slab rate rather than a flat percentage, since there is no STT to justify a concessional flat rate.',
           ],
         },
+        {
+          heading: 'Timing a sale around the holding-period threshold',
+          paragraphs: [
+            'Because the tax treatment changes sharply right at the long-term threshold, it is often worth checking how close you are to it before selling — waiting even a few extra weeks to cross from 11 to 12 months on an equity holding can shift a gain from the 20% short-term rate to the much lower 12.5% long-term rate plus the annual exemption.',
+            'This calculator makes that comparison easy: run the same purchase and sale values with a holding period just under and just over the threshold to see the tax difference for yourself before deciding when to sell.',
+          ],
+        },
       ],
     },
     faq: [
@@ -839,6 +953,7 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'Why does short-term tax on "other" assets show no number?', a: 'Because it is added to your total income and taxed at whatever income slab you fall into, which depends on your full income — not something a standalone gains calculator can know. Use the Income Tax Calculator with this gain included in your income to estimate it.' },
       { q: 'Does the ₹1.25 lakh exemption apply to STCG too?', a: 'No — the exemption applies only to long-term equity gains. Short-term equity gains are taxed on the full amount at 20%.' },
       { q: 'Can I offset a loss against a gain?', a: 'Indian tax law allows capital losses to be set off against gains and carried forward for up to 8 years under specific rules. This calculator computes tax for a single transaction and does not model loss set-off across a portfolio.' },
+      { q: 'Does this apply to cryptocurrency gains?', a: 'No — cryptocurrency and other virtual digital assets in India are taxed under a separate flat 30% regime with no LTCG/STCG distinction, which this calculator does not model.' },
     ],
     relatedTools: ['income-tax-calculator', 'sip-calculator', 'cagr-calculator', 'step-up-sip-calculator'],
   },
@@ -904,6 +1019,12 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'If you own the home you live in, you cannot claim HRA exemption on it — HRA exemption requires that you actually pay rent for the accommodation you occupy.',
           ],
         },
+        {
+          heading: 'Paying rent to a family member',
+          paragraphs: [
+            'It is legally possible to claim HRA exemption while paying rent to a parent or other family member who owns the home you live in, provided the arrangement is genuine — a real rental agreement, actual rent payments (ideally by bank transfer, not cash), and the recipient declaring that rent as their own taxable income. Tax authorities do scrutinise these arrangements more closely than a payment to an unrelated landlord.',
+          ],
+        },
       ],
     },
     faq: [
@@ -911,6 +1032,7 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'What if I don\'t pay any rent?', a: 'Then your exempt HRA is zero — the "rent paid minus 10% of basic" factor becomes zero or negative (floored at zero), which is always the smallest of the three, so nothing is exempt.' },
       { q: 'Can I claim HRA and a home loan deduction at the same time?', a: 'Yes, if you rent a home in one city while owning and paying a home loan on a property elsewhere (or renting it out) — the two are independent claims under the old regime.' },
       { q: 'Is Delhi NCR (Gurugram, Noida) treated as metro?', a: 'No. Only Delhi, Mumbai, Kolkata and Chennai are treated as metro cities for this 50% rule; Gurugram and Noida use the 40% non-metro rate.' },
+      { q: 'Do I need to submit proof of rent to my employer, or only at tax filing?', a: 'Most employers ask for rent receipts (and landlord PAN above ₹1 lakh/year) during the year to apply the exemption to your monthly TDS. If you don\'t submit it there, you can still claim it directly when filing your return.' },
     ],
     relatedTools: ['income-tax-calculator', 'salary-calculator', 'gratuity-calculator', 'home-loan-prepayment-calculator'],
   },
@@ -973,6 +1095,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'The ₹20 lakh exemption limit is a lifetime cumulative cap across all employers for a private-sector employee, not a per-job allowance — factor in any gratuity already received tax-free elsewhere.',
           ],
         },
+        {
+          heading: 'Government vs private-sector employees',
+          paragraphs: [
+            'Central and state government employees receive gratuity fully tax-exempt with no ₹20 lakh ceiling — the cap applies specifically to private-sector employees covered under the Payment of Gratuity Act, which is the case this calculator models.',
+            'Employees of some public-sector undertakings and autonomous bodies may fall under different exemption rules depending on their specific service conditions, so check your organisation\'s classification if you\'re unsure which rules apply.',
+          ],
+        },
       ],
     },
     faq: [
@@ -980,6 +1109,8 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'Is gratuity part of my CTC?', a: 'Some employers include an estimated gratuity accrual in the CTC figure quoted at hiring, but it is only actually paid out when you leave after qualifying service — check your offer letter.' },
       { q: 'What is the difference between the 26-day and 30-day divisor?', a: 'Employers covered under the Payment of Gratuity Act use 26 (accounting for 4 weekly offs a month). Employers not covered by the Act commonly use 30 as a simple monthly divisor — a convention, not a statutory requirement.' },
       { q: 'Is gratuity taxed?', a: 'Up to ₹20 lakh (cumulative across employers, for private-sector employees) is exempt under Section 10(10). Any amount above that is added to your taxable income.' },
+      { q: 'What counts as "last drawn salary" for the formula?', a: 'Basic pay plus dearness allowance at the time of leaving — not your full CTC, and not including allowances like HRA or bonuses.' },
+      { q: 'Does resigning versus being terminated change my gratuity entitlement?', a: 'Not for eligibility itself, provided you meet the 5-year service requirement — gratuity is a statutory right earned through service, not a discretionary payout tied to how employment ends, except in cases of termination for proven misconduct.' },
     ],
     relatedTools: ['income-tax-calculator', 'salary-calculator', 'hra-exemption-calculator', 'home-loan-prepayment-calculator'],
   },
@@ -1044,6 +1175,13 @@ export const FINANCE_TOOLS: ToolConfig[] = [
             'A commonly cited safe withdrawal guideline is to keep annual withdrawals around 4–6% of the corpus for a multi-decade horizon, adjusted for your specific return expectations and how long you need the money to last.',
           ],
         },
+        {
+          heading: 'A common use case: retirement income',
+          paragraphs: [
+            'SWP is a popular way to turn a retirement corpus into a monthly income stream without locking the money into an annuity — you keep the flexibility to change or stop the withdrawal amount and the remaining balance stays invested and potentially growing, unlike most annuity products.',
+            'The trade-off is that flexibility comes without a guarantee: if the market underperforms in the early years of a large, sustained withdrawal, the corpus can be depleted faster than a conservative plan assumed. Run a few pessimistic return scenarios here alongside your expected one before relying on SWP as a sole income source.',
+          ],
+        },
       ],
     },
     faq: [
@@ -1051,6 +1189,7 @@ export const FINANCE_TOOLS: ToolConfig[] = [
       { q: 'Is SWP the same as a pension?', a: 'It behaves similarly — regular payouts from an investment — but there is no guarantee: the amount, duration and outcome all depend on actual market returns, unlike an annuity or pension with contractual payouts.' },
       { q: 'Does this account for capital gains tax on each withdrawal?', a: 'No. Each SWP withdrawal from a mutual fund is technically a partial redemption and may attract capital gains tax depending on the fund type and holding period — use the Capital Gains Calculator alongside this one.' },
       { q: 'Can I increase my withdrawal amount over time for inflation?', a: 'This calculator assumes a fixed monthly withdrawal for simplicity. To model an increasing withdrawal, re-run it in segments with a higher monthly amount for later years.' },
+      { q: 'What return assumption should I use for a retirement SWP?', a: 'A more conservative estimate than a pure equity SIP is generally wise — many retirement portfolios blend equity and debt, so 7-9% is a more cautious planning assumption than the 10-12% sometimes used for long-term equity SIPs.' },
     ],
     relatedTools: ['sip-calculator', 'step-up-sip-calculator', 'capital-gains-calculator', 'fd-calculator'],
   },
