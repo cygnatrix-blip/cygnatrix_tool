@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/config/site';
 import { CATEGORY_LIST } from '@/config/categories';
 import { ACTIVE_TOOLS } from '@/config/tools';
+import { LANDING_PAGES } from '@/config/landing-pages';
 
 const LEGAL = ['/about', '/contact', '/privacy-policy', '/terms', '/cookie-policy', '/disclaimer'];
 
@@ -34,5 +35,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.3,
   }));
 
-  return [...home, ...categories, ...tools, ...legal];
+  const landingPages: MetadataRoute.Sitemap = LANDING_PAGES.map((p) => ({
+    url: `${SITE_URL}/${p.slug}`,
+    lastModified: new Date(p.updatedAt),
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
+  return [...home, ...categories, ...tools, ...landingPages, ...legal];
 }

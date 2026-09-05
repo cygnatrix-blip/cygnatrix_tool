@@ -71,6 +71,29 @@ export interface ToolConfig {
   updatedAt: string;
 }
 
+/**
+ * An intent-specific landing page: a distinct URL/title/meta for a narrow
+ * search query (e.g. "compress image to 50kb"), pre-configuring an EXISTING
+ * tool rather than duplicating its logic. One route component renders every
+ * entry in this config — see app/[landingSlug]/page.tsx.
+ */
+export interface LandingPageConfig {
+  slug: string;
+  /** Must reference an existing, active tool id. */
+  targetToolId: string;
+  /** Pre-fills the compress-to-size widget's target, in KB. */
+  targetSizeKB: number;
+  h1: string;
+  intro: string;
+  seoTitle: string;
+  seoDescription: string;
+  keywords: string[];
+  howItWorks: HowItWorksStep[];
+  sections: ContentSection[];
+  faq: FaqItem[];
+  updatedAt: string;
+}
+
 export interface CategoryConfig {
   slug: CategorySlug;
   name: string;

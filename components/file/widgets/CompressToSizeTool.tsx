@@ -25,9 +25,9 @@ interface Row {
 
 let counter = 0;
 
-export function CompressToSizeTool() {
+export function CompressToSizeTool({ initialTargetKB = 100 }: { initialTargetKB?: number } = {}) {
   const [rows, setRows] = useState<Row[]>([]);
-  const [targetKB, setTargetKB] = useState(100);
+  const [targetKB, setTargetKB] = useState(initialTargetKB);
   const [minKB, setMinKB] = useState<number | ''>('');
   const [mime, setMime] = useState<'image/jpeg' | 'image/webp'>('image/jpeg');
   const [busy, setBusy] = useState(false);
