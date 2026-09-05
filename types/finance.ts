@@ -113,6 +113,81 @@ export interface SalaryInput {
   regime?: 'new' | 'old';
 }
 
+export type AssetClass = 'equity' | 'other';
+
+export interface CapitalGainsInput {
+  assetClass: AssetClass;
+  purchaseValue: number;
+  saleValue: number;
+  holdingMonths: number;
+}
+
+export interface CapitalGainsResult {
+  assetClass: AssetClass;
+  gain: number;
+  isLongTerm: boolean;
+  exemptionApplied: number;
+  taxableGain: number;
+  /** null when the tax depends on the person's income slab rather than a flat rate. */
+  tax: number | null;
+  ratePct: number | null;
+  note: string | null;
+}
+
+export interface HraInput {
+  basicPlusDaAnnual: number;
+  hraReceivedAnnual: number;
+  rentPaidAnnual: number;
+  isMetro: boolean;
+}
+
+export interface HraResult {
+  exemptAnnual: number;
+  taxableHraAnnual: number;
+  limitingFactor: 'actualHra' | 'rentMinusTenPct' | 'salaryPct';
+  breakdown: {
+    actualHra: number;
+    rentMinusTenPct: number;
+    salaryPct: number;
+  };
+}
+
+export interface GratuityInput {
+  lastDrawnMonthlySalary: number;
+  yearsOfService: number;
+  /** Employer covered under the Payment of Gratuity Act, 1972 (almost all are). */
+  coveredUnderAct?: boolean;
+}
+
+export interface GratuityResult {
+  gratuityPayable: number;
+  statutoryExemptionLimit: number;
+  taxExemptAmount: number;
+  taxableAmount: number;
+  yearsUsedInFormula: number;
+}
+
+export interface SwpInput {
+  initialInvestment: number;
+  monthlyWithdrawal: number;
+  annualReturnPct: number;
+  years: number;
+}
+
+export interface SwpYearlyPoint {
+  year: number;
+  withdrawn: number;
+  value: number;
+}
+
+export interface SwpResult {
+  totalWithdrawn: number;
+  finalValue: number;
+  /** Number of months the corpus lasted; null if it survived the full period. */
+  monthsUntilDepleted: number | null;
+  yearly: SwpYearlyPoint[];
+}
+
 export interface SalaryResult {
   ctcAnnual: number;
   grossAnnual: number;

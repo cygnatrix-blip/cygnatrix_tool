@@ -556,4 +556,502 @@ export const FINANCE_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['gst-calculator', 'emi-calculator', 'sip-calculator', 'loan-calculator'],
   },
+  {
+    ...base,
+    id: 'income-tax-calculator',
+    name: 'Income Tax Calculator',
+    slug: 'income-tax-calculator',
+    path: '/finance/income-tax-calculator',
+    icon: 'file-text',
+    featured: true,
+    popular: true,
+    sortOrder: 9,
+    shortDescription: 'Compare old vs new tax regime side by side for FY 2024-25.',
+    description:
+      'Enter your annual income and old-regime deductions to see income tax under both regimes side by side, with the standard deduction, taxable income, effective rate and which regime saves you more.',
+    keywords: ['income tax calculator', 'old vs new tax regime', 'income tax india', 'new tax regime calculator', 'tax slabs fy 2024-25', 'income tax comparison'],
+    seoTitle: 'Income Tax Calculator — Old vs New Regime Comparison',
+    seoDescription:
+      'Free India income tax calculator. Compare tax payable under the old and new regimes side by side for FY 2024-25, including standard deduction, 87A rebate, cess and which regime saves you more.',
+    content: {
+      howItWorks: [
+        { title: 'Enter your annual income', body: 'Gross income before any deduction.' },
+        { title: 'Enter old-regime deductions', body: 'Combine 80C, 80D, home loan interest and any other old-regime-only deductions into one figure.' },
+        { title: 'Compare the two regimes', body: 'Tax, effective rate and in-hand income appear for both the old and new regime side by side, with the cheaper one highlighted.' },
+      ],
+      features: [
+        'Old and new regime shown side by side',
+        'Standard deduction applied automatically for each regime',
+        'Section 87A rebate handled correctly',
+        '4% health & education cess included',
+        'Highlights which regime saves you money, and by how much',
+        'Tax slabs kept in one dated config file for easy updates',
+      ],
+      formula: {
+        expression: 'Tax = Σ(slab band × slab rate) on taxable income, × 1.04 for cess',
+        where: [
+          { sym: 'Taxable income', meaning: 'Annual income − standard deduction − (old regime only) other deductions' },
+          { sym: 'Slabs', meaning: 'Progressive bands defined for each regime for the financial year' },
+        ],
+        notes: ['Rebate under Section 87A makes tax nil below a taxable-income threshold that differs by regime.'],
+      },
+      example: {
+        inputs: [
+          { label: 'Annual income', value: '₹12,00,000' },
+          { label: 'Old regime deductions', value: '₹1,50,000' },
+        ],
+        result: [
+          { label: 'Old regime tax', value: '≈ ₹96,000' },
+          { label: 'New regime tax', value: '≈ ₹83,200' },
+          { label: 'Better regime', value: 'New — saves ≈ ₹12,800' },
+        ],
+        walkthrough:
+          'Old regime taxable income = 12,00,000 − 50,000 standard deduction − 1,50,000 deductions = 10,00,000. New regime taxable income = 12,00,000 − 75,000 = 11,25,000. Applying each regime\'s slabs and 4% cess gives the two tax figures compared above.',
+      },
+      sections: [
+        {
+          heading: 'Which regime should you pick?',
+          paragraphs: [
+            'The new regime has lower slab rates and a higher standard deduction but does not allow 80C, 80D, HRA exemption or home loan interest deductions. The old regime has higher rates but rewards those deductions.',
+            'As a rule of thumb: if your old-regime deductions comfortably exceed roughly ₹3–4 lakh, the old regime often wins at middle incomes. Below that, the new regime usually comes out ahead. Run both numbers here rather than guessing.',
+          ],
+        },
+      ],
+    },
+    faq: [
+      { q: 'Which financial year do these slabs apply to?', a: 'FY 2024-25, as announced in the July 2024 Budget. Slabs are reviewed each Budget and this calculator is updated when they change.' },
+      { q: 'Can I switch regimes every year?', a: 'Salaried individuals can choose either regime each financial year. Those with business income have restrictions on switching back after opting out once.' },
+      { q: 'Does this include HRA exemption calculation?', a: 'No — HRA exemption is a separate old-regime deduction. Use the HRA Exemption Calculator to work that out, then add it to "old regime deductions" here.' },
+      { q: 'Is this exact enough to file my return?', a: 'It is a planning estimate using standard slabs and the standard deduction. Your actual liability may include other income, TDS credits and exemptions this calculator does not model — verify with a tax professional or the official portal before filing.' },
+    ],
+    relatedTools: ['salary-calculator', 'hra-exemption-calculator', 'gratuity-calculator', 'capital-gains-calculator'],
+  },
+  {
+    ...base,
+    id: 'home-loan-prepayment-calculator',
+    name: 'Home Loan Prepayment Calculator',
+    slug: 'home-loan-prepayment-calculator',
+    path: '/finance/home-loan-prepayment-calculator',
+    icon: 'home',
+    featured: true,
+    popular: true,
+    sortOrder: 10,
+    shortDescription: 'See how much interest and time a loan prepayment actually saves.',
+    description:
+      'Model a one-time lump-sum prepayment or extra monthly payments on a home loan to see interest saved, EMIs saved, the new shorter tenure, and a chart comparing the original and prepaid payoff.',
+    keywords: ['home loan prepayment calculator', 'loan prepayment', 'part payment calculator', 'foreclosure calculator', 'extra emi payment', 'home loan interest saved'],
+    seoTitle: 'Home Loan Prepayment Calculator — Interest & Time Saved',
+    seoDescription:
+      'Free home loan prepayment calculator. See exactly how much interest and how many EMIs a one-time lump sum or extra monthly payment saves, with a before/after balance chart. In ₹.',
+    content: {
+      howItWorks: [
+        { title: 'Enter your loan details', body: 'Loan amount, interest rate and tenure, same as your sanction letter.' },
+        { title: 'Choose a prepayment style', body: 'A one-time lump sum in a specific month, or a fixed extra amount added to every EMI from now on.' },
+        { title: 'See what you save', body: 'Interest saved, EMIs saved and the new tenure appear instantly, with a chart comparing the loan balance with and without the prepayment.' },
+      ],
+      features: [
+        'One-time lump sum or recurring extra-monthly prepayment',
+        'Interest saved and EMIs saved shown clearly',
+        'New (shorter) tenure vs the original',
+        'Balance-over-time chart, original vs with prepayment',
+        'EMI amount stays fixed — only the tenure shortens, matching most lenders\' default',
+        'Full month-by-month simulation, not an approximation',
+      ],
+      formula: {
+        expression: 'Each month: balance = balance − (EMI − interest + extra payment), interest = balance × monthly rate',
+        where: [
+          { sym: 'EMI', meaning: 'The original fixed instalment — recalculated once, then held constant' },
+          { sym: 'extra payment', meaning: 'The lump sum (in its chosen month) or the recurring extra amount' },
+        ],
+        notes: ['The loan is considered closed the month the balance reaches zero — that is the new, shorter tenure.'],
+      },
+      example: {
+        inputs: [
+          { label: 'Loan amount', value: '₹30,00,000' },
+          { label: 'Interest rate', value: '8.5% per year' },
+          { label: 'Tenure', value: '20 years' },
+          { label: 'Extra every month', value: '₹5,000' },
+        ],
+        result: [
+          { label: 'Original tenure', value: '240 months' },
+          { label: 'New tenure', value: '≈ 191 months' },
+          { label: 'Interest saved', value: '≈ ₹8.6 lakh' },
+        ],
+        walkthrough:
+          'Adding ₹5,000 to every EMI reduces the outstanding balance faster each month, so less interest accrues going forward. Simulating month by month, the loan closes about 49 months early and total interest drops by roughly ₹8.6 lakh.',
+      },
+      sections: [
+        {
+          heading: 'Why prepaying early matters more than prepaying late',
+          paragraphs: [
+            'Interest is charged on the outstanding balance, which is highest in the early years. A rupee of prepayment in year 1 removes many more future interest charges than the same rupee in year 15, when the balance is already much smaller.',
+            'If you have a choice, prepay as early in the loan as you can, and check whether your lender charges a prepayment penalty (most floating-rate home loans in India do not, by RBI mandate).',
+          ],
+        },
+      ],
+    },
+    faq: [
+      { q: 'Does prepayment reduce my EMI or my tenure?', a: 'This calculator assumes the common default: your EMI stays exactly the same and the tenure shortens. Some lenders let you choose to reduce the EMI instead and keep the original tenure — ask your lender which option they apply.' },
+      { q: 'Are there prepayment charges?', a: 'By RBI rules, floating-rate home loans to individuals cannot carry a prepayment penalty. Fixed-rate loans and other loan types may still charge one — check your loan agreement.' },
+      { q: 'What if I want to prepay more than once?', a: 'Run the calculator again using the reduced balance and remaining tenure as your new starting point to model a second prepayment.' },
+      { q: 'Is a lump sum or extra-monthly prepayment better?', a: 'A lump sum applied early saves the most per rupee, but a smaller recurring extra payment is often easier to sustain. Try both here with the amounts you can realistically afford.' },
+    ],
+    relatedTools: ['emi-calculator', 'loan-calculator', 'sip-calculator', 'income-tax-calculator'],
+  },
+  {
+    ...base,
+    id: 'step-up-sip-calculator',
+    name: 'Step-up SIP Calculator',
+    slug: 'step-up-sip-calculator',
+    path: '/finance/step-up-sip-calculator',
+    icon: 'trending-up',
+    featured: false,
+    popular: true,
+    sortOrder: 11,
+    shortDescription: 'See how raising your SIP every year grows your final corpus.',
+    description:
+      'Project a Systematic Investment Plan where your monthly investment increases by a fixed percentage every year, and compare the result directly against a flat SIP of the same starting amount.',
+    keywords: ['step up sip calculator', 'sip step up', 'increasing sip calculator', 'annual step up sip', 'sip with yearly increase'],
+    seoTitle: 'Step-up SIP Calculator — Growing SIP vs Flat SIP',
+    seoDescription:
+      'Free step-up SIP calculator. See the future value of a mutual fund SIP that increases every year, compared side by side against a flat SIP with no step-up. In ₹.',
+    content: {
+      howItWorks: [
+        { title: 'Enter your starting SIP', body: 'The monthly amount you will invest in year one.' },
+        { title: 'Set the annual step-up', body: 'The percentage you plan to raise the SIP by every year, e.g. matching an expected salary increment.' },
+        { title: 'Compare the outcomes', body: 'See the step-up SIP\'s final value against a flat SIP of the same starting amount, with a year-by-year chart.' },
+      ],
+      features: [
+        'Custom starting amount, return and step-up percentage',
+        'Direct comparison against an equivalent flat SIP',
+        'Total invested vs estimated returns',
+        'Year-by-year growth chart for both scenarios',
+        'Handles a 0% step-up (identical to a flat SIP)',
+      ],
+      formula: {
+        expression: 'Monthly investment in year k = starting amount × (1 + step-up%)^(k−1); FV compounds each month at the expected return',
+        where: [
+          { sym: 'step-up%', meaning: 'Annual percentage increase applied at each 12-month boundary' },
+          { sym: 'k', meaning: 'The investment year (1, 2, 3, ...)' },
+        ],
+      },
+      example: {
+        inputs: [
+          { label: 'Starting SIP', value: '₹10,000/month' },
+          { label: 'Expected return', value: '12% per year' },
+          { label: 'Period', value: '15 years' },
+          { label: 'Step-up', value: '10% per year' },
+        ],
+        result: [
+          { label: 'Step-up SIP final value', value: '≈ ₹65 lakh' },
+          { label: 'Flat SIP final value', value: '≈ ₹50 lakh' },
+          { label: 'Extra from stepping up', value: '≈ ₹15 lakh' },
+        ],
+        walkthrough:
+          'Raising the SIP by 10% every year means later, larger instalments are invested for less time individually, but the total invested amount grows substantially — over 15 years this more than offsets the shorter compounding window for the later instalments, producing a noticeably higher final value than a flat SIP.',
+      },
+      sections: [
+        {
+          heading: 'Why step-up beats a flat SIP for most earners',
+          paragraphs: [
+            'Income typically rises faster than expenses in the early-to-mid career years. A step-up SIP channels that rising income into investing without ever feeling like a bigger commitment relative to your salary at the time.',
+            'Because the step-up compounds every year, even a modest 5–10% annual increase produces a meaningfully larger corpus than holding the SIP flat for the whole period — the comparison chart here makes the gap concrete.',
+          ],
+        },
+      ],
+    },
+    faq: [
+      { q: 'How is this different from the SIP Calculator?', a: 'The plain SIP Calculator projects a constant monthly investment. This one increases the investment every year and shows the comparison against a flat SIP directly, so you can see the benefit of stepping up.' },
+      { q: 'What step-up percentage is realistic?', a: 'Many investors tie it to their expected annual salary increment — commonly 8–12% in India. Use whatever you can realistically commit to increasing each year.' },
+      { q: 'Are returns guaranteed?', a: 'No. As with any SIP projection, the return is an assumption for illustration; actual mutual fund returns are market-linked and vary year to year.' },
+      { q: 'Does this account for taxes or exit load?', a: 'No, the projection is before costs and capital gains tax. Use the Capital Gains Calculator separately to estimate tax on withdrawal.' },
+    ],
+    relatedTools: ['sip-calculator', 'swp-calculator', 'capital-gains-calculator', 'cagr-calculator'],
+  },
+  {
+    ...base,
+    id: 'capital-gains-calculator',
+    name: 'Capital Gains Calculator',
+    slug: 'capital-gains-calculator',
+    path: '/finance/capital-gains-calculator',
+    icon: 'percent',
+    featured: false,
+    popular: true,
+    sortOrder: 12,
+    shortDescription: 'LTCG and STCG tax on equity, debt funds, gold and property.',
+    description:
+      'Work out long-term or short-term capital gains tax on equity shares, equity mutual funds, debt funds, gold or property, using the post-Budget-2024 holding periods, rates and equity LTCG exemption.',
+    keywords: ['capital gains calculator', 'ltcg calculator', 'stcg calculator', 'ltcg tax on equity', 'capital gains tax india', 'long term capital gains'],
+    seoTitle: 'Capital Gains Calculator — LTCG & STCG Tax (India)',
+    seoDescription:
+      'Free India capital gains calculator. Calculate LTCG or STCG tax on equity shares, equity mutual funds, debt funds, gold or property with the current holding-period thresholds, rates and equity LTCG exemption.',
+    content: {
+      howItWorks: [
+        { title: 'Choose the asset type', body: 'Listed equity / equity mutual funds, or the "other" category covering debt funds, gold, property and unlisted shares.' },
+        { title: 'Enter purchase and sale value', body: 'What you paid and what you received (or expect to receive).' },
+        { title: 'Enter the holding period', body: 'In months. The calculator classifies it as long-term or short-term for that asset type and applies the matching rate automatically.' },
+      ],
+      features: [
+        'Separate rules for equity vs other assets',
+        'Automatic long-term / short-term classification',
+        '₹1.25 lakh annual LTCG exemption applied for equity',
+        'Post-July-2024-Budget rates',
+        'Clear note when short-term tax depends on your slab rate rather than a flat rate',
+        'Handles a loss as zero taxable gain',
+      ],
+      formula: {
+        expression: 'Gain = Sale value − Purchase value; Tax = max(0, Gain − exemption) × rate',
+        where: [
+          { sym: 'Long-term threshold', meaning: '12 months for equity, 24 months for other assets' },
+          { sym: 'Equity LTCG', meaning: '12.5% above a ₹1.25 lakh annual exemption' },
+          { sym: 'Equity STCG', meaning: 'Flat 20%' },
+          { sym: 'Other LTCG', meaning: 'Flat 12.5%, no exemption' },
+        ],
+        notes: ['Short-term gains on non-equity assets are added to your income and taxed at your slab rate — this calculator flags that case rather than guessing a number.'],
+      },
+      example: {
+        inputs: [
+          { label: 'Asset type', value: 'Equity mutual fund' },
+          { label: 'Purchase value', value: '₹1,00,000' },
+          { label: 'Sale value', value: '₹3,00,000' },
+          { label: 'Holding period', value: '18 months' },
+        ],
+        result: [
+          { label: 'Gain', value: '₹2,00,000' },
+          { label: 'Exemption applied', value: '₹1,25,000' },
+          { label: 'Tax', value: '≈ ₹9,375 (12.5% of ₹75,000)' },
+        ],
+        walkthrough:
+          'At 18 months, the holding qualifies as long-term for equity (threshold: 12 months). The ₹2,00,000 gain is reduced by the ₹1,25,000 annual LTCG exemption, leaving ₹75,000 taxable at 12.5%, i.e. about ₹9,375.',
+      },
+      sections: [
+        {
+          heading: 'Equity vs "other" — why the rules differ',
+          paragraphs: [
+            'Listed equity and equity-oriented mutual funds get a shorter 12-month long-term threshold and an annual exemption because Securities Transaction Tax is already paid on these trades.',
+            'Debt funds, gold, unlisted shares and property don\'t attract STT, use a 24-month threshold instead, and — for short-term holdings — are taxed at your regular income slab rate rather than a flat percentage, since there is no STT to justify a concessional flat rate.',
+          ],
+        },
+      ],
+    },
+    faq: [
+      { q: 'What counts as a metro city for HRA — wait, does this affect capital gains?', a: 'No, city has no bearing on capital gains tax; that question applies to the separate HRA Exemption Calculator.' },
+      { q: 'Why does short-term tax on "other" assets show no number?', a: 'Because it is added to your total income and taxed at whatever income slab you fall into, which depends on your full income — not something a standalone gains calculator can know. Use the Income Tax Calculator with this gain included in your income to estimate it.' },
+      { q: 'Does the ₹1.25 lakh exemption apply to STCG too?', a: 'No — the exemption applies only to long-term equity gains. Short-term equity gains are taxed on the full amount at 20%.' },
+      { q: 'Can I offset a loss against a gain?', a: 'Indian tax law allows capital losses to be set off against gains and carried forward for up to 8 years under specific rules. This calculator computes tax for a single transaction and does not model loss set-off across a portfolio.' },
+    ],
+    relatedTools: ['income-tax-calculator', 'sip-calculator', 'cagr-calculator', 'step-up-sip-calculator'],
+  },
+  {
+    ...base,
+    id: 'hra-exemption-calculator',
+    name: 'HRA Exemption Calculator',
+    slug: 'hra-exemption-calculator',
+    path: '/finance/hra-exemption-calculator',
+    icon: 'home',
+    featured: false,
+    popular: true,
+    sortOrder: 13,
+    shortDescription: 'Work out your tax-exempt HRA under Section 10(13A).',
+    description:
+      'Calculate how much of your House Rent Allowance is exempt from income tax under Section 10(13A), using the standard three-way minimum of actual HRA, rent paid minus 10% of basic, and a percentage of basic salary.',
+    keywords: ['hra exemption calculator', 'hra calculator', 'house rent allowance exemption', 'section 10 13a', 'hra tax exemption', 'hra income tax'],
+    seoTitle: 'HRA Exemption Calculator — Section 10(13A) (India)',
+    seoDescription:
+      'Free HRA exemption calculator for India. Enter basic salary, HRA received and rent paid to see your exact tax-exempt HRA under Section 10(13A), with the full three-way calculation shown.',
+    content: {
+      howItWorks: [
+        { title: 'Enter basic + DA', body: 'Your annual basic salary plus dearness allowance, if any.' },
+        { title: 'Enter HRA received and rent paid', body: 'The annual HRA your employer pays you, and the annual rent you actually pay.' },
+        { title: 'Select your city type', body: 'Metro (Delhi, Mumbai, Kolkata, Chennai) uses 50% of basic; other cities use 40%. The exempt and taxable HRA are shown instantly, along with which of the three factors limited the exemption.' },
+      ],
+      features: [
+        'Full Section 10(13A) three-way minimum calculation',
+        'Metro vs non-metro percentage applied automatically',
+        'Shows exactly which factor limited your exemption',
+        'Taxable HRA (the remainder, added to your income) shown separately',
+        'Only relevant under the old tax regime — this calculator assumes that context',
+      ],
+      formula: {
+        expression: 'Exempt HRA = minimum of (Actual HRA, Rent paid − 10% of basic, 50%/40% of basic)',
+        where: [
+          { sym: 'Actual HRA', meaning: 'HRA your employer actually pays you' },
+          { sym: 'Rent paid − 10% of basic', meaning: 'Cannot be negative — floored at zero' },
+          { sym: '50% / 40% of basic', meaning: '50% in a metro city, 40% elsewhere' },
+        ],
+        notes: ['HRA exemption is available only under the old tax regime; the new regime does not allow it.'],
+      },
+      example: {
+        inputs: [
+          { label: 'Basic + DA (annual)', value: '₹6,00,000' },
+          { label: 'HRA received (annual)', value: '₹4,00,000' },
+          { label: 'Rent paid (annual)', value: '₹3,00,000' },
+          { label: 'City', value: 'Metro' },
+        ],
+        result: [
+          { label: 'Rent − 10% of basic', value: '₹2,40,000' },
+          { label: '50% of basic', value: '₹3,00,000' },
+          { label: 'Exempt HRA', value: '₹2,40,000 (the smallest of the three)' },
+        ],
+        walkthrough:
+          'The three candidates are: actual HRA ₹4,00,000, rent minus 10% of basic = 3,00,000 − 60,000 = ₹2,40,000, and 50% of basic = ₹3,00,000. The smallest, ₹2,40,000, is exempt; the remaining ₹1,60,000 of HRA received is added to taxable income.',
+      },
+      sections: [
+        {
+          heading: 'You need rent receipts and, above ₹1 lakh a year, your landlord\'s PAN',
+          paragraphs: [
+            'To actually claim this exemption, most employers require rent receipts and, if annual rent exceeds ₹1,00,000, your landlord\'s PAN for their records. Without proof, HRA received may be taxed in full even though you are genuinely paying rent.',
+            'If you own the home you live in, you cannot claim HRA exemption on it — HRA exemption requires that you actually pay rent for the accommodation you occupy.',
+          ],
+        },
+      ],
+    },
+    faq: [
+      { q: 'Can I claim HRA exemption under the new tax regime?', a: 'No. HRA exemption under Section 10(13A) is available only if you opt for the old tax regime.' },
+      { q: 'What if I don\'t pay any rent?', a: 'Then your exempt HRA is zero — the "rent paid minus 10% of basic" factor becomes zero or negative (floored at zero), which is always the smallest of the three, so nothing is exempt.' },
+      { q: 'Can I claim HRA and a home loan deduction at the same time?', a: 'Yes, if you rent a home in one city while owning and paying a home loan on a property elsewhere (or renting it out) — the two are independent claims under the old regime.' },
+      { q: 'Is Delhi NCR (Gurugram, Noida) treated as metro?', a: 'No. Only Delhi, Mumbai, Kolkata and Chennai are treated as metro cities for this 50% rule; Gurugram and Noida use the 40% non-metro rate.' },
+    ],
+    relatedTools: ['income-tax-calculator', 'salary-calculator', 'gratuity-calculator', 'home-loan-prepayment-calculator'],
+  },
+  {
+    ...base,
+    id: 'gratuity-calculator',
+    name: 'Gratuity Calculator',
+    slug: 'gratuity-calculator',
+    path: '/finance/gratuity-calculator',
+    icon: 'briefcase',
+    featured: false,
+    popular: false,
+    sortOrder: 14,
+    shortDescription: 'Gratuity payable under the Payment of Gratuity Act, 1972.',
+    description:
+      'Calculate the gratuity payable on leaving a job after 5+ years of service, using the standard Payment of Gratuity Act formula, along with the tax-exempt and taxable portion of the payout.',
+    keywords: ['gratuity calculator', 'gratuity calculation india', 'payment of gratuity act', 'gratuity formula', 'gratuity tax exemption'],
+    seoTitle: 'Gratuity Calculator — Payment of Gratuity Act, 1972',
+    seoDescription:
+      'Free gratuity calculator for India. Enter your last drawn salary and years of service to calculate gratuity payable under the Payment of Gratuity Act, plus the tax-exempt and taxable amount.',
+    content: {
+      howItWorks: [
+        { title: 'Enter your last drawn monthly salary', body: 'Basic + dearness allowance, not your full CTC.' },
+        { title: 'Enter years of service', body: 'A fractional year of 6 months or more rounds up to the next full year, per common practice under the Act.' },
+        { title: 'Read the payout', body: 'Gratuity payable, along with how much of it is tax-exempt versus taxable, appears instantly.' },
+      ],
+      features: [
+        'Standard 15/26 formula for employers covered under the Act',
+        '30-day divisor variant for employers not covered under the Act',
+        'Correct rounding of fractional years of service',
+        'Statutory ₹20 lakh tax-exemption cap applied automatically',
+        'Taxable portion (above the cap) shown separately',
+      ],
+      formula: {
+        expression: 'Gratuity = (15 × last drawn monthly salary × years of service) ÷ 26',
+        where: [
+          { sym: '15', meaning: 'Days of salary paid per year of service' },
+          { sym: '26', meaning: 'Working days per month, per the Act (30 for employers not covered by the Act)' },
+          { sym: 'years of service', meaning: 'Rounded up if the fractional part is 6 months or more' },
+        ],
+        notes: ['Gratuity typically applies only after 5+ years of continuous service, except in case of death or disability.'],
+      },
+      example: {
+        inputs: [
+          { label: 'Last drawn monthly salary', value: '₹50,000' },
+          { label: 'Years of service', value: '10' },
+        ],
+        result: [
+          { label: 'Gratuity payable', value: '≈ ₹2,88,462' },
+          { label: 'Tax-exempt amount', value: '₹2,88,462 (fully exempt)' },
+        ],
+        walkthrough:
+          '(15 × 50,000 × 10) ÷ 26 = ₹2,88,462. Since this is well below the ₹20 lakh statutory exemption limit, the entire amount is tax-free.',
+      },
+      sections: [
+        {
+          heading: 'Eligibility comes before the formula',
+          paragraphs: [
+            'Gratuity under the Act generally requires at least 5 years of continuous service with the same employer, with an exception that waives this requirement in case of death or disability.',
+            'The ₹20 lakh exemption limit is a lifetime cumulative cap across all employers for a private-sector employee, not a per-job allowance — factor in any gratuity already received tax-free elsewhere.',
+          ],
+        },
+      ],
+    },
+    faq: [
+      { q: 'Do I need 5 years of service to get gratuity?', a: 'Generally yes, under the Payment of Gratuity Act. The 5-year requirement is waived if employment ends due to death or disability.' },
+      { q: 'Is gratuity part of my CTC?', a: 'Some employers include an estimated gratuity accrual in the CTC figure quoted at hiring, but it is only actually paid out when you leave after qualifying service — check your offer letter.' },
+      { q: 'What is the difference between the 26-day and 30-day divisor?', a: 'Employers covered under the Payment of Gratuity Act use 26 (accounting for 4 weekly offs a month). Employers not covered by the Act commonly use 30 as a simple monthly divisor — a convention, not a statutory requirement.' },
+      { q: 'Is gratuity taxed?', a: 'Up to ₹20 lakh (cumulative across employers, for private-sector employees) is exempt under Section 10(10). Any amount above that is added to your taxable income.' },
+    ],
+    relatedTools: ['income-tax-calculator', 'salary-calculator', 'hra-exemption-calculator', 'home-loan-prepayment-calculator'],
+  },
+  {
+    ...base,
+    id: 'swp-calculator',
+    name: 'SWP Calculator',
+    slug: 'swp-calculator',
+    path: '/finance/swp-calculator',
+    icon: 'calendar-clock',
+    featured: false,
+    popular: true,
+    sortOrder: 15,
+    shortDescription: 'See how long a lump sum lasts under a fixed monthly withdrawal.',
+    description:
+      'Model a Systematic Withdrawal Plan: withdraw a fixed amount every month from an invested lump sum and see whether the corpus grows, shrinks, or runs out — and exactly when.',
+    keywords: ['swp calculator', 'systematic withdrawal plan', 'swp mutual fund', 'monthly withdrawal calculator', 'retirement withdrawal calculator'],
+    seoTitle: 'SWP Calculator — Systematic Withdrawal Plan',
+    seoDescription:
+      'Free SWP calculator. See how a fixed monthly withdrawal from an invested lump sum affects your corpus over time — total withdrawn, final value, and whether or when the money runs out.',
+    content: {
+      howItWorks: [
+        { title: 'Enter your lump sum', body: 'The amount already invested, e.g. in a mutual fund.' },
+        { title: 'Enter the monthly withdrawal', body: 'The fixed amount you plan to withdraw each month for expenses or income.' },
+        { title: 'Read the outcome', body: 'See the total withdrawn, the final corpus value, and — if the withdrawal rate is too high — exactly which month the corpus would run out.' },
+      ],
+      features: [
+        'Month-by-month depletion simulation, not a rough estimate',
+        'Clear warning if the corpus runs out before your target period',
+        'Total withdrawn and final remaining value',
+        'Year-by-year corpus value chart',
+        'Handles a withdrawal rate low enough that the corpus keeps growing',
+      ],
+      formula: {
+        expression: 'Each month: balance = (balance − withdrawal) × (1 + monthly return)',
+        where: [
+          { sym: 'withdrawal', meaning: 'Fixed monthly amount, capped at the remaining balance' },
+          { sym: 'monthly return', meaning: 'Expected annual return ÷ 12 ÷ 100' },
+        ],
+        notes: ['Withdrawals are modelled at the start of each month, with growth applied to what remains for the rest of the month.'],
+      },
+      example: {
+        inputs: [
+          { label: 'Initial investment', value: '₹50,00,000' },
+          { label: 'Monthly withdrawal', value: '₹30,000' },
+          { label: 'Expected return', value: '8% per year' },
+          { label: 'Period', value: '15 years' },
+        ],
+        result: [
+          { label: 'Total withdrawn', value: '≈ ₹54 lakh' },
+          { label: 'Final corpus value', value: '≈ ₹68 lakh' },
+          { label: 'Corpus lasted', value: 'Full 15 years, and grew' },
+        ],
+        walkthrough:
+          'At ₹30,000 a month (≈ 7.2% of the initial corpus annually) against an 8% expected return, the corpus\'s growth outpaces the withdrawals, so it not only lasts the full period but ends up larger than it started.',
+      },
+      sections: [
+        {
+          heading: 'Why the withdrawal rate matters more than the corpus size',
+          paragraphs: [
+            'A ₹1 crore corpus withdrawing ₹1,50,000 a month (18% annually) will deplete quickly no matter how large it started, because the withdrawal rate far exceeds any realistic return. The relationship between your monthly withdrawal and the expected return — not the absolute rupee amount — determines whether the corpus survives.',
+            'A commonly cited safe withdrawal guideline is to keep annual withdrawals around 4–6% of the corpus for a multi-decade horizon, adjusted for your specific return expectations and how long you need the money to last.',
+          ],
+        },
+      ],
+    },
+    faq: [
+      { q: 'What happens if I withdraw more than the corpus earns?', a: 'The corpus shrinks over time and, at a high enough rate, is depleted before your target period ends. This calculator flags exactly which month that happens.' },
+      { q: 'Is SWP the same as a pension?', a: 'It behaves similarly — regular payouts from an investment — but there is no guarantee: the amount, duration and outcome all depend on actual market returns, unlike an annuity or pension with contractual payouts.' },
+      { q: 'Does this account for capital gains tax on each withdrawal?', a: 'No. Each SWP withdrawal from a mutual fund is technically a partial redemption and may attract capital gains tax depending on the fund type and holding period — use the Capital Gains Calculator alongside this one.' },
+      { q: 'Can I increase my withdrawal amount over time for inflation?', a: 'This calculator assumes a fixed monthly withdrawal for simplicity. To model an increasing withdrawal, re-run it in segments with a higher monthly amount for later years.' },
+    ],
+    relatedTools: ['sip-calculator', 'step-up-sip-calculator', 'capital-gains-calculator', 'fd-calculator'],
+  },
 ];
