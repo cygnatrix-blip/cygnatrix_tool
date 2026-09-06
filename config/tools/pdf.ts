@@ -646,4 +646,124 @@ export const PDF_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['compress-pdf', 'merge-pdf', 'organize-pdf', 'split-pdf'],
   },
+  {
+    ...base,
+    id: 'edit-pdf',
+    name: 'Edit PDF',
+    slug: 'edit-pdf',
+    path: '/pdf/edit-pdf',
+    icon: 'pencil-line',
+    featured: true,
+    popular: false,
+    sortOrder: 10,
+    updatedAt: UPDATED,
+    shortDescription: 'Add text, a signature, highlights, whiteout and shapes to a PDF in your browser.',
+    description:
+      'A visual PDF editor that runs entirely on your device. Drop a PDF, then type text anywhere, draw or upload a signature, highlight passages, cover mistakes with whiteout, draw freehand and add boxes — then download the edited file. Nothing is uploaded.',
+    keywords: [
+      'edit pdf',
+      'pdf editor',
+      'add text to pdf',
+      'sign pdf',
+      'highlight pdf',
+      'draw on pdf',
+      'whiteout pdf',
+      'free pdf editor online',
+    ],
+    seoTitle: 'Edit PDF — Add Text, Signature & Highlights Online Free',
+    seoDescription:
+      'Free online PDF editor. Add text, insert a hand-drawn or uploaded signature, highlight, whiteout, draw freehand and add shapes on any page — 100% in your browser, no upload, no watermark, no sign-up.',
+    content: {
+      howItWorks: [
+        {
+          title: 'Open your PDF',
+          body: 'Drop in a PDF and every page renders as an editable canvas you can scroll through.',
+        },
+        {
+          title: 'Pick a tool and mark up the page',
+          body: 'Use Edit text to click a line of existing text and retype it, or Text, Draw, Highlight, Whiteout, Rectangle and Image / signature to add your own. Switch to Select to move, resize or delete anything.',
+        },
+        {
+          title: 'Apply and download',
+          body: 'Press “Apply edits & download PDF”. Your marks are stamped into the page content and the finished file saves straight to your device.',
+        },
+      ],
+      features: [
+        'Edit text: click an existing line, and it is covered and reopened for retyping at the same spot, size and font',
+        'Add text boxes anywhere, with size, colour, font family and bold',
+        'Insert a signature — draw it with a mouse or finger, or upload a PNG / JPG',
+        'Highlight text, cover mistakes with opaque whiteout, or draw outlined rectangles',
+        'Freehand pen for ticks, arrows and circling',
+        'Move, resize and delete any edit before saving; one-click undo and clear',
+        'Runs fully in your browser — the PDF and your signature never leave your device',
+      ],
+      sections: [
+        {
+          heading: 'What "editing" a PDF actually means here',
+          paragraphs: [
+            'A PDF is a fixed layout, not a word-processor document, so no browser tool can truly re-flow the original paragraphs. What works instead — and what every online PDF editor does — is to cover the old content and place new content on top. The Edit text tool automates this: it reads where each line of text sits, and when you click one it drops an opaque patch over it (colour-matched to the page) and opens a text box in the same place, at the same size, pre-filled with the words so you can change them.',
+            'Every addition is stamped into the page content when you save, so it appears in any PDF reader, prints correctly, and cannot be toggled off. A whiteout patch only covers text visually — to remove confidential text so it can never be recovered, use a dedicated redaction workflow.',
+          ],
+        },
+        {
+          heading: 'Signing a document without printing it',
+          paragraphs: [
+            'The most common reason to edit a PDF is to sign it. Open the Image / signature tool, draw your signature in the box (or upload a photo of one on white paper), and drop it onto the signature line. Resize it with the corner handle and nudge it into place.',
+            'Add the date and your name as separate text boxes if the form needs them. Because everything happens locally, a signature you draw here is never sent to a server or stored anywhere after you close the tab.',
+          ],
+        },
+        {
+          heading: 'Filling a form that has no fillable fields',
+          paragraphs: [
+            'Many "forms" are just scanned or exported pages with lines to write on and no interactive fields. Use the Text tool to click next to each label and type your answer, matching the font size to the printed text. For tick boxes, either type an "X" or use the Draw tool.',
+            'If a page is rotated, straighten it first with Rotate PDF so text lands where you expect. For a very long document, split out the pages you need with Split PDF, edit those, and merge everything back together.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Input', value: 'agreement.pdf — 3 pages, a signature line on page 3' },
+          { label: 'Edits', value: 'Signature + typed date on page 3, one highlight on page 1' },
+        ],
+        result: [{ label: 'Output', value: 'edited.pdf — same 3 pages with the marks stamped in' }],
+        walkthrough:
+          'The signature image is embedded on page 3 at the position and size you placed it, the date is drawn as text next to it, and the page-1 highlight becomes a semi-transparent yellow rectangle. Page count and existing content are unchanged.',
+      },
+    },
+    faq: [
+      {
+        q: 'Can I edit the existing text in the PDF?',
+        a: 'Yes, with the Edit text tool: click a line and it is covered with a page-matched patch and reopened as a text box holding the same words, size and font, ready to change. It is a cover-and-retype flow, not true glyph editing — check the size and font after editing, and expect small position shifts on complex layouts.',
+      },
+      {
+        q: 'Is my file or signature uploaded anywhere?',
+        a: 'No. The PDF is opened in your browser, all editing happens on your device, and the finished file is generated locally. Your document and any signature you draw never leave your computer.',
+      },
+      {
+        q: 'Will my edits show up in Adobe Acrobat and other readers?',
+        a: 'Yes. When you save, the edits are written into the page content itself, so they appear and print identically in every PDF reader.',
+      },
+      {
+        q: 'Can I use a rupee sign or Hindi text?',
+        a: 'Text uses the standard built-in PDF fonts, which cover Latin characters. The rupee sign is converted to “Rs.” automatically; other non-Latin characters are not supported yet and are shown as “?”.',
+      },
+      {
+        q: 'How do I move or delete something after adding it?',
+        a: 'Switch to the Select tool, then click the item to pick it up — drag to move, use the corner dot to resize, or press Delete in the toolbar. Undo removes the last edit; Clear removes them all.',
+      },
+      {
+        q: 'Does whiteout permanently remove the text underneath?',
+        a: 'It covers it visually and prints as a solid block, which is fine for tidying up a document. It is not secure redaction — the original text can still be extracted from the file, so do not rely on it for confidential information.',
+      },
+      {
+        q: 'Is there a page limit?',
+        a: 'You can edit the first 60 pages of a document in one session. For a longer PDF, extract the pages you need with Split PDF, edit them here, and recombine with Merge PDF.',
+      },
+      {
+        q: 'Can I add the same signature to several pages?',
+        a: 'Add it once, then insert it again for each page — each placement is independent, so you can position and size them separately.',
+      },
+    ],
+    relatedTools: ['organize-pdf', 'rotate-pdf', 'protect-pdf', 'merge-pdf'],
+  },
 ];
