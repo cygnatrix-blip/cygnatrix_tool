@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { LegalLayout } from '@/components/legal/LegalLayout';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { SITE } from '@/config/site';
@@ -56,7 +57,7 @@ export default function PrivacyPage() {
       <p>
         If you enable analytics cookies, we also load Google Analytics 4 with IP anonymisation. You can
         withdraw consent at any time using the cookie controls; see our{' '}
-        <a href="/cookie-policy">Cookie Policy</a>.
+        <Link href="/cookie-policy">Cookie Policy</Link>.
       </p>
 
       <h2>Advertising</h2>
@@ -72,7 +73,7 @@ export default function PrivacyPage() {
 
       <h2>Contact form</h2>
       <p>
-        If you use the <a href="/contact">contact form</a>, we store your name, email, subject and
+        If you use the <Link href="/contact">contact form</Link>, we store your name, email, subject and
         message so we can reply. We keep these messages only as long as needed to handle your enquiry
         and do not use them for marketing.
       </p>
@@ -80,7 +81,7 @@ export default function PrivacyPage() {
       <h2>Cookies and local storage</h2>
       <p>
         We use a small amount of browser local storage to remember your cookie choices and interface
-        preferences. These stay on your device. See the <a href="/cookie-policy">Cookie Policy</a> for
+        preferences. These stay on your device. See the <Link href="/cookie-policy">Cookie Policy</Link> for
         details.
       </p>
 

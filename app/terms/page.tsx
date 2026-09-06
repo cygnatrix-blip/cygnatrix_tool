@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { LegalLayout } from '@/components/legal/LegalLayout';
 import { buildMetadata } from '@/lib/seo/metadata';
 import { SITE } from '@/config/site';
@@ -37,7 +38,7 @@ export default function TermsPage() {
       <h2>Not professional advice</h2>
       <p>
         The finance calculators are informational tools, not financial, tax, legal or investment
-        advice. See our <a href="/disclaimer">Disclaimer</a>.
+        advice. See our <Link href="/disclaimer">Disclaimer</Link>.
       </p>
 
       <h2>Limitation of liability</h2>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { LegalLayout } from '@/components/legal/LegalLayout';
 import { ContactForm } from '@/components/legal/ContactForm';
 import { buildMetadata } from '@/lib/seo/metadata';
@@ -28,7 +29,7 @@ export default function ContactPage() {
       <ContactForm />
       <p className="mt-6 text-sm text-ink-400">
         We use your email address only to reply to your message. See our{' '}
-        <a href="/privacy-policy">Privacy Policy</a>.
+        <Link href="/privacy-policy">Privacy Policy</Link>.
       </p>
     </LegalLayout>
   );
