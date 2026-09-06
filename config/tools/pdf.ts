@@ -1,6 +1,6 @@
 import type { ToolConfig } from '@/types/tool';
 
-const UPDATED = '2026-08-27';
+const UPDATED = '2026-09-05';
 
 const base = {
   category: 'pdf' as const,
@@ -375,7 +375,7 @@ export const PDF_TOOLS: ToolConfig[] = [
     featured: true,
     popular: false,
     sortOrder: 6,
-    updatedAt: '2026-08-28',
+    updatedAt: '2026-09-05',
     shortDescription: 'Combine JPG, PNG or WebP photos into a single PDF.',
     description:
       'Turn one or more images into a PDF document. Drag to set the page order, choose A4, Letter or a page sized to fit each photo, pick orientation and margins.',
@@ -445,7 +445,7 @@ export const PDF_TOOLS: ToolConfig[] = [
     featured: false,
     popular: false,
     sortOrder: 7,
-    updatedAt: '2026-08-28',
+    updatedAt: '2026-09-05',
     shortDescription: 'Rotate one page or every page of a PDF, with a live preview.',
     description:
       'Fix sideways or upside-down pages. Rotate a single page or the whole document by 90, 180 or 270 degrees and preview the result before saving.',
@@ -519,7 +519,7 @@ export const PDF_TOOLS: ToolConfig[] = [
     featured: true,
     popular: false,
     sortOrder: 8,
-    updatedAt: '2026-08-28',
+    updatedAt: '2026-09-05',
     shortDescription: 'Reorder, delete or extract pages with drag-and-drop thumbnails.',
     description:
       'See every page as a thumbnail, drag pages into a new order, remove the ones you don’t need, or tick a selection to pull out into a brand-new PDF.',
@@ -587,7 +587,7 @@ export const PDF_TOOLS: ToolConfig[] = [
     featured: true,
     popular: false,
     sortOrder: 9,
-    updatedAt: '2026-08-28',
+    updatedAt: '2026-09-05',
     shortDescription: 'Add an open password to a PDF, or remove one you already know.',
     description:
       'Protect a PDF with a password so it can’t be opened without it, or remove a password you already know from a protected file. Standard 128-bit encryption, opens in every PDF reader.',

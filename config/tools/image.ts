@@ -1,6 +1,6 @@
 import type { ToolConfig } from '@/types/tool';
 
-const UPDATED = '2026-08-27';
+const UPDATED = '2026-09-05';
 
 const base = {
   category: 'image' as const,
@@ -376,7 +376,7 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     featured: true,
     popular: false,
     sortOrder: 6,
-    updatedAt: '2026-08-28',
+    updatedAt: '2026-09-05',
     shortDescription: 'Convert iPhone HEIC/HEIF photos to widely-supported JPG.',
     description:
       'Convert HEIC or HEIF photos from an iPhone into JPG images that open everywhere. Batch convert, control quality, and choose whether to keep EXIF metadata.',
@@ -447,7 +447,7 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     featured: true,
     popular: true,
     sortOrder: 7,
-    updatedAt: '2026-08-28',
+    updatedAt: '2026-09-05',
     shortDescription: 'Hit an exact file size in KB — for forms that demand it.',
     description:
       'Tell it a target size — like 50 KB for a government form — and it finds the right quality automatically. No guessing with a slider, no repeated re-uploads.',
@@ -516,7 +516,7 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     featured: true,
     popular: true,
     sortOrder: 8,
-    updatedAt: '2026-08-28',
+    updatedAt: '2026-09-05',
     shortDescription: 'Crop, resize and compress your photo and signature to an exam’s exact spec.',
     description:
       'Pick your exam, upload a photo and a signature, and get back files already matching the required dimensions, file size range and format — no manual cropping or trial-and-error compression.',
@@ -585,7 +585,7 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     featured: true,
     popular: true,
     sortOrder: 9,
-    updatedAt: '2026-08-28',
+    updatedAt: '2026-09-05',
     shortDescription: 'Crop to India, US or Schengen passport photo standards, plus a printable sheet.',
     description:
       'Crop your photo to the exact passport or visa photo standard — India (35×45mm), US (2×2in) or Schengen (35×45mm) — at 300 DPI on a white background, then generate a 4×6in print sheet with multiple copies and cut guides.',

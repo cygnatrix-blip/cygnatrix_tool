@@ -1,6 +1,6 @@
 import type { ToolConfig } from '@/types/tool';
 
-const UPDATED = '2026-08-27';
+const UPDATED = '2026-09-05';
 
 const base = {
   category: 'finance' as const,
