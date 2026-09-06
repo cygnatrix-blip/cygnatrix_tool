@@ -84,31 +84,31 @@ export const CATEGORIES: Record<CategorySlug, CategoryConfig> = {
     title: 'Free Online Finance Calculators',
     tagline: 'Plan loans, investments and taxes with clear, transparent calculations.',
     description:
-      'Free finance calculators for the Indian market — EMI, SIP, FD, RD, GST, loan, CAGR and salary. Every result comes with the formula, a worked example and a full breakdown so you can see exactly how the number was reached.',
-    seoTitle: 'Free Online Finance Calculators — EMI, SIP, FD, GST & More',
+      'Free finance calculators for the Indian market — EMI and loan, SIP and step-up SIP, SWP, FD and RD, CAGR, GST, salary, income tax (FY 2025-26), home loan prepayment, capital gains, HRA and gratuity. Every result comes with the formula, a worked example and a full breakdown.',
+    seoTitle: 'Free Online Finance Calculators — EMI, SIP, Tax, GST & More',
     seoDescription:
-      'Free finance calculators for India: EMI, SIP, FD, RD, GST, loan, CAGR and salary. Instant results with charts, amortization schedules, formulas and worked examples.',
+      'Free finance calculators for India: EMI, loan, SIP, SWP, FD, RD, CAGR, GST, salary, income tax (FY 2025-26), home loan prepayment, capital gains, HRA and gratuity. Instant results with charts, schedules, formulas and worked examples.',
     keywords: [
       'finance calculator',
       'emi calculator',
       'sip calculator',
-      'fd calculator',
+      'income tax calculator',
       'gst calculator',
       'loan calculator',
-      'cagr calculator',
+      'capital gains calculator',
       'salary calculator india',
     ],
     icon: 'calculator',
     intro: [
-      'Good financial decisions start with a clear number. How much will this loan actually cost? What could a monthly SIP grow into? How much of my CTC reaches my bank account?',
-      'These eight calculators answer those questions instantly, in rupees, with the maths shown in full. Nothing is stored and no account is needed — open a calculator, enter your figures and read the result.',
+      'Good financial decisions start with a clear number. How much will this loan actually cost? What could a monthly SIP grow into? How much of my CTC reaches my bank account? Which tax regime leaves me better off?',
+      'These 15 calculators answer those questions instantly, in rupees, with the maths shown in full. Nothing is stored and no account is needed — open a calculator, enter your figures and read the result.',
     ],
     helpfulContent: [
       {
         heading: 'Built for the Indian context',
         paragraphs: [
-          'Interest rates are entered as annual percentages the way Indian banks quote them. Amounts are in rupees with Indian-style grouping (lakh and crore). The GST calculator uses Indian slabs and splits tax into CGST and SGST. The salary calculator models Provident Fund, professional tax and the new and old income-tax regimes.',
-          'Tax rules and rates change every year. Our calculation layer keeps every rate in a single dated configuration file, so when the Budget changes a slab we update one place and every calculator stays correct.',
+          'Interest rates are entered as annual percentages the way Indian banks quote them. Amounts are in rupees with Indian-style grouping (lakh and crore). The GST calculator carries the current two-slab structure (5% and 18%, plus 40% on luxury and sin goods) alongside the pre-22-September-2025 rates. The income tax and salary calculators model both the new and old regimes for FY 2025-26, with FY 2024-25 selectable.',
+          'Tax rules and rates change every year. Our calculation layer keeps every rate in a single dated configuration file keyed by financial year, so when the Budget changes a slab we update one place and every calculator stays correct.',
         ],
       },
       {
@@ -138,7 +138,7 @@ export const CATEGORIES: Record<CategorySlug, CategoryConfig> = {
       },
     ],
     sortOrder: 2,
-    updatedAt: UPDATED,
+    updatedAt: '2026-09-05',
   },
 
   image: {
