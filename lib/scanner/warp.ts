@@ -1,98 +1,114 @@
 'use client';
 
 /**
- * Perspective de-warp of a captured page. Maps the unit square onto the detected
- * quad with a homography, then renders it as a fine grid of texture-mapped
- * triangles on a 2-D canvas — perspective-correct to within a fraction of a
- * pixel at grid 24, and works everywhere without WebGL.
+ * Perspective de-warp of a captured page.
+ *
+ * Inverse mapping: for every output pixel we project back through the homography
+ * that maps the output rectangle onto the detected quad, then bilinearly sample
+ * the source. One pass, no tiling — so there are no seams or grid artefacts.
  */
 
-import { applyMatrix, solveHomography, type Pt, type Quad } from './geometry';
+import { solveHomography, type Quad } from './geometry';
 
-export interface WarpSource {
-  image: CanvasImageSource;
+const UNIT_SQUARE: Quad = [
+  { x: 0, y: 0 },
+  { x: 1, y: 0 },
+  { x: 1, y: 1 },
+  { x: 0, y: 1 },
+];
+
+export interface Raster {
+  data: Uint8ClampedArray;
   width: number;
   height: number;
 }
 
-export function warpQuad(src: WarpSource, quad: Quad, outW: number, outH: number, grid = 24): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.max(1, Math.round(outW));
-  canvas.height = Math.max(1, Math.round(outH));
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Your browser could not create a drawing canvas.');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
+/** Pure warp: `src` raster → new raster of size `outW × outH`. Testable in Node. */
+export function warpRaster(src: Raster, quad: Quad, outW: number, outH: number): Raster {
+  const w = Math.max(1, Math.round(outW));
+  const h = Math.max(1, Math.round(outH));
+  const { width: sw, height: sh, data: sd } = src;
+  const out = new Uint8ClampedArray(w * h * 4);
 
-  // unit square → source-pixel quad
-  const h = solveHomography(
-    [
-      { x: 0, y: 0 },
-      { x: 1, y: 0 },
-      { x: 1, y: 1 },
-      { x: 0, y: 1 },
-    ],
-    quad,
-  );
+  // Maps output-normalised (0..1) → source pixels.
+  const m = solveHomography(UNIT_SQUARE, quad);
+  const [a, b, c, d, e, f, g, hh, i] = m;
 
-  const cw = canvas.width;
-  const ch = canvas.height;
+  for (let y = 0; y < h; y += 1) {
+    const v = (y + 0.5) / h;
+    for (let x = 0; x < w; x += 1) {
+      const u = (x + 0.5) / w;
+      const den = g * u + hh * v + i || 1e-9;
+      const sx = (a * u + b * v + c) / den;
+      const sy = (d * u + e * v + f) / den;
+      const o = (y * w + x) * 4;
 
-  for (let j = 0; j < grid; j += 1) {
-    for (let i = 0; i < grid; i += 1) {
-      const u0 = i / grid;
-      const u1 = (i + 1) / grid;
-      const v0 = j / grid;
-      const v1 = (j + 1) / grid;
-
-      const dst = [
-        { x: u0 * cw, y: v0 * ch },
-        { x: u1 * cw, y: v0 * ch },
-        { x: u1 * cw, y: v1 * ch },
-        { x: u0 * cw, y: v1 * ch },
-      ];
-      const s00 = applyMatrix(h, { x: u0, y: v0 });
-      const s10 = applyMatrix(h, { x: u1, y: v0 });
-      const s11 = applyMatrix(h, { x: u1, y: v1 });
-      const s01 = applyMatrix(h, { x: u0, y: v1 });
-
-      drawTriangle(ctx, src.image, [s00, s10, s11], [dst[0]!, dst[1]!, dst[2]!]);
-      drawTriangle(ctx, src.image, [s00, s11, s01], [dst[0]!, dst[2]!, dst[3]!]);
+      if (sx < -1 || sy < -1 || sx > sw || sy > sh) {
+        out[o] = out[o + 1] = out[o + 2] = 255;
+        out[o + 3] = 255;
+        continue;
+      }
+      const cx = sx < 0 ? 0 : sx > sw - 1 ? sw - 1 : sx;
+      const cy = sy < 0 ? 0 : sy > sh - 1 ? sh - 1 : sy;
+      const x0 = cx | 0;
+      const y0 = cy | 0;
+      const x1 = x0 + 1 < sw ? x0 + 1 : x0;
+      const y1 = y0 + 1 < sh ? y0 + 1 : y0;
+      const fx = cx - x0;
+      const fy = cy - y0;
+      const i00 = (y0 * sw + x0) * 4;
+      const i10 = (y0 * sw + x1) * 4;
+      const i01 = (y1 * sw + x0) * 4;
+      const i11 = (y1 * sw + x1) * 4;
+      for (let ch = 0; ch < 3; ch += 1) {
+        const top = sd[i00 + ch]! + (sd[i10 + ch]! - sd[i00 + ch]!) * fx;
+        const bot = sd[i01 + ch]! + (sd[i11 + ch]! - sd[i01 + ch]!) * fx;
+        out[o + ch] = top + (bot - top) * fy;
+      }
+      out[o + 3] = 255;
     }
   }
-  return canvas;
+  return { data: out, width: w, height: h };
 }
 
-/** Affine-map a source triangle onto a destination triangle, clipped to it. */
-function drawTriangle(
-  ctx: CanvasRenderingContext2D,
-  image: CanvasImageSource,
-  s: [Pt, Pt, Pt],
-  d: [Pt, Pt, Pt],
-): void {
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(d[0].x, d[0].y);
-  ctx.lineTo(d[1].x, d[1].y);
-  ctx.lineTo(d[2].x, d[2].y);
-  ctx.closePath();
-  // Overlap neighbouring triangles very slightly to hide seams.
-  ctx.clip();
+/** Rasterise a CanvasImageSource and de-warp it onto a fresh canvas. */
+export function warpQuad(
+  src: { image: CanvasImageSource; width: number; height: number },
+  quad: Quad,
+  outW: number,
+  outH: number,
+): HTMLCanvasElement {
+  // Rasterise the source at ~2× the output resolution — a huge memory/time saving
+  // for small previews from a 12 MP photo, with no visible quality loss.
+  const k = Math.min(1, (Math.max(outW, outH) * 2) / Math.max(src.width, src.height));
+  const rw = Math.max(1, Math.round(src.width * k));
+  const rh = Math.max(1, Math.round(src.height * k));
 
-  const [s0, s1, s2] = s;
-  const [d0, d1, d2] = d;
-  const denom =
-    (s1.x - s0.x) * (s2.y - s0.y) - (s2.x - s0.x) * (s1.y - s0.y) || 1e-9;
-  const a = ((d1.x - d0.x) * (s2.y - s0.y) - (d2.x - d0.x) * (s1.y - s0.y)) / denom;
-  const b = ((d2.x - d0.x) * (s1.x - s0.x) - (d1.x - d0.x) * (s2.x - s0.x)) / denom;
-  const c = ((d1.y - d0.y) * (s2.y - s0.y) - (d2.y - d0.y) * (s1.y - s0.y)) / denom;
-  const e = ((d2.y - d0.y) * (s1.x - s0.x) - (d1.y - d0.y) * (s2.x - s0.x)) / denom;
-  const tx = d0.x - a * s0.x - b * s0.y;
-  const ty = d0.y - c * s0.x - e * s0.y;
+  const sc = document.createElement('canvas');
+  sc.width = rw;
+  sc.height = rh;
+  const sctx = sc.getContext('2d', { willReadFrequently: true });
+  if (!sctx) throw new Error('Your browser could not create a drawing canvas.');
+  sctx.imageSmoothingQuality = 'high';
+  sctx.drawImage(src.image, 0, 0, rw, rh);
+  const srcData = sctx.getImageData(0, 0, rw, rh);
+  sc.width = sc.height = 0;
 
-  ctx.setTransform(a, c, b, e, tx, ty);
-  ctx.drawImage(image, 0, 0);
-  ctx.restore();
+  const scaledQuad = quad.map((p) => ({ x: p.x * k, y: p.y * k })) as Quad;
+  const warped = warpRaster(
+    { data: srcData.data, width: srcData.width, height: srcData.height },
+    scaledQuad,
+    outW,
+    outH,
+  );
+
+  const oc = document.createElement('canvas');
+  oc.width = warped.width;
+  oc.height = warped.height;
+  const octx = oc.getContext('2d');
+  if (!octx) throw new Error('Your browser could not create a drawing canvas.');
+  const out = octx.createImageData(warped.width, warped.height);
+  out.data.set(warped.data);
+  octx.putImageData(out, 0, 0);
+  return oc;
 }

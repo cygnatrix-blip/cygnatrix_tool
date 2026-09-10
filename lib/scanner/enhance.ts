@@ -4,13 +4,26 @@
  * Post-de-warp cleanup filters. Each mode takes a canvas and returns a new one.
  *
  *  - original : untouched
- *  - color    : gray-world white balance + contrast stretch + light sharpen
- *  - auto     : color, then a gentle brightening — the "clean scan" look
- *  - grey     : luma
- *  - bw       : adaptive threshold (Bradley/Wellner), a crisp black-on-white page
+ *  - auto     : white balance + contrast + gentle brightening + sharpen
+ *  - color    : white balance + soft contrast + sharpen — natural colour
+ *  - magic    : push the background to white + boost saturation + sharpen —
+ *               for whiteboards, coloured diagrams and flyers
+ *  - grey     : luma + contrast
+ *  - greytext : luma + strong contrast, keeps soft edges (photos of text)
+ *  - bw       : adaptive threshold (Bradley/Wellner), crisp black-on-white
  */
 
-export type EnhanceMode = 'auto' | 'color' | 'grey' | 'bw' | 'original';
+export type EnhanceMode = 'auto' | 'color' | 'magic' | 'grey' | 'greytext' | 'bw' | 'original';
+
+export const ENHANCE_MODES: { id: EnhanceMode; label: string }[] = [
+  { id: 'auto', label: 'Auto' },
+  { id: 'magic', label: 'Magic colour' },
+  { id: 'color', label: 'Colour' },
+  { id: 'grey', label: 'Greyscale' },
+  { id: 'greytext', label: 'Grey text' },
+  { id: 'bw', label: 'B & W' },
+  { id: 'original', label: 'Original' },
+];
 
 export function enhance(source: HTMLCanvasElement, mode: EnhanceMode): HTMLCanvasElement {
   if (mode === 'original') return source;
@@ -30,12 +43,23 @@ export function enhance(source: HTMLCanvasElement, mode: EnhanceMode): HTMLCanva
     return canvas;
   }
 
-  if (mode === 'grey') {
+  if (mode === 'grey' || mode === 'greytext') {
     for (let i = 0; i < d.length; i += 4) {
-      const y = (d[i]! * 0.299 + d[i + 1]! * 0.587 + d[i + 2]! * 0.114) | 0;
+      const y = d[i]! * 0.299 + d[i + 1]! * 0.587 + d[i + 2]! * 0.114;
       d[i] = d[i + 1] = d[i + 2] = y;
     }
+    contrastStretch(d, mode === 'greytext' ? 0.02 : 0.008, mode === 'greytext' ? 6 : 0);
     ctx.putImageData(img, 0, 0);
+    return canvas;
+  }
+
+  if (mode === 'magic') {
+    grayWorldWhiteBalance(d);
+    whitePoint(d, 0.03);
+    saturate(d, 1.35);
+    contrastStretch(d, 0.006, 0);
+    ctx.putImageData(img, 0, 0);
+    sharpen(ctx, canvas);
     return canvas;
   }
 
@@ -45,6 +69,37 @@ export function enhance(source: HTMLCanvasElement, mode: EnhanceMode): HTMLCanva
   ctx.putImageData(img, 0, 0);
   sharpen(ctx, canvas);
   return canvas;
+}
+
+/** Per-channel: map the given top fraction of pixels to pure white. */
+function whitePoint(d: Uint8ClampedArray, frac: number): void {
+  const n = d.length / 4;
+  const cut = Math.max(1, n * frac);
+  for (let ch = 0; ch < 3; ch += 1) {
+    const hist = new Uint32Array(256);
+    for (let i = ch; i < d.length; i += 4) hist[d[i]!]! += 1;
+    let acc = 0;
+    let white = 255;
+    for (let v = 255; v >= 1; v -= 1) {
+      acc += hist[v]!;
+      if (acc >= cut) {
+        white = v;
+        break;
+      }
+    }
+    const scale = 255 / Math.max(1, white);
+    for (let i = ch; i < d.length; i += 4) d[i] = d[i]! * scale;
+  }
+}
+
+/** Scale colour away from (k>1) or toward (k<1) its luma. */
+function saturate(d: Uint8ClampedArray, k: number): void {
+  for (let i = 0; i < d.length; i += 4) {
+    const y = d[i]! * 0.299 + d[i + 1]! * 0.587 + d[i + 2]! * 0.114;
+    d[i] = y + (d[i]! - y) * k;
+    d[i + 1] = y + (d[i + 1]! - y) * k;
+    d[i + 2] = y + (d[i + 2]! - y) * k;
+  }
 }
 
 function grayWorldWhiteBalance(d: Uint8ClampedArray): void {

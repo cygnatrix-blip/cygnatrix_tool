@@ -13,6 +13,8 @@ export interface ProcessInput {
   /** Clockwise rotation applied after de-warp: 0 | 90 | 180 | 270. */
   rotate: number;
   mode: EnhanceMode;
+  /** Cap the long side of the output (e.g. for a fast review preview). */
+  maxOutputPx?: number;
 }
 
 export interface ProcessedPage {
@@ -25,7 +27,7 @@ export interface ProcessedPage {
 export async function processPage(input: ProcessInput): Promise<ProcessedPage> {
   const decoded = await decodeImage(input.source);
   const quad = orderQuad(input.quad);
-  const size = outputSize(quad);
+  const size = outputSize(quad, input.maxOutputPx ?? 2600);
 
   let canvas = warpQuad(
     { image: decoded.bitmap, width: decoded.width, height: decoded.height },

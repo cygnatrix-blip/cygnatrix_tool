@@ -4,12 +4,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Camera, Upload, RotateCw, X, Check, Trash2, ArrowUp, ArrowDown, ScanLine } from 'lucide-react';
 import { track } from '@/lib/analytics/client';
 import { downloadBlob, bytesToBlob } from '@/lib/download';
-import { Alert } from '@/components/ui/primitives';
+import { Alert, Spinner } from '@/components/ui/primitives';
 import { Button } from '@/components/ui/Button';
 import { ProgressIndicator } from '@/components/file/ProcessBar';
 import { cn } from '@/lib/cn';
 import { orderQuad, defaultQuad, type Quad, type Pt } from '@/lib/scanner/geometry';
-import type { EnhanceMode } from '@/lib/scanner/enhance';
+import { ENHANCE_MODES, type EnhanceMode } from '@/lib/scanner/enhance';
 import {
   cameraSupported,
   startCamera,
@@ -33,6 +33,7 @@ interface Review {
   height: number;
   quad: Quad;
   rotate: number;
+  mode: EnhanceMode;
   fromCamera: boolean;
 }
 
@@ -43,19 +44,12 @@ interface Page {
   height: number;
   quad: Quad;
   rotate: number;
+  mode: EnhanceMode;
   processedUrl: string;
   processedW: number;
   processedH: number;
   processedBlob: Blob;
 }
-
-const MODES: { id: EnhanceMode; label: string }[] = [
-  { id: 'auto', label: 'Auto' },
-  { id: 'color', label: 'Colour' },
-  { id: 'grey', label: 'Greyscale' },
-  { id: 'bw', label: 'B & W' },
-  { id: 'original', label: 'Original' },
-];
 
 let seq = 0;
 const uid = () => `p${Date.now().toString(36)}${seq++}`;
@@ -65,7 +59,7 @@ export function DocumentScannerTool() {
   const [stage, setStage] = useState<Stage>('idle');
   const [pages, setPages] = useState<Page[]>([]);
   const [review, setReview] = useState<Review | null>(null);
-  const [mode, setMode] = useState<EnhanceMode>('auto');
+  const [defaultMode, setDefaultMode] = useState<EnhanceMode>('auto');
   const [autoCapture, setAutoCapture] = useState(true);
   const autoCaptureRef = useRef(autoCapture);
   autoCaptureRef.current = autoCapture;
@@ -81,7 +75,6 @@ export function DocumentScannerTool() {
   const detectorRef = useRef<LiveDetector | null>(null);
   const rafRef = useRef<number | null>(null);
   const scratchRef = useRef<HTMLCanvasElement | null>(null);
-  const liveQuadRef = useRef<{ quad: Quad; score: number } | null>(null);
   const stableRef = useRef<{ quad: Quad; since: number } | null>(null);
   const capturingRef = useRef(false);
 
@@ -139,7 +132,6 @@ export function DocumentScannerTool() {
       const handle = await startCamera();
       camRef.current = handle;
       setStage('camera');
-      // wait a tick for <video> to mount
       requestAnimationFrame(() => {
         const v = videoRef.current;
         if (!v) return;
@@ -165,7 +157,6 @@ export function DocumentScannerTool() {
     rafRef.current = null;
     stopCamera(camRef.current);
     camRef.current = null;
-    liveQuadRef.current = null;
     stableRef.current = null;
     setStage('idle');
   };
@@ -193,18 +184,15 @@ export function DocumentScannerTool() {
           const quad = orderQuad(
             res.quad.map((p) => ({ x: p.x * scaleBack, y: p.y * scaleBack })),
           ) as Quad;
-          liveQuadRef.current = { quad, score: res.score };
           drawOverlay(quad, res.score);
           maybeAutoCapture(quad, res.score);
         } else {
-          liveQuadRef.current = null;
           drawOverlay(null, 0);
           stableRef.current = null;
         }
       } catch {
         /* keep looping */
       }
-      // ~8 fps is plenty for framing feedback
       window.setTimeout(() => {
         rafRef.current = requestAnimationFrame(run);
       }, 110);
@@ -236,14 +224,10 @@ export function DocumentScannerTool() {
       return;
     }
     const prev = stableRef.current;
+    const v = videoRef.current;
+    const diag = v ? Math.hypot(v.videoWidth, v.videoHeight) : 1000;
     const moved =
-      !prev ||
-      quad.some((p, i) => {
-        const q = prev.quad[i]!;
-        const v = videoRef.current;
-        const diag = v ? Math.hypot(v.videoWidth, v.videoHeight) : 1000;
-        return Math.hypot(p.x - q.x, p.y - q.y) > diag * 0.02;
-      });
+      !prev || quad.some((p, i) => Math.hypot(p.x - prev.quad[i]!.x, p.y - prev.quad[i]!.y) > diag * 0.02);
     if (moved) {
       stableRef.current = { quad, since: performance.now() };
       return;
@@ -289,7 +273,6 @@ export function DocumentScannerTool() {
       return;
     }
     const { decodeImage } = await loadDecode();
-    // Single file → review it. Multiple → auto-detect each and add straight to the tray.
     if (list.length === 1) {
       try {
         const file = list[0]!;
@@ -311,7 +294,9 @@ export function DocumentScannerTool() {
         const decoded = await decodeImage(file);
         const quad = await detectOnBitmap(decoded.bitmap, decoded.width, decoded.height);
         decoded.bitmap.close();
-        added.push(await buildPage({ source: file, width: decoded.width, height: decoded.height, quad, rotate: 0 }));
+        added.push(
+          await buildPage({ source: file, width: decoded.width, height: decoded.height, quad, rotate: 0, mode: defaultMode }),
+        );
         setProgress((i + 1) / list.length);
       }
       setPages((prev) => [...prev, ...added]);
@@ -332,6 +317,7 @@ export function DocumentScannerTool() {
     height: number;
     quad: Quad;
     rotate?: number;
+    mode?: EnhanceMode;
     fromCamera: boolean;
   }) => {
     if (review) URL.revokeObjectURL(review.srcUrl);
@@ -343,6 +329,7 @@ export function DocumentScannerTool() {
       height: p.height,
       quad: p.quad,
       rotate: p.rotate ?? 0,
+      mode: p.mode ?? defaultMode,
       fromCamera: p.fromCamera,
     });
     setStage('review');
@@ -359,6 +346,7 @@ export function DocumentScannerTool() {
       height: page.height,
       quad: page.quad,
       rotate: page.rotate,
+      mode: page.mode,
       fromCamera: false,
     });
   };
@@ -370,9 +358,10 @@ export function DocumentScannerTool() {
     height: number;
     quad: Quad;
     rotate: number;
+    mode: EnhanceMode;
   }): Promise<Page> => {
     const { processPage } = await loadProcess();
-    const processed = await processPage({ source: p.source, quad: p.quad, rotate: p.rotate, mode });
+    const processed = await processPage({ source: p.source, quad: p.quad, rotate: p.rotate, mode: p.mode });
     return {
       id: p.id ?? uid(),
       source: p.source,
@@ -380,6 +369,7 @@ export function DocumentScannerTool() {
       height: p.height,
       quad: p.quad,
       rotate: p.rotate,
+      mode: p.mode,
       processedBlob: processed.blob,
       processedUrl: URL.createObjectURL(processed.blob),
       processedW: processed.width,
@@ -398,6 +388,7 @@ export function DocumentScannerTool() {
         height: review.height,
         quad: review.quad,
         rotate: review.rotate,
+        mode: review.mode,
       });
       setPages((prev) => {
         const idx = review.id ? prev.findIndex((p) => p.id === review.id) : -1;
@@ -409,6 +400,7 @@ export function DocumentScannerTool() {
         }
         return [...prev, built];
       });
+      setDefaultMode(review.mode);
       setOutput(null);
       URL.revokeObjectURL(review.srcUrl);
       setReview(null);
@@ -438,35 +430,74 @@ export function DocumentScannerTool() {
     }
   };
 
-  /* ---------- pages / mode ---------- */
-  const reprocessAll = async (nextMode: EnhanceMode) => {
-    setMode(nextMode);
-    if (pages.length === 0) return;
-    setBusy('Applying filter…');
-    setProgress(0);
-    try {
-      const { processPage } = await loadProcess();
-      const next: Page[] = [];
-      for (let i = 0; i < pages.length; i += 1) {
-        const p = pages[i]!;
-        const processed = await processPage({ source: p.source, quad: p.quad, rotate: p.rotate, mode: nextMode });
-        URL.revokeObjectURL(p.processedUrl);
-        next.push({
-          ...p,
-          processedBlob: processed.blob,
-          processedUrl: URL.createObjectURL(processed.blob),
-          processedW: processed.width,
-          processedH: processed.height,
-        });
-        setProgress((i + 1) / pages.length);
+  /* ---------- pages ---------- */
+  const reprocessPage = async (page: Page, patch: Partial<Pick<Page, 'mode' | 'rotate'>>) => {
+    const { processPage } = await loadProcess();
+    const mode = patch.mode ?? page.mode;
+    const rotate = patch.rotate ?? page.rotate;
+    const processed = await processPage({ source: page.source, quad: page.quad, rotate, mode });
+    URL.revokeObjectURL(page.processedUrl);
+    return {
+      ...page,
+      mode,
+      rotate,
+      processedBlob: processed.blob,
+      processedUrl: URL.createObjectURL(processed.blob),
+      processedW: processed.width,
+      processedH: processed.height,
+    };
+  };
+
+  const setPageMode = (id: string, nextMode: EnhanceMode) => {
+    const page = pages.find((p) => p.id === id);
+    if (!page || busy || page.mode === nextMode) return;
+    setDefaultMode(nextMode);
+    void (async () => {
+      setBusy('Applying filter…');
+      try {
+        const updated = await reprocessPage(page, { mode: nextMode });
+        setPages((prev) => prev.map((p) => (p.id === id ? updated : p)));
+        setOutput(null);
+      } finally {
+        setBusy(null);
       }
-      setPages(next);
-      setOutput(null);
-    } catch {
-      setError('Could not re-apply the filter to every page.');
-    } finally {
-      setBusy(null);
-    }
+    })();
+  };
+
+  const applyModeToAll = () => {
+    if (pages.length === 0 || busy) return;
+    void (async () => {
+      setBusy('Applying to all pages…');
+      setProgress(0);
+      try {
+        const next: Page[] = [];
+        for (let i = 0; i < pages.length; i += 1) {
+          next.push(await reprocessPage(pages[i]!, { mode: defaultMode }));
+          setProgress((i + 1) / pages.length);
+        }
+        setPages(next);
+        setOutput(null);
+      } catch {
+        setError('Could not re-apply the filter to every page.');
+      } finally {
+        setBusy(null);
+      }
+    })();
+  };
+
+  const rotatePage = (id: string) => {
+    const page = pages.find((p) => p.id === id);
+    if (!page || busy) return;
+    void (async () => {
+      setBusy('Rotating…');
+      try {
+        const updated = await reprocessPage(page, { rotate: (page.rotate + 90) % 360 });
+        setPages((prev) => prev.map((p) => (p.id === id ? updated : p)));
+        setOutput(null);
+      } finally {
+        setBusy(null);
+      }
+    })();
   };
 
   const removePage = (id: string) => {
@@ -490,37 +521,6 @@ export function DocumentScannerTool() {
     setOutput(null);
   };
 
-  const rotatePage = (id: string) => {
-    const page = pages.find((p) => p.id === id);
-    if (!page || busy) return;
-    void (async () => {
-      setBusy('Rotating…');
-      try {
-        const { processPage } = await loadProcess();
-        const rotate = (page.rotate + 90) % 360;
-        const processed = await processPage({ source: page.source, quad: page.quad, rotate, mode });
-        URL.revokeObjectURL(page.processedUrl);
-        setPages((prev) =>
-          prev.map((p) =>
-            p.id === id
-              ? {
-                  ...p,
-                  rotate,
-                  processedBlob: processed.blob,
-                  processedUrl: URL.createObjectURL(processed.blob),
-                  processedW: processed.width,
-                  processedH: processed.height,
-                }
-              : p,
-          ),
-        );
-        setOutput(null);
-      } finally {
-        setBusy(null);
-      }
-    })();
-  };
-
   /* ---------- export ---------- */
   const exportPdf = async () => {
     if (pages.length === 0) return;
@@ -530,12 +530,11 @@ export function DocumentScannerTool() {
       const bytes = await scansToPdf(
         pages.map((p) => ({ blob: p.processedBlob, width: p.processedW, height: p.processedH })),
       );
-      const blob = bytesToBlob(bytes, 'application/pdf');
-      setOutput(blob);
+      setOutput(bytesToBlob(bytes, 'application/pdf'));
       track('tool_completed', {
         toolSlug: 'document-scanner',
         category: 'pdf',
-        meta: { pages: pages.length, mode },
+        meta: { pages: pages.length, modes: [...new Set(pages.map((p) => p.mode))].join('+') },
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not build the PDF.');
@@ -643,6 +642,7 @@ export function DocumentScannerTool() {
           review={review}
           onQuad={(quad) => setReview((r) => (r ? { ...r, quad } : r))}
           onRotate={() => setReview((r) => (r ? { ...r, rotate: (r.rotate + 90) % 360 } : r))}
+          onMode={(mode) => setReview((r) => (r ? { ...r, mode } : r))}
           onCancel={cancelReview}
           onCommit={() => void commitReview()}
           busy={!!busy}
@@ -650,11 +650,7 @@ export function DocumentScannerTool() {
       )}
 
       {busy && <ProgressIndicator value={progress ? progress * 100 : 40} label={busy} />}
-      {error && (
-        <Alert tone="error">
-          {error}
-        </Alert>
-      )}
+      {error && <Alert tone="error">{error}</Alert>}
 
       {pages.length > 0 && stage === 'idle' && (
         <div className="space-y-4 rounded-2xl border border-ink-200 p-4 dark:border-ink-800">
@@ -662,25 +658,28 @@ export function DocumentScannerTool() {
             <span className="text-sm font-semibold text-ink-700 dark:text-ink-200">
               {pages.length} page{pages.length === 1 ? '' : 's'}
             </span>
-            <div className="ml-auto flex flex-wrap gap-1">
-              {MODES.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => void reprocessAll(m.id)}
-                  disabled={!!busy}
-                  aria-pressed={mode === m.id}
-                  className={cn(
-                    'rounded-lg px-2.5 py-1 text-xs font-medium transition disabled:opacity-50',
-                    mode === m.id
-                      ? 'bg-brand-600 text-white'
-                      : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300',
-                  )}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
+            <label className="ml-auto flex items-center gap-1.5 text-xs text-ink-500">
+              New pages:
+              <select
+                value={defaultMode}
+                onChange={(e) => setDefaultMode(e.target.value as EnhanceMode)}
+                className="rounded-lg border border-ink-300 bg-transparent px-2 py-1 text-xs dark:border-ink-600"
+              >
+                {ENHANCE_MODES.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={applyModeToAll}
+              disabled={!!busy}
+              className="rounded-lg border border-ink-300 px-2.5 py-1 text-xs font-medium text-ink-600 hover:bg-ink-100 disabled:opacity-50 dark:border-ink-600 dark:text-ink-300 dark:hover:bg-ink-800"
+            >
+              Apply to all
+            </button>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -695,22 +694,37 @@ export function DocumentScannerTool() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={p.processedUrl} alt={`Page ${i + 1}`} className="h-full w-full object-contain" />
                 </button>
-                <div className="flex items-center justify-between gap-1 px-2 py-1.5">
-                  <span className="text-xs text-ink-400">{i + 1}</span>
-                  <span className="flex gap-0.5">
-                    <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => movePage(p.id, -1)} className="rounded p-1 text-ink-400 hover:bg-ink-100 disabled:opacity-30 dark:hover:bg-ink-800">
-                      <ArrowUp className="h-3.5 w-3.5" />
-                    </button>
-                    <button type="button" aria-label="Move down" disabled={i === pages.length - 1} onClick={() => movePage(p.id, 1)} className="rounded p-1 text-ink-400 hover:bg-ink-100 disabled:opacity-30 dark:hover:bg-ink-800">
-                      <ArrowDown className="h-3.5 w-3.5" />
-                    </button>
-                    <button type="button" aria-label="Rotate" onClick={() => rotatePage(p.id)} className="rounded p-1 text-ink-400 hover:bg-ink-100 dark:hover:bg-ink-800">
-                      <RotateCw className="h-3.5 w-3.5" />
-                    </button>
-                    <button type="button" aria-label="Delete" onClick={() => removePage(p.id)} className="rounded p-1 text-ink-400 hover:bg-ink-100 hover:text-red-600 dark:hover:bg-ink-800">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </span>
+                <div className="space-y-1 px-2 py-1.5">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-xs text-ink-400">{i + 1}</span>
+                    <span className="flex gap-0.5">
+                      <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => movePage(p.id, -1)} className="rounded p-1 text-ink-400 hover:bg-ink-100 disabled:opacity-30 dark:hover:bg-ink-800">
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button type="button" aria-label="Move down" disabled={i === pages.length - 1} onClick={() => movePage(p.id, 1)} className="rounded p-1 text-ink-400 hover:bg-ink-100 disabled:opacity-30 dark:hover:bg-ink-800">
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button type="button" aria-label="Rotate" onClick={() => rotatePage(p.id)} className="rounded p-1 text-ink-400 hover:bg-ink-100 dark:hover:bg-ink-800">
+                        <RotateCw className="h-3.5 w-3.5" />
+                      </button>
+                      <button type="button" aria-label="Delete" onClick={() => removePage(p.id)} className="rounded p-1 text-ink-400 hover:bg-ink-100 hover:text-red-600 dark:hover:bg-ink-800">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </span>
+                  </div>
+                  <select
+                    value={p.mode}
+                    onChange={(e) => setPageMode(p.id, e.target.value as EnhanceMode)}
+                    disabled={!!busy}
+                    aria-label={`Filter for page ${i + 1}`}
+                    className="w-full rounded border border-ink-300 bg-transparent px-1.5 py-1 text-xs dark:border-ink-600"
+                  >
+                    {ENHANCE_MODES.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             ))}
@@ -749,13 +763,14 @@ export function DocumentScannerTool() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Corner-adjust pane                                                  */
+/*  Corner-adjust + filter pane                                         */
 /* ------------------------------------------------------------------ */
 
 function ReviewPane({
   review,
   onQuad,
   onRotate,
+  onMode,
   onCancel,
   onCommit,
   busy,
@@ -763,15 +778,57 @@ function ReviewPane({
   review: Review;
   onQuad: (q: Quad) => void;
   onRotate: () => void;
+  onMode: (m: EnhanceMode) => void;
   onCancel: () => void;
   onCommit: () => void;
   busy: boolean;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<number | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewBusy, setPreviewBusy] = useState(true);
 
   const fx = (p: Pt) => (p.x / review.width) * 100;
   const fy = (p: Pt) => (p.y / review.height) * 100;
+
+  /* debounced de-warp + filter preview */
+  useEffect(() => {
+    let cancelled = false;
+    setPreviewBusy(true);
+    const t = window.setTimeout(async () => {
+      try {
+        const { processPage } = await import('@/lib/scanner/process');
+        const res = await processPage({
+          source: review.source,
+          quad: review.quad,
+          rotate: review.rotate,
+          mode: review.mode,
+          maxOutputPx: 760,
+        });
+        if (cancelled) return;
+        const u = URL.createObjectURL(res.blob);
+        if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = u;
+        setPreviewUrl(u);
+      } catch {
+        /* leave the last good preview */
+      } finally {
+        if (!cancelled) setPreviewBusy(false);
+      }
+    }, 260);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [review.source, review.quad, review.rotate, review.mode]);
+
+  useEffect(
+    () => () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    },
+    [],
+  );
 
   const onPointerDown = (e: React.PointerEvent, i: number) => {
     e.preventDefault();
@@ -785,8 +842,7 @@ function ReviewPane({
     const r = box.getBoundingClientRect();
     const nx = clamp01((e.clientX - r.left) / r.width) * review.width;
     const ny = clamp01((e.clientY - r.top) / r.height) * review.height;
-    const next = review.quad.map((p, k) => (k === i ? { x: nx, y: ny } : p)) as Quad;
-    onQuad(next);
+    onQuad(review.quad.map((p, k) => (k === i ? { x: nx, y: ny } : p)) as Quad);
   };
   const onPointerUp = (e: React.PointerEvent) => {
     (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
@@ -795,32 +851,75 @@ function ReviewPane({
 
   return (
     <div className="space-y-3">
-      <div
-        ref={boxRef}
-        className="relative mx-auto max-w-2xl touch-none select-none overflow-hidden rounded-xl border border-ink-200 dark:border-ink-800"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={review.srcUrl} alt="Captured page" className="block w-full" draggable={false} />
-        <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polygon
-            points={review.quad.map((p) => `${fx(p)},${fy(p)}`).join(' ')}
-            fill="rgba(13,144,137,0.12)"
-            stroke="#0d9089"
-            strokeWidth="0.4"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-        {review.quad.map((p, i) => (
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {/* source + handles */}
+        <div>
+          <p className="mb-1 text-xs font-medium text-ink-500">Drag the corners to the page edges</p>
+          <div
+            ref={boxRef}
+            className="relative touch-none select-none overflow-hidden rounded-xl border border-ink-200 dark:border-ink-800"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={review.srcUrl} alt="Captured page" className="block w-full" draggable={false} />
+            <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <polygon
+                points={review.quad.map((p) => `${fx(p)},${fy(p)}`).join(' ')}
+                fill="rgba(13,144,137,0.12)"
+                stroke="#0d9089"
+                strokeWidth="0.4"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+            {review.quad.map((p, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Corner ${i + 1}`}
+                onPointerDown={(e) => onPointerDown(e, i)}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                className="absolute h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-brand-600 shadow-md"
+                style={{ left: `${fx(p)}%`, top: `${fy(p)}%`, touchAction: 'none' }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* result preview */}
+        <div>
+          <p className="mb-1 text-xs font-medium text-ink-500">Result</p>
+          <div className="relative flex min-h-[8rem] items-center justify-center overflow-hidden rounded-xl border border-ink-200 bg-ink-50 dark:border-ink-800 dark:bg-ink-900">
+            {previewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={previewUrl} alt="De-warped result" className="max-h-[60vh] w-full object-contain" />
+            ) : (
+              <span className="p-8 text-xs text-ink-400">Rendering…</span>
+            )}
+            {previewBusy && previewUrl && (
+              <span className="absolute right-2 top-2 rounded-full bg-ink-900/60 p-1.5 text-white">
+                <Spinner className="h-3.5 w-3.5" />
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-1">
+        {ENHANCE_MODES.map((m) => (
           <button
-            key={i}
+            key={m.id}
             type="button"
-            aria-label={`Corner ${i + 1}`}
-            onPointerDown={(e) => onPointerDown(e, i)}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            className="absolute h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-brand-600 shadow-md"
-            style={{ left: `${fx(p)}%`, top: `${fy(p)}%`, touchAction: 'none' }}
-          />
+            onClick={() => onMode(m.id)}
+            aria-pressed={review.mode === m.id}
+            className={cn(
+              'rounded-lg px-2.5 py-1 text-xs font-medium transition',
+              review.mode === m.id
+                ? 'bg-brand-600 text-white'
+                : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300',
+            )}
+          >
+            {m.label}
+          </button>
         ))}
       </div>
 
@@ -831,13 +930,10 @@ function ReviewPane({
         <Button variant="secondary" size="sm" onClick={onRotate} disabled={busy}>
           <RotateCw className="h-4 w-4" /> Rotate ({review.rotate}°)
         </Button>
-        <Button size="sm" onClick={onCommit} disabled={busy}>
+        <Button size="sm" onClick={onCommit} disabled={busy || previewBusy}>
           <Check className="h-4 w-4" /> {review.id ? 'Update page' : 'Add page'}
         </Button>
       </div>
-      <p className="text-center text-xs text-ink-400">
-        Drag the four dots to the page corners. The de-warped result appears in your pages below.
-      </p>
     </div>
   );
 }

@@ -805,14 +805,14 @@ export const PDF_TOOLS: ToolConfig[] = [
         },
         {
           title: 'Choose a look and export',
-          body: 'Pick Auto, Colour, Greyscale or B&W, reorder or delete pages, then download a single PDF (or a ZIP of images).',
+          body: 'Set a filter per page — Auto, Magic Colour, Colour, Greyscale, Grey Text, B&W or Original — with a live before/after preview. Reorder or delete pages, then download a single PDF (or a ZIP of images).',
         },
       ],
       features: [
         'Automatic page-edge detection with a live camera outline',
         'Drag the four corners to correct the crop by hand any time',
         'Perspective de-warp straightens a photo taken at an angle',
-        'Auto / Colour / Greyscale / B&W cleanup, plus 90° rotate',
+        'Seven cleanup filters chosen per page (Auto, Magic Colour, Colour, Greyscale, Grey Text, B&W, Original) with a live preview, plus 90° rotate',
         'Multi-page: capture, reorder and delete pages, export one PDF',
         'Full-resolution capture where the browser allows it; upload path for everything else',
         'Runs entirely in your browser — camera frames and scans never leave your device',
@@ -822,7 +822,7 @@ export const PDF_TOOLS: ToolConfig[] = [
           heading: 'How the scan is built',
           paragraphs: [
             'A phone photo of a document is never quite square: you are holding the camera at an angle, so the page looks like a trapezoid, and the lighting is uneven. The scanner fixes both. First it finds the page boundary — in the live preview this runs several times a second so you can see the outline track the page. Then, on capture, it maps the four detected corners onto a true rectangle (a perspective transform), which pulls the page flat as if it had been laid on a copier.',
-            'After straightening, a cleanup pass evens out the lighting and lifts the contrast. B&W mode goes further, using an adaptive threshold so text becomes solid black on clean white — the smallest files and the most readable result for printed or handwritten pages.',
+            'After straightening, a cleanup filter evens out the lighting and lifts the contrast. B&W goes further, using an adaptive threshold so text becomes solid black on clean white — the smallest files and the most readable result for printed or handwritten pages. Each page carries its own filter with a live before/after preview, so a batch that mixes a printed letter, a colour ID card and a hand-drawn diagram can each get the right treatment in one PDF.',
           ],
         },
         {
@@ -868,8 +868,8 @@ export const PDF_TOOLS: ToolConfig[] = [
         a: 'Drag the four corner dots to the real corners of the page before adding it. Detection works best with the whole page in frame on a plain, contrasting surface. You can re-adjust any page later from the tray.',
       },
       {
-        q: 'Which mode should I use?',
-        a: 'B&W for printed or handwritten text — it is the most readable and the smallest file. Greyscale keeps shading (e.g. pencil). Colour or Auto for anything with colour, like an ID card, a photo or a coloured form.',
+        q: 'Which filter should I use?',
+        a: 'B&W for printed or handwritten text — most readable, smallest file. Grey Text is a softer version that keeps anti-aliased edges. Greyscale keeps shading like pencil. Colour or Auto for natural colour (ID cards, photos). Magic Colour flattens the background to white and boosts colour — good for whiteboards, sticky notes and printed diagrams. Each page has its own filter, so a mixed batch is fine.',
       },
       {
         q: 'Can I scan more than one page into a single PDF?',
