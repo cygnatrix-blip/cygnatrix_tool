@@ -26,6 +26,7 @@ import {
   IdCard,
   Camera,
   PencilLine,
+  ScanLine,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -56,6 +57,7 @@ const MAP: Record<string, LucideIcon> = {
   'id-card': IdCard,
   camera: Camera,
   'pencil-line': PencilLine,
+  'scan-line': ScanLine,
 };
 
 export function ToolIcon({ name, className }: { name: string; className?: string }) {

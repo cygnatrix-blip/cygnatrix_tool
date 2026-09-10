@@ -766,4 +766,124 @@ export const PDF_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['organize-pdf', 'rotate-pdf', 'protect-pdf', 'merge-pdf'],
   },
+  {
+    ...base,
+    id: 'document-scanner',
+    name: 'Document Scanner',
+    slug: 'document-scanner',
+    path: '/pdf/document-scanner',
+    icon: 'scan-line',
+    featured: true,
+    popular: false,
+    sortOrder: 11,
+    updatedAt: UPDATED,
+    shortDescription: 'Scan paper to a clean, straightened PDF with your phone camera — no app.',
+    description:
+      'Turn your phone into a document scanner. Point the camera at a page, the edges are found automatically, and the photo is straightened, cropped and cleaned into a crisp scan. Add more pages, then export one PDF — all processed on your device, nothing uploaded.',
+    keywords: [
+      'document scanner',
+      'scan document to pdf',
+      'scan with phone',
+      'photo to pdf scanner',
+      'free scanner online',
+      'scan pdf no app',
+      'camera scanner',
+      'scan multiple pages to pdf',
+    ],
+    seoTitle: 'Document Scanner — Scan to PDF with Your Phone, Free',
+    seoDescription:
+      'Free online document scanner. Use your phone camera with automatic edge detection to scan pages to a clean, deskewed multi-page PDF. B&W and colour modes, manual corner adjust, 100% in your browser — no app, no upload, no sign-up.',
+    content: {
+      howItWorks: [
+        {
+          title: 'Open the camera or upload a photo',
+          body: 'On a phone, tap Open camera for a live preview with automatic edge detection. On a desktop, or in an app that blocks the camera, upload photos of your pages instead.',
+        },
+        {
+          title: 'Capture each page',
+          body: 'Fill the frame with the page — the outline turns green when it locks on, and it can capture automatically once the shot is steady. Adjust the four corner dots if the detection is slightly off, then rotate if needed.',
+        },
+        {
+          title: 'Choose a look and export',
+          body: 'Pick Auto, Colour, Greyscale or B&W, reorder or delete pages, then download a single PDF (or a ZIP of images).',
+        },
+      ],
+      features: [
+        'Automatic page-edge detection with a live camera outline',
+        'Drag the four corners to correct the crop by hand any time',
+        'Perspective de-warp straightens a photo taken at an angle',
+        'Auto / Colour / Greyscale / B&W cleanup, plus 90° rotate',
+        'Multi-page: capture, reorder and delete pages, export one PDF',
+        'Full-resolution capture where the browser allows it; upload path for everything else',
+        'Runs entirely in your browser — camera frames and scans never leave your device',
+      ],
+      sections: [
+        {
+          heading: 'How the scan is built',
+          paragraphs: [
+            'A phone photo of a document is never quite square: you are holding the camera at an angle, so the page looks like a trapezoid, and the lighting is uneven. The scanner fixes both. First it finds the page boundary — in the live preview this runs several times a second so you can see the outline track the page. Then, on capture, it maps the four detected corners onto a true rectangle (a perspective transform), which pulls the page flat as if it had been laid on a copier.',
+            'After straightening, a cleanup pass evens out the lighting and lifts the contrast. B&W mode goes further, using an adaptive threshold so text becomes solid black on clean white — the smallest files and the most readable result for printed or handwritten pages.',
+          ],
+        },
+        {
+          heading: 'When auto-detection struggles',
+          paragraphs: [
+            'Edge detection needs contrast between the page and what is behind it. A white page on a white desk, heavy glare, a busy background or a page that runs off the edge of the frame can all throw it off. Two things help: put the page on a darker, plain surface and get the whole page in shot.',
+            'If the outline is still wrong, it is not a dead end — every capture opens with four draggable corner dots. Drag them to the actual corners of the page and the de-warp uses those instead. You can also come back to any page in the tray later and re-adjust it.',
+          ],
+        },
+        {
+          heading: 'Camera access and privacy',
+          paragraphs: [
+            'The live preview uses your browser’s camera, which needs your permission and a secure (https) connection. If you decline, or your browser or in-app viewer blocks it, the Upload / take a photo button still works — on a phone it opens the normal camera app and hands the photo straight back.',
+            'Either way, the image is processed on your device. No frame, photo or finished scan is ever sent to a server, and nothing is stored once you leave the page.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Input', value: 'Three A4 pages photographed on a desk, slightly skewed' },
+          { label: 'Settings', value: 'Auto-capture on, B&W mode' },
+        ],
+        result: [{ label: 'Output', value: 'scan.pdf — 3 straightened, high-contrast pages' }],
+        walkthrough:
+          'Each page is detected, captured when steady, de-warped to a rectangle and thresholded to black-on-white. The three pages are combined into one PDF sized to the page aspect ratio.',
+      },
+    },
+    faq: [
+      {
+        q: 'Do I need to install an app?',
+        a: 'No. It runs in your mobile or desktop browser. There is nothing to download and no account to create.',
+      },
+      {
+        q: 'Are my documents uploaded anywhere?',
+        a: 'No. The camera feed and every captured page are processed on your device using your browser. No image is transmitted to a server or stored after you close the page.',
+      },
+      {
+        q: 'The camera will not turn on — what now?',
+        a: 'Camera access needs your permission and an https connection, and some in-app browsers (inside social apps) block it entirely. Use the Upload / take a photo button instead — on a phone it opens your normal camera app.',
+      },
+      {
+        q: 'The auto-detected border is wrong.',
+        a: 'Drag the four corner dots to the real corners of the page before adding it. Detection works best with the whole page in frame on a plain, contrasting surface. You can re-adjust any page later from the tray.',
+      },
+      {
+        q: 'Which mode should I use?',
+        a: 'B&W for printed or handwritten text — it is the most readable and the smallest file. Greyscale keeps shading (e.g. pencil). Colour or Auto for anything with colour, like an ID card, a photo or a coloured form.',
+      },
+      {
+        q: 'Can I scan more than one page into a single PDF?',
+        a: 'Yes. Capture or upload as many pages as you need, reorder or delete them in the tray, then export one multi-page PDF.',
+      },
+      {
+        q: 'How good is the resolution?',
+        a: 'Uploaded photos and, on Android Chrome, live captures use the full camera resolution. On iPhone the live capture is limited by the browser to around 1080p, which is fine for text; use the upload button if you need maximum detail.',
+      },
+      {
+        q: 'Does it do OCR / make the text selectable?',
+        a: 'Not yet — the output is an image-based PDF. Run it through a separate OCR step if you need selectable text.',
+      },
+    ],
+    relatedTools: ['image-to-pdf', 'compress-pdf', 'edit-pdf', 'pdf-to-jpg'],
+  },
 ];

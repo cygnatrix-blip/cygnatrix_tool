@@ -22,7 +22,10 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const outDir = join(root, 'public', 'workers');
 mkdirSync(outDir, { recursive: true });
 
-const workers = [{ entry: 'lib/image/compress-to-target.worker.ts', out: 'compress-to-target.js' }];
+const workers = [
+  { entry: 'lib/image/compress-to-target.worker.ts', out: 'compress-to-target.js' },
+  { entry: 'lib/scanner/detect.worker.ts', out: 'scanner-detect.js' },
+];
 
 for (const w of workers) {
   await build({
