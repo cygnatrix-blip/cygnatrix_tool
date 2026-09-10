@@ -15,6 +15,8 @@ const RESERVED_SLUGS = new Set([
   'finance',
   'icon.svg',
   'image',
+  'llms.txt',
+  'llms-full.txt',
   'manifest.webmanifest',
   'opengraph-image',
   'pdf',
