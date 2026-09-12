@@ -27,6 +27,7 @@ import {
   Camera,
   PencilLine,
   ScanLine,
+  Crop,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -58,6 +59,7 @@ const MAP: Record<string, LucideIcon> = {
   camera: Camera,
   'pencil-line': PencilLine,
   'scan-line': ScanLine,
+  crop: Crop,
 };
 
 export function ToolIcon({ name, className }: { name: string; className?: string }) {

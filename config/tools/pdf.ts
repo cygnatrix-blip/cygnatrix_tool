@@ -886,4 +886,106 @@ export const PDF_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['image-to-pdf', 'compress-pdf', 'edit-pdf', 'pdf-to-jpg'],
   },
+  {
+    ...base,
+    id: 'crop-pdf',
+    name: 'Crop PDF',
+    slug: 'crop-pdf',
+    path: '/pdf/crop-pdf',
+    icon: 'crop',
+    featured: false,
+    popular: false,
+    sortOrder: 12,
+    updatedAt: UPDATED,
+    shortDescription: 'Trim margins or cut a PDF page down to a chosen area, visually.',
+    description:
+      'Drag a crop box over a PDF page — the same margin on every page, or a different area on each — and download the trimmed file. Text stays selectable and vector quality is untouched; nothing is uploaded.',
+    keywords: [
+      'crop pdf',
+      'trim pdf margins',
+      'cut pdf page',
+      'remove pdf white space',
+      'resize pdf page area',
+      'crop pdf online free',
+    ],
+    seoTitle: 'Crop PDF — Trim Page Margins Online Free',
+    seoDescription:
+      'Free online PDF cropper. Drag a crop box to trim margins or cut a page down to a chosen area — the same crop on every page or a different one per page. Text stays selectable, no upload, no sign-up.',
+    content: {
+      howItWorks: [
+        {
+          title: 'Upload a PDF',
+          body: 'Every page renders as a preview so you can see exactly what you are cropping.',
+        },
+        {
+          title: 'Drag the crop box',
+          body: 'Resize it from the corners or move it, use a margin preset, or type exact percentages for each side. Choose whether the same crop applies to every page or each page gets its own.',
+        },
+        {
+          title: 'Crop and download',
+          body: 'The cropped PDF downloads immediately — the same size or smaller, with everything outside the box trimmed from view and from print.',
+        },
+      ],
+      features: [
+        'Visual drag-to-crop with corner handles and a live preview',
+        'Exact numeric margins (top, bottom, left, right, in %)',
+        'One-click presets: margin removal, top/bottom/left/right half',
+        'Same crop for every page, or a different crop per page',
+        'Text stays selectable — this changes the visible area, not the content',
+        'Runs entirely in your browser',
+      ],
+      sections: [
+        {
+          heading: 'What cropping a PDF actually changes',
+          paragraphs: [
+            'Cropping does not delete anything from the page or shrink the file by re-drawing it — it sets the page\'s crop box, the same mechanism Adobe Acrobat\'s crop tool uses. Every PDF viewer and printer then shows and prints only what is inside that box. Text stays selectable, images keep their original resolution, and the change is instant because nothing is re-rendered.',
+            'This is different from cropping a photo, where pixels outside the frame are gone for good. Here, the original content is still in the file — a PDF editor that resets the crop box (or exports the raw MediaBox) can reveal it again. For that reason this tool is not a way to redact or permanently remove something from a page; use whiteout or a proper redaction tool for that instead.',
+          ],
+        },
+        {
+          heading: 'Common reasons to crop',
+          paragraphs: [
+            'Scanned documents often carry wide, uneven margins, or a strip of the scanner bed along one edge — cropping tightens the page so it prints or displays without wasted white space. Slide decks exported to PDF sometimes need only the content area, not the surrounding canvas. And a page that mixes a full-size diagram with a footer you do not need can be cut down to just the useful region.',
+            'If a scanned batch has consistent margins across every page, use "same crop for every page" and set it once. If pages differ — a mix of portrait letters and a landscape table, say — switch to "each page individually" and adjust the ones that need it.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Input', value: 'scan.pdf — 4 pages, a 12% margin of scanner bed on every edge' },
+          { label: 'Action', value: '"Same for every page", 10% margin preset' },
+        ],
+        result: [{ label: 'Output', value: 'cropped.pdf — 4 pages, same content, tighter margins' }],
+        walkthrough:
+          'Each page\'s crop box is set to the inner 80% of the page (10% trimmed from every edge), accounting for that page\'s own rotation. The document opens and prints showing only the cropped area.',
+      },
+    },
+    faq: [
+      {
+        q: 'Does cropping reduce the file size?',
+        a: 'Usually only slightly. Cropping changes what is visible, not the underlying content, so the file size is roughly unchanged. To also shrink the file size, run the result through Compress PDF afterwards.',
+      },
+      {
+        q: 'Is the cropped-out content permanently deleted?',
+        a: 'No — cropping sets the page\'s crop box rather than deleting content, which is exactly what desktop PDF editors do too. It is not a redaction tool; do not rely on it to permanently remove sensitive information.',
+      },
+      {
+        q: 'Can I crop each page differently?',
+        a: 'Yes — switch to "each page individually", select a page in the strip below the preview, and adjust its crop box. Pages you have not touched keep the full page until you set one.',
+      },
+      {
+        q: 'Will the cropped PDF still have selectable text?',
+        a: 'Yes. Cropping only changes the visible area — text, links and form fields inside that area work exactly as before.',
+      },
+      {
+        q: 'What happens to a rotated page?',
+        a: 'The crop box is set correctly relative to how the page actually displays, not its raw orientation, so a sideways-scanned page crops where you see it, not where the file stores it.',
+      },
+      {
+        q: 'Is my file uploaded anywhere?',
+        a: 'No. Every page renders and crops entirely in your browser; the PDF never leaves your device.',
+      },
+    ],
+    relatedTools: ['organize-pdf', 'rotate-pdf', 'compress-pdf', 'split-pdf'],
+  },
 ];

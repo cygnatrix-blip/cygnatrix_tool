@@ -3,13 +3,13 @@ import { ALL_TOOLS, ACTIVE_TOOLS, getTool, getToolsByCategory, getRelatedTools, 
 import { CATEGORY_LIST } from '@/config/categories';
 
 describe('tool registry', () => {
-  it('contains exactly the 35 tools (Phase 1 + 2A-2D + Phase 3 + PDF editor + scanner)', () => {
-    expect(ALL_TOOLS).toHaveLength(35);
-    expect(ACTIVE_TOOLS).toHaveLength(35);
+  it('contains exactly the 36 tools (Phase 1 + 2A-2D + Phase 3 + PDF editor + scanner + crop)', () => {
+    expect(ALL_TOOLS).toHaveLength(36);
+    expect(ACTIVE_TOOLS).toHaveLength(36);
   });
 
-  it('has 11 PDF, 15 finance and 9 image tools', () => {
-    expect(getToolsByCategory('pdf')).toHaveLength(11);
+  it('has 12 PDF, 15 finance and 9 image tools', () => {
+    expect(getToolsByCategory('pdf')).toHaveLength(12);
     expect(getToolsByCategory('finance')).toHaveLength(15);
     expect(getToolsByCategory('image')).toHaveLength(9);
   });
