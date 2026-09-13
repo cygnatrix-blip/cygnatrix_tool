@@ -5,7 +5,6 @@ import { Lock, Printer, Image as ImageIcon, FileText } from 'lucide-react';
 import { IDCARD_PDF_PRESETS, type FracBox, type IdCardKind } from '@/config/idcard-pdf-presets';
 import { CR80 } from '@/config/cr80';
 import { DropZone } from '@/components/file/DropZone';
-import { ImageCropFrame } from '@/components/file/ImageCropFrame';
 import { ProcessButton, DownloadButton, ProgressIndicator } from '@/components/file/ProcessBar';
 import { Alert } from '@/components/ui/primitives';
 import { Button } from '@/components/ui/Button';
@@ -13,10 +12,9 @@ import { cn } from '@/lib/cn';
 import { downloadBlob } from '@/lib/download';
 import { formatBytes } from '@/lib/format';
 import { track } from '@/lib/analytics/client';
-import type { CropRect } from '@/lib/image/exam-photo';
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
-const CR80_ASPECT = CR80.width / CR80.height;
+const FULL_BOX: FracBox = { x: 0, y: 0, w: 1, h: 1 };
 
 type CornerId = 'tl' | 'tr' | 'br' | 'bl';
 const CORNERS: CornerId[] = ['tl', 'tr', 'br', 'bl'];
@@ -142,10 +140,45 @@ async function canvasToOutput(canvas: HTMLCanvasElement): Promise<OutputCard> {
 interface PhotoState {
   file: File | null;
   previewUrl: string | null;
-  natural: { w: number; h: number } | null;
-  crop: CropRect | null;
+  /** Fraction of the photo to keep — defaults to the whole image (no crop). */
+  box: FracBox;
 }
-const EMPTY_PHOTO: PhotoState = { file: null, previewUrl: null, natural: null, crop: null };
+const EMPTY_PHOTO: PhotoState = { file: null, previewUrl: null, box: FULL_BOX };
+
+/** A photo of one side of the card: optional trim box (defaults to the full photo), then contain-fit to CR80. */
+function PhotoPanel({
+  title,
+  state,
+  onFiles,
+  onBoxChange,
+}: {
+  title: string;
+  state: PhotoState;
+  onFiles: (files: File[]) => void;
+  onBoxChange: (b: FracBox) => void;
+}) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  return (
+    <div className="card p-5">
+      <h3 className="mb-3 text-sm font-semibold text-ink-900 dark:text-ink-100">{title}</h3>
+      {!state.file && (
+        <DropZone onFiles={onFiles} accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple={false} hint="A clear, straight-on photo of the whole card" />
+      )}
+      {state.file && state.previewUrl && (
+        <>
+          <div ref={stageRef} className="relative select-none rounded-xl border border-ink-200 dark:border-ink-800">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={state.previewUrl} alt={title} className="block w-full touch-none rounded-xl" draggable={false} />
+            <RegionBox stageRef={stageRef} box={state.box} onChange={onBoxChange} color="#0d9089" label="Card" />
+          </div>
+          <p className="mt-2 text-center text-xs text-ink-400">
+            The whole photo is used by default. Drag the corners in only if there's background around the card to trim off.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
 
 export function IdCardPvcTool() {
   const [docType, setDocType] = useState<IdCardKind>('aadhaar');
@@ -227,29 +260,26 @@ export function IdCardPvcTool() {
   const addPhoto = (which: 'front' | 'back') => (files: File[]) => {
     const f = files[0];
     if (!f) return;
-    const url = URL.createObjectURL(f);
     const setState = which === 'front' ? setFrontPhoto : setBackPhoto;
-    setState({ file: f, previewUrl: url, natural: null, crop: null });
+    setState({ file: f, previewUrl: URL.createObjectURL(f), box: FULL_BOX });
     clearOutputs();
-    const img = new Image();
-    img.onload = () => setState((prev) => ({ ...prev, natural: { w: img.naturalWidth, h: img.naturalHeight } }));
-    img.src = url;
   };
 
+  /**
+   * The whole photo is used by default (box = full image) — contain-fit into
+   * CR80, never a forced-aspect crop. A real card's proportions rarely match
+   * CR80's exactly, so cropping to that shape can cut pieces of the card off;
+   * padding with a thin white margin instead keeps the whole card intact.
+   */
   const processPhoto = async (photo: PhotoState): Promise<HTMLCanvasElement> => {
-    if (!photo.file || !photo.crop) throw new Error('Crop both photos first.');
+    if (!photo.file) throw new Error('Add both photos first.');
     const { decodeImage } = await import('@/lib/image/canvas');
+    const { cropRegion } = await import('@/lib/idcard/region');
+    const { renderToCr80 } = await import('@/lib/idcard/compose');
     const decoded = await decodeImage(photo.file);
-    const canvas = document.createElement('canvas');
-    canvas.width = CR80.width;
-    canvas.height = CR80.height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Your browser could not create a drawing canvas.');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, CR80.width, CR80.height);
-    ctx.drawImage(decoded.bitmap, photo.crop.x, photo.crop.y, photo.crop.width, photo.crop.height, 0, 0, CR80.width, CR80.height);
+    const cropped = cropRegion(decoded.bitmap, decoded.width, decoded.height, photo.box);
     decoded.bitmap.close();
-    return canvas;
+    return renderToCr80(cropped, cropped.width, cropped.height);
   };
 
   const extractFromPdf = async () => {
@@ -308,7 +338,7 @@ export function IdCardPvcTool() {
     }
   };
 
-  const canExtractPhotos = Boolean(frontPhoto.crop && backPhoto.crop);
+  const canExtractPhotos = Boolean(frontPhoto.file && backPhoto.file);
 
   return (
     <div className="space-y-4">
@@ -415,30 +445,8 @@ export function IdCardPvcTool() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {(
-            [
-              { key: 'front' as const, title: 'Front photo', state: frontPhoto },
-              { key: 'back' as const, title: 'Back photo', state: backPhoto },
-            ]
-          ).map(({ key, title, state }) => (
-            <div key={key} className="card p-5">
-              <h3 className="mb-3 text-sm font-semibold text-ink-900 dark:text-ink-100">{title}</h3>
-              {!state.file && (
-                <DropZone onFiles={addPhoto(key)} accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple={false} hint="A clear, straight-on photo" />
-              )}
-              {state.file && state.previewUrl && state.natural && (
-                <div className="flex justify-center">
-                  <ImageCropFrame
-                    src={state.previewUrl}
-                    naturalWidth={state.natural.w}
-                    naturalHeight={state.natural.h}
-                    aspectRatio={CR80_ASPECT}
-                    onCropChange={(crop) => (key === 'front' ? setFrontPhoto : setBackPhoto)((prev) => ({ ...prev, crop }))}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
+          <PhotoPanel title="Front photo" state={frontPhoto} onFiles={addPhoto('front')} onBoxChange={(b) => setFrontPhoto((p) => ({ ...p, box: b }))} />
+          <PhotoPanel title="Back photo" state={backPhoto} onFiles={addPhoto('back')} onBoxChange={(b) => setBackPhoto((p) => ({ ...p, box: b }))} />
           <div className="flex justify-center sm:col-span-2">
             <ProcessButton onClick={extractFromPhotos} busy={!!busy} disabled={!canExtractPhotos}>
               Process front &amp; back
