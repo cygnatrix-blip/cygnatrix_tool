@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Lock, Printer, Image as ImageIcon, FileText } from 'lucide-react';
 import { IDCARD_PDF_PRESETS, type FracBox, type IdCardKind } from '@/config/idcard-pdf-presets';
 import { CR80 } from '@/config/cr80';
+import type { Cr80FitMode } from '@/lib/idcard/compose';
 import { DropZone } from '@/components/file/DropZone';
 import { ProcessButton, DownloadButton, ProgressIndicator } from '@/components/file/ProcessBar';
 import { Alert } from '@/components/ui/primitives';
@@ -184,6 +185,7 @@ export function IdCardPvcTool() {
   const [docType, setDocType] = useState<IdCardKind>('aadhaar');
   const preset = IDCARD_PDF_PRESETS[docType];
   const [inputMode, setInputMode] = useState<'pdf' | 'photos'>('pdf');
+  const [fitMode, setFitMode] = useState<Cr80FitMode>('contain');
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -279,7 +281,7 @@ export function IdCardPvcTool() {
     const decoded = await decodeImage(photo.file);
     const cropped = cropRegion(decoded.bitmap, decoded.width, decoded.height, photo.box);
     decoded.bitmap.close();
-    return renderToCr80(cropped, cropped.width, cropped.height);
+    return renderToCr80(cropped, cropped.width, cropped.height, fitMode);
   };
 
   const extractFromPdf = async () => {
@@ -293,8 +295,8 @@ export function IdCardPvcTool() {
       const frontCrop = cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, frontBox);
       const backCrop = cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, backBox);
       const [frontOut, backOut] = await Promise.all([
-        canvasToOutput(renderToCr80(frontCrop, frontCrop.width, frontCrop.height)),
-        canvasToOutput(renderToCr80(backCrop, backCrop.width, backCrop.height)),
+        canvasToOutput(renderToCr80(frontCrop, frontCrop.width, frontCrop.height, fitMode)),
+        canvasToOutput(renderToCr80(backCrop, backCrop.width, backCrop.height, fitMode)),
       ]);
       setFront(frontOut);
       setBack(backOut);
@@ -388,6 +390,45 @@ export function IdCardPvcTool() {
             <ImageIcon className="h-4 w-4" /> Photos of the printed card
           </button>
         </div>
+      </div>
+
+      <div className="card p-5">
+        <p className="mb-3 text-sm font-medium text-ink-700 dark:text-ink-200">How should it fit the PVC card?</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setFitMode('contain');
+              clearOutputs();
+            }}
+            aria-pressed={fitMode === 'contain'}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-sm font-medium transition',
+              fitMode === 'contain' ? 'bg-brand-600 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300',
+            )}
+          >
+            Fit whole card
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setFitMode('cover');
+              clearOutputs();
+            }}
+            aria-pressed={fitMode === 'cover'}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-sm font-medium transition',
+              fitMode === 'cover' ? 'bg-brand-600 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300',
+            )}
+          >
+            Fill the frame
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-ink-400">
+          {fitMode === 'contain'
+            ? 'Keeps the whole card visible — if its shape doesn\'t exactly match a PVC card, you\'ll see a thin white border. Nothing is ever cropped.'
+            : 'Fills the card edge to edge with no white border, by trimming a thin sliver off two opposite sides if the shapes don\'t match exactly. Check the preview to make sure nothing important (the photo or QR code) got trimmed.'}
+        </p>
       </div>
 
       {inputMode === 'pdf' ? (

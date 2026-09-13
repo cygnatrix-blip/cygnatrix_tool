@@ -31,11 +31,25 @@ describe('computeCr80Fit', () => {
     expect(fit.height).toBeCloseTo(CR80.height, 5);
   });
 
-  it('letterboxes a taller-than-card source without cropping it', () => {
+  it('letterboxes a taller-than-card source without cropping it ("contain")', () => {
     const fit = computeCr80Fit(500, 1000); // much taller than CR80's ~1.58:1
     expect(fit.height).toBeCloseTo(CR80.height, 5);
     expect(fit.width).toBeLessThan(CR80.width);
     expect(fit.x).toBeGreaterThan(0); // padded left/right, not cropped
+  });
+
+  it('"cover" fills the card completely, drawing past the edges instead of padding', () => {
+    const fit = computeCr80Fit(500, 1000, 'cover'); // same source as above
+    expect(fit.width).toBeGreaterThan(CR80.width - 1e-6);
+    expect(fit.height).toBeGreaterThan(CR80.height - 1e-6);
+    // it must overflow on at least one axis — that's what "no white border" requires
+    expect(fit.x <= 1e-6 || fit.y <= 1e-6).toBe(true);
+  });
+
+  it('"cover" and "contain" agree exactly when the source already matches CR80', () => {
+    const contain = computeCr80Fit(CR80.width, CR80.height, 'contain');
+    const cover = computeCr80Fit(CR80.width, CR80.height, 'cover');
+    expect(cover).toEqual(contain);
   });
 });
 
