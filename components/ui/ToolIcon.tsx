@@ -28,6 +28,7 @@ import {
   PencilLine,
   ScanLine,
   Crop,
+  CreditCard,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -60,6 +61,7 @@ const MAP: Record<string, LucideIcon> = {
   'pencil-line': PencilLine,
   'scan-line': ScanLine,
   crop: Crop,
+  'credit-card': CreditCard,
 };
 
 export function ToolIcon({ name, className }: { name: string; className?: string }) {

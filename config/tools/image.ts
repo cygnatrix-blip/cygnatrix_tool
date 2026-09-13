@@ -643,4 +643,114 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['exam-photo-signature', 'compress-to-size', 'resize-image', 'compress-image'],
   },
+  {
+    ...base,
+    id: 'id-card-photo',
+    name: 'Aadhaar, PAN & Ayushman Photo Maker',
+    slug: 'id-card-photo',
+    path: '/image/id-card-photo',
+    icon: 'credit-card',
+    toolType: 'file',
+    featured: true,
+    popular: false,
+    sortOrder: 10,
+    updatedAt: '2026-09-13',
+    shortDescription: 'Crop your photo (and signature) to the exact size for PAN, Aadhaar or Ayushman Bharat.',
+    description:
+      'Pick PAN (NSDL or UTIITSL), Aadhaar or Ayushman Bharat / PM-JAY, crop your photo — and signature, for PAN — to the exact required pixels, and compress into the required KB range automatically. A clear pass/fail check confirms every requirement before you download.',
+    keywords: [
+      'pan card photo size',
+      'pan card photo online',
+      'aadhaar photo size',
+      'ayushman bharat photo size',
+      'pan card signature size',
+      'nsdl photo size',
+      'utiitsl photo size',
+      'pmjay photo upload',
+    ],
+    seoTitle: 'Aadhaar, PAN & Ayushman Photo Maker — Exact Size Free',
+    seoDescription:
+      'Free photo (and signature) maker for PAN card (NSDL or UTIITSL), Aadhaar and Ayushman Bharat / PM-JAY — exact pixel size and file size range, with a pass/fail check. Runs in your browser, no upload, no sign-up.',
+    content: {
+      howItWorks: [
+        {
+          title: 'Pick the document',
+          body: 'PAN (NSDL), PAN (UTIITSL), Aadhaar-standard or Ayushman Bharat — each shows its exact photo (and signature, for PAN) requirement.',
+        },
+        {
+          title: 'Crop your photo',
+          body: 'Drag to position and zoom to fill the required aspect ratio exactly, on a white background. PAN also asks for a signature — crop that from a photo of your signature on plain paper.',
+        },
+        {
+          title: 'Get a pass/fail result',
+          body: 'The tool resizes to the exact pixel dimensions and searches for the file quality that lands inside the required KB range, then shows a clear pass or fail for width, height and size.',
+        },
+      ],
+      features: [
+        'PAN Card presets for both NSDL and UTIITSL — their photo requirements are different shapes',
+        'Signature crop for PAN, with paper-background whitening built in',
+        'Aadhaar-standard and Ayushman Bharat / PM-JAY photo presets',
+        'Automatic compression to hit an exact KB range, never distorting the required pixel size',
+        'Clear pass/fail check against width, height and file size',
+        'Download individually or as a ZIP',
+        'Runs entirely in your browser — nothing is uploaded',
+      ],
+      sections: [
+        {
+          heading: 'Why NSDL and UTIITSL are listed separately for PAN',
+          paragraphs: [
+            'PAN cards are issued through two authorised agencies, NSDL (now Protean) and UTIITSL, and their online forms do not ask for the same photo. NSDL wants a portrait rectangle (3.5 × 2.5 cm), while UTIITSL wants a square photo (213 × 213 px). A photo cropped correctly for one will be the wrong shape for the other, so this tool keeps them as two separate presets rather than one "PAN photo" option that would only work for half of applicants.',
+            'Both agencies ask for a signature too — photographed or scanned on plain paper, 4.5 × 2 cm — which this tool crops and lightly cleans up (stretching the paper background toward white while keeping the ink dark) before compressing to size.',
+          ],
+        },
+        {
+          heading: 'A note on Aadhaar and Ayushman Bharat',
+          paragraphs: [
+            'Unlike PAN, neither Aadhaar nor Ayushman Bharat has one fixed, universally published online-upload photo spec. Most Aadhaar updates through myAadhaar only need your existing documents (any JPEG, PNG or PDF under 2 MB) — no new photograph — and a fresh enrolment photo is captured live at an enrolment centre, not self-uploaded. Ayushman Bharat / PM-JAY registration runs through many different state portals and CSC centres, each with its own limits.',
+            'The Aadhaar and Ayushman presets here use India\'s standard 35 × 45 mm ID-photo size for the cases that do call for one — a specific form, a photo studio print, or a state portal that asks for "a passport-style photo." Always check your specific portal\'s current instructions before submitting, exactly as the notice on each preset says.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Document', value: 'PAN Card — NSDL' },
+          { label: 'Photo requirement', value: '197×276px, 4–50 KB' },
+        ],
+        result: [{ label: 'Photo result', value: '197×276px, 38 KB — passes' }],
+        walkthrough:
+          'The uploaded photo is cropped to the 197:276 portrait ratio using the position you chose, resized to exactly those pixels, then compressed to land inside the 4–50 KB range NSDL expects.',
+      },
+    },
+    faq: [
+      {
+        q: 'Which PAN preset should I use, NSDL or UTIITSL?',
+        a: 'Whichever agency\'s portal you\'re actually applying through — check the form itself, since the two require differently shaped photos (a rectangle for NSDL, a square for UTIITSL) and are not interchangeable.',
+      },
+      {
+        q: 'Do Aadhaar and Ayushman Bharat really need a photo like this?',
+        a: 'Not usually for routine Aadhaar updates (those need documents, not a photo) or for most Ayushman Bharat registrations done via live capture. This preset is for the specific cases where a form, photo studio or particular state portal does ask for a fixed-size photo.',
+      },
+      {
+        q: 'Is my photo or signature uploaded anywhere?',
+        a: 'No. Cropping, resizing, signature cleanup and compression all happen in your browser.',
+      },
+      {
+        q: 'Why does it say "couldn\'t hit every requirement"?',
+        a: 'This happens on rare, very restrictive size ranges where the required pixel dimensions can\'t be compressed into the target range without visibly damaging the image. The tool always shows you the closest possible result rather than silently failing.',
+      },
+      {
+        q: 'Can I redo the photo and signature separately?',
+        a: 'Yes — for PAN, each has its own crop and result step, so you can retake or re-crop just the signature without redoing the photo, or the other way around.',
+      },
+      {
+        q: 'What image formats can I upload?',
+        a: 'JPG, PNG or WebP for either the photo or the signature — the tool normalises both internally before cropping and compressing to the required format.',
+      },
+      {
+        q: 'How current are these specs?',
+        a: 'Each preset shows the date it was last checked and links to the relevant official site. Government portals change requirements without much notice, so confirm before you submit — the same caution this tool\'s own exam photo tool gives.',
+      },
+    ],
+    relatedTools: ['exam-photo-signature', 'passport-photo', 'compress-to-size', 'resize-image'],
+  },
 ];
