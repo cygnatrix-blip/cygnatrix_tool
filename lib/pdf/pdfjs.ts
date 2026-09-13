@@ -22,9 +22,20 @@ export async function getPdfjs() {
   return libPromise;
 }
 
-export async function loadPdfDocument(data: ArrayBuffer): Promise<PDFDocumentProxy> {
+export async function loadPdfDocument(data: ArrayBuffer, password?: string): Promise<PDFDocumentProxy> {
   const pdfjs = await getPdfjs();
-  return pdfjs.getDocument({ data, isEvalSupported: false, useSystemFonts: true }).promise;
+  return pdfjs.getDocument({ data, password, isEvalSupported: false, useSystemFonts: true }).promise;
+}
+
+/**
+ * `PasswordException.code` — matches pdfjs-dist's `PasswordResponses` enum
+ * (NEED_PASSWORD = 1, INCORRECT_PASSWORD = 2). Kept as a local literal type
+ * rather than importing the enum, since callers only ever compare against it.
+ */
+export function passwordExceptionKind(e: unknown): 'required' | 'incorrect' | null {
+  if (!(e instanceof Error) || e.name !== 'PasswordException') return null;
+  const code = (e as unknown as { code?: number }).code;
+  return code === 2 ? 'incorrect' : 'required';
 }
 
 /**

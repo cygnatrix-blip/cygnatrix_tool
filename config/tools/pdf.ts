@@ -988,4 +988,112 @@ export const PDF_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['organize-pdf', 'rotate-pdf', 'compress-pdf', 'split-pdf'],
   },
+  {
+    ...base,
+    id: 'aadhaar-ayushman-pvc',
+    name: 'Aadhaar & Ayushman PVC Card Maker',
+    slug: 'aadhaar-ayushman-pvc',
+    path: '/pdf/aadhaar-ayushman-pvc',
+    icon: 'layers',
+    featured: true,
+    popular: false,
+    sortOrder: 13,
+    updatedAt: UPDATED,
+    shortDescription: 'Pull the front and back out of your Aadhaar or Ayushman PDF, sized for PVC printing.',
+    description:
+      'Upload your official e-Aadhaar or Ayushman Bharat PDF (or photos of the printed card), drag the front and back boxes into place, and download both sides sized to a standard CR80 card at 300 DPI — plus a ready-to-print A4 sheet with both sides side by side.',
+    keywords: [
+      'aadhaar pvc card',
+      'aadhaar card front back cut',
+      'ayushman bharat pvc card',
+      'aadhaar card print size',
+      'e aadhaar crop tool',
+      'ayushman card print',
+      'cr80 card print',
+    ],
+    seoTitle: 'Aadhaar & Ayushman PVC Card Maker — Free, No Upload',
+    seoDescription:
+      'Extract the front and back of your Aadhaar or Ayushman Bharat card from the official PDF (or a photo) and get a CR80-sized, 300 DPI, print-ready A4 sheet — free, entirely in your browser, no upload.',
+    content: {
+      howItWorks: [
+        {
+          title: 'Pick your card and source',
+          body: 'Choose Aadhaar or Ayushman Bharat, then upload the official PDF you downloaded — or, if you only have the printed card, two photos of it instead.',
+        },
+        {
+          title: 'Position the front and back boxes',
+          body: 'For a PDF, two coloured boxes appear on the page with a starting guess already in place — drag or resize them so each one frames just the front or back of the card. For photos, crop each one to the card\'s shape.',
+        },
+        {
+          title: 'Download the cards or the print sheet',
+          body: 'Each side downloads as its own CR80-sized (85.6 × 54 mm, 300 DPI) JPG, or combine both onto one A4 sheet ready to print at 100% scale and cut out.',
+        },
+      ],
+      features: [
+        'Works from the official Aadhaar or Ayushman Bharat PDF, or from two photos of the printed card',
+        'Handles password-protected e-Aadhaar PDFs, with a hint for the standard password format',
+        'Draggable, resizable front/back boxes — never a rigid, unadjustable auto-crop',
+        'Outputs exact CR80 card dimensions (85.6 × 54 mm) at 300 DPI print resolution',
+        'One-click A4 sheet with both sides placed side by side and cut guides',
+        'Runs entirely in your browser — your ID document is never uploaded anywhere',
+      ],
+      sections: [
+        {
+          heading: 'Why the boxes are draggable, not automatic',
+          paragraphs: [
+            'The official e-Aadhaar PDF has a consistent layout — the card sits near the bottom of the page, front on the left and back on the right — so this tool starts with a box already positioned there. Ayushman Bharat downloads vary more between states, so its starting boxes are a rougher guess. Either way, small differences in scan quality, page margins or a template update can shift things slightly, so both boxes are always draggable and resizable rather than a fixed crop you can\'t correct.',
+            'For a photo of the printed card, the same idea applies as a locked-aspect crop frame: pan and zoom until the card fills the frame edge to edge, for the front and then the back.',
+          ],
+        },
+        {
+          heading: 'The e-Aadhaar PDF password',
+          paragraphs: [
+            'UIDAI protects e-Aadhaar downloads with a password made of the first four letters of your name in capitals, followed by your birth year — for example RAHU1990 for someone named Rahul born in 1990. If your name is shorter than four letters, use the whole name. This tool only asks you to type that password in when the PDF actually needs one; it never asks for your name or date of birth directly, and the password is used locally in your browser to open the file, never sent anywhere.',
+          ],
+        },
+        {
+          heading: 'Printing the result',
+          paragraphs: [
+            'The A4 sheet is generated at 300 DPI, the resolution most print shops and inkjet printers expect for a sharp result at real card size. Print it at 100% or "actual size" — not "fit to page", which would rescale the cards away from their true 85.6 × 54 mm dimensions — then cut along the dashed guide and laminate or slot it into a card holder.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Input', value: 'e-Aadhaar.pdf (password-protected)' },
+          { label: 'Action', value: 'Unlock, position front/back boxes, extract' },
+        ],
+        result: [{ label: 'Output', value: 'aadhaar-pvc-sheet.jpg — A4, both sides at 1011×638px' }],
+        walkthrough:
+          'After unlocking with the standard name+birth-year password, the front and back regions are cropped from the rendered page, each resized to fit a 1011×638px (CR80 at 300 DPI) card, and placed side by side on an A4 sheet with cut guides.',
+      },
+    },
+    faq: [
+      {
+        q: 'Is my Aadhaar or Ayushman PDF uploaded anywhere?',
+        a: 'No. The PDF is opened and rendered entirely in your browser, including entering the password — nothing is sent to a server at any point.',
+      },
+      {
+        q: 'What is the e-Aadhaar PDF password?',
+        a: 'The first four letters of your name in capitals, followed by your four-digit birth year (e.g. RAHU1990). If your name is under four letters, use it in full. This is set by UIDAI, not by this tool.',
+      },
+      {
+        q: 'The front/back boxes don\'t line up with my card — what do I do?',
+        a: 'Drag the corner handles to resize each box, or drag the middle to move it, until it frames just that side of the card. The starting position is only a guess based on the standard template.',
+      },
+      {
+        q: 'Can I use a photo instead of the PDF?',
+        a: 'Yes — switch to "Photos of the printed card" and upload a clear, straight-on photo of the front and one of the back. Each is cropped to the card shape with a locked-aspect crop frame.',
+      },
+      {
+        q: 'What size should I print at?',
+        a: 'Print the A4 sheet at 100% or "actual size" in your print dialog. Using "fit to page" will scale the cards away from their correct 85.6 × 54 mm size.',
+      },
+      {
+        q: 'Does this work for other ID cards?',
+        a: 'It\'s tuned for the Aadhaar and Ayushman Bharat PDF layouts specifically. For a general document, use Crop PDF or Document Scanner instead.',
+      },
+    ],
+    relatedTools: ['crop-pdf', 'document-scanner', 'id-card-photo', 'compress-pdf'],
+  },
 ];
