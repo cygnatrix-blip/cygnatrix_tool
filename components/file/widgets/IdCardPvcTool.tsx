@@ -185,7 +185,9 @@ export function IdCardPvcTool() {
   const [docType, setDocType] = useState<IdCardKind>('aadhaar');
   const preset = IDCARD_PDF_PRESETS[docType];
   const [inputMode, setInputMode] = useState<'pdf' | 'photos'>('pdf');
-  const [fitMode, setFitMode] = useState<Cr80FitMode>('contain');
+  // "Fill the frame" is the better default for a PVC card — nobody wants a
+  // white border on a physical card, and the alternative is one click away.
+  const [fitMode, setFitMode] = useState<Cr80FitMode>('cover');
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
