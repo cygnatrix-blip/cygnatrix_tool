@@ -17,6 +17,24 @@ import { track } from '@/lib/analytics/client';
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 const FULL_BOX: FracBox = { x: 0, y: 0, w: 1, h: 1 };
 
+const FIT_MODES: { id: Cr80FitMode; label: string; help: string }[] = [
+  {
+    id: 'stretch',
+    label: 'Stretch to fit',
+    help: 'Fills the card edge to edge with a mild, even squeeze if the shapes don\'t match exactly — nothing is cropped or padded, and text, numbers and the QR code stay fully readable. Recommended.',
+  },
+  {
+    id: 'cover',
+    label: 'Fill the frame',
+    help: 'Fills the card edge to edge with no distortion, by trimming a thin sliver off two opposite sides if the shapes don\'t match. Check the preview to make sure nothing important (the photo or QR code) got trimmed.',
+  },
+  {
+    id: 'contain',
+    label: 'Fit whole card',
+    help: 'Keeps the whole card visible with no cropping or distortion — if its shape doesn\'t exactly match a PVC card, you\'ll see a thin white border.',
+  },
+];
+
 type CornerId = 'tl' | 'tr' | 'br' | 'bl';
 const CORNERS: CornerId[] = ['tl', 'tr', 'br', 'bl'];
 function anchorFor(id: CornerId, box: FracBox) {
@@ -185,9 +203,11 @@ export function IdCardPvcTool() {
   const [docType, setDocType] = useState<IdCardKind>('aadhaar');
   const preset = IDCARD_PDF_PRESETS[docType];
   const [inputMode, setInputMode] = useState<'pdf' | 'photos'>('pdf');
-  // "Fill the frame" is the better default for a PVC card — nobody wants a
-  // white border on a physical card, and the alternative is one click away.
-  const [fitMode, setFitMode] = useState<Cr80FitMode>('cover');
+  // "Stretch" is the best default for a small ID card: no white border (like
+  // "contain") and no risk of cropping into edge content like a QR code or a
+  // line of text (like "cover") — just a mild, even squeeze, which stays
+  // fully legible. The other two stay one click away.
+  const [fitMode, setFitMode] = useState<Cr80FitMode>('stretch');
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -397,40 +417,25 @@ export function IdCardPvcTool() {
       <div className="card p-5">
         <p className="mb-3 text-sm font-medium text-ink-700 dark:text-ink-200">How should it fit the PVC card?</p>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setFitMode('contain');
-              clearOutputs();
-            }}
-            aria-pressed={fitMode === 'contain'}
-            className={cn(
-              'rounded-lg px-3 py-1.5 text-sm font-medium transition',
-              fitMode === 'contain' ? 'bg-brand-600 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300',
-            )}
-          >
-            Fit whole card
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setFitMode('cover');
-              clearOutputs();
-            }}
-            aria-pressed={fitMode === 'cover'}
-            className={cn(
-              'rounded-lg px-3 py-1.5 text-sm font-medium transition',
-              fitMode === 'cover' ? 'bg-brand-600 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300',
-            )}
-          >
-            Fill the frame
-          </button>
+          {FIT_MODES.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => {
+                setFitMode(m.id);
+                clearOutputs();
+              }}
+              aria-pressed={fitMode === m.id}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-sm font-medium transition',
+                fitMode === m.id ? 'bg-brand-600 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200 dark:bg-ink-800 dark:text-ink-300',
+              )}
+            >
+              {m.label}
+            </button>
+          ))}
         </div>
-        <p className="mt-2 text-xs text-ink-400">
-          {fitMode === 'contain'
-            ? 'Keeps the whole card visible — if its shape doesn\'t exactly match a PVC card, you\'ll see a thin white border. Nothing is ever cropped.'
-            : 'Fills the card edge to edge with no white border, by trimming a thin sliver off two opposite sides if the shapes don\'t match exactly. Check the preview to make sure nothing important (the photo or QR code) got trimmed.'}
-        </p>
+        <p className="mt-2 text-xs text-ink-400">{FIT_MODES.find((m) => m.id === fitMode)!.help}</p>
       </div>
 
       {inputMode === 'pdf' ? (

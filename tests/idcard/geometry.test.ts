@@ -32,7 +32,7 @@ describe('computeCr80Fit', () => {
   });
 
   it('letterboxes a taller-than-card source without cropping it ("contain")', () => {
-    const fit = computeCr80Fit(500, 1000); // much taller than CR80's ~1.58:1
+    const fit = computeCr80Fit(500, 1000, 'contain'); // much taller than CR80's ~1.58:1
     expect(fit.height).toBeCloseTo(CR80.height, 5);
     expect(fit.width).toBeLessThan(CR80.width);
     expect(fit.x).toBeGreaterThan(0); // padded left/right, not cropped
@@ -50,6 +50,15 @@ describe('computeCr80Fit', () => {
     const contain = computeCr80Fit(CR80.width, CR80.height, 'contain');
     const cover = computeCr80Fit(CR80.width, CR80.height, 'cover');
     expect(cover).toEqual(contain);
+  });
+
+  it('"stretch" always fills the exact canvas, regardless of source shape', () => {
+    expect(computeCr80Fit(500, 1000, 'stretch')).toEqual({ x: 0, y: 0, width: CR80.width, height: CR80.height });
+    expect(computeCr80Fit(3000, 100, 'stretch')).toEqual({ x: 0, y: 0, width: CR80.width, height: CR80.height });
+  });
+
+  it('is the default mode', () => {
+    expect(computeCr80Fit(500, 1000)).toEqual(computeCr80Fit(500, 1000, 'stretch'));
   });
 });
 

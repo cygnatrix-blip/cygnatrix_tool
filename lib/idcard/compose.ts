@@ -3,27 +3,36 @@
 import { CR80, A4_SHEET } from '@/config/cr80';
 import type { PixelRect } from './region';
 
-export type Cr80FitMode = 'contain' | 'cover';
+export type Cr80FitMode = 'contain' | 'cover' | 'stretch';
 
 /**
  * Pure: where a `srcW × srcH` image lands inside a CR80 canvas.
- *  - "contain" (default): scales to fit entirely inside the card, padding
- *    with a thin white margin if the source's own proportions don't exactly
- *    match CR80 — nothing is ever cropped off.
+ *  - "contain": scales to fit entirely inside the card, padding with a thin
+ *    white margin if the source's own proportions don't exactly match CR80 —
+ *    nothing is ever cropped off, but a border can show.
  *  - "cover": scales to fill the card completely, cropping a sliver off two
- *    opposite edges if needed — no white margin, at the cost of possibly
- *    trimming a little off the source.
+ *    opposite edges if needed — no white margin, but risks trimming into
+ *    edge content (a QR code or a line of text near the border).
+ *  - "stretch" (default): scales width and height independently to fill the
+ *    card exactly — no margin and nothing cropped, at the cost of a mild,
+ *    even squeeze/stretch when the source's proportions don't match CR80.
+ *    For a small ID card (a face photo plus mostly text and a QR code, both
+ *    still fully legible when evenly stretched) this is usually the best
+ *    trade-off — never losing information beats a perfectly-proportioned
+ *    photo on a card this size.
  * No canvas — testable.
  */
-export function computeCr80Fit(srcW: number, srcH: number, mode: Cr80FitMode = 'contain'): PixelRect {
-  const scale =
-    mode === 'cover' ? Math.max(CR80.width / srcW, CR80.height / srcH) : Math.min(CR80.width / srcW, CR80.height / srcH);
+export function computeCr80Fit(srcW: number, srcH: number, mode: Cr80FitMode = 'stretch'): PixelRect {
+  if (mode === 'stretch') {
+    return { x: 0, y: 0, width: CR80.width, height: CR80.height };
+  }
+  const scale = mode === 'cover' ? Math.max(CR80.width / srcW, CR80.height / srcH) : Math.min(CR80.width / srcW, CR80.height / srcH);
   const width = srcW * scale;
   const height = srcH * scale;
   return { x: (CR80.width - width) / 2, y: (CR80.height - height) / 2, width, height };
 }
 
-export function renderToCr80(source: CanvasImageSource, srcW: number, srcH: number, mode: Cr80FitMode = 'contain'): HTMLCanvasElement {
+export function renderToCr80(source: CanvasImageSource, srcW: number, srcH: number, mode: Cr80FitMode = 'stretch'): HTMLCanvasElement {
   const fit = computeCr80Fit(srcW, srcH, mode);
   const canvas = document.createElement('canvas');
   canvas.width = CR80.width;
@@ -34,6 +43,8 @@ export function renderToCr80(source: CanvasImageSource, srcW: number, srcH: numb
   ctx.fillRect(0, 0, CR80.width, CR80.height);
   // "cover" draws larger than the canvas on purpose — drawImage clips to the
   // canvas bounds automatically, which is exactly the crop-to-fill behaviour.
+  // "stretch" always draws the whole source into exactly CR80.width×height,
+  // which is a non-uniform scale whenever the source aspect isn't 1011:638.
   ctx.drawImage(source, fit.x, fit.y, fit.width, fit.height);
   return canvas;
 }
