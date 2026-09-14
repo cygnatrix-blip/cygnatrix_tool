@@ -511,18 +511,23 @@ export function IdCardPvcTool() {
           <Alert tone="success" className="mb-4">
             Front and back are ready — {CR80.width}×{CR80.height}px each (CR80, 300 DPI).
           </Alert>
-          <div className="mb-4 flex flex-wrap justify-center gap-6">
+          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="text-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={front.url} alt="Front" className="h-32 rounded-lg border border-ink-200 shadow-sm dark:border-ink-800" />
+              <img src={front.url} alt="Front" className="mx-auto w-full max-w-sm rounded-lg border border-ink-200 shadow-sm dark:border-ink-800" />
               <p className="mt-1 text-xs text-ink-400">Front — {formatBytes(front.bytes)}</p>
             </div>
             <div className="text-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={back.url} alt="Back" className="h-32 rounded-lg border border-ink-200 shadow-sm dark:border-ink-800" />
+              <img src={back.url} alt="Back" className="mx-auto w-full max-w-sm rounded-lg border border-ink-200 shadow-sm dark:border-ink-800" />
               <p className="mt-1 text-xs text-ink-400">Back — {formatBytes(back.bytes)}</p>
             </div>
           </div>
+          <p className="mb-4 text-center text-xs text-ink-400">
+            This preview is shown at the card's true 1011×638px shape — the frame is CR80's own proportions, narrower
+            relative to its height than most card graphics. Look for a white bar at any edge: with "Stretch to fit" or
+            "Fill the frame" there shouldn't be one.
+          </p>
           <div className="flex flex-wrap justify-center gap-2">
             <DownloadButton onClick={() => downloadBlob(front.blob, `${docType}-front.jpg`)}>Download front</DownloadButton>
             <DownloadButton onClick={() => downloadBlob(back.blob, `${docType}-back.jpg`)}>Download back</DownloadButton>
