@@ -189,11 +189,25 @@ async function detectCardBox(file: File, setState: (updater: (prev: PhotoState) 
     if (result) {
       const xs = result.quad.map((p) => p.x / w);
       const ys = result.quad.map((p) => p.y / h);
+      const rawX = Math.min(...xs);
+      const rawY = Math.min(...ys);
+      const rawW = Math.max(...xs) - Math.min(...xs);
+      const rawH = Math.max(...ys) - Math.min(...ys);
+      // Detected edges sit right at the card's boundary, sometimes with a
+      // sliver of background still inside due to blur/anti-aliasing at the
+      // edge. Every fit mode (including "stretch") draws exactly what's
+      // inside this box, so that sliver would otherwise get stretched into a
+      // visible band across the whole card. Biasing a couple of percent
+      // inward trades an imperceptible edge trim for guaranteeing no
+      // background ever shows on the final card.
+      const inset = 0.02;
+      const insetX = rawW * inset;
+      const insetY = rawH * inset;
       const box: FracBox = {
-        x: clamp01(Math.min(...xs)),
-        y: clamp01(Math.min(...ys)),
-        w: Math.max(...xs) - Math.min(...xs),
-        h: Math.max(...ys) - Math.min(...ys),
+        x: clamp01(rawX + insetX),
+        y: clamp01(rawY + insetY),
+        w: Math.max(0.01, rawW - insetX * 2),
+        h: Math.max(0.01, rawH - insetY * 2),
       };
       setState((prev) => (prev.boxSource === 'manual' ? prev : { ...prev, box, boxSource: 'detected', detecting: false }));
       return;
