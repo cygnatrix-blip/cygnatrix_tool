@@ -156,15 +156,72 @@ async function canvasToOutput(canvas: HTMLCanvasElement): Promise<OutputCard> {
   return { canvas, blob, url: URL.createObjectURL(blob), bytes: blob.size };
 }
 
+type BoxSource = 'full' | 'detected' | 'manual';
+
+/**
+ * Finds the card's edges within an uploaded photo (reusing the same detector
+ * as Document Scanner) and, if found, tightens the default crop to just the
+ * card. Otherwise leaves the default at the whole photo. This matters: any
+ * background/desk visible around the card in the photo gets stretched or
+ * padded right along with the card by every fit mode, since none of them can
+ * tell "card" from "background" on their own — only a tighter crop can.
+ */
+async function detectCardBox(file: File, setState: (updater: (prev: PhotoState) => PhotoState) => void): Promise<void> {
+  try {
+    const [{ decodeImage }, { detectDocument }] = await Promise.all([
+      import('@/lib/image/canvas'),
+      import('@/lib/scanner/detect'),
+    ]);
+    const decoded = await decodeImage(file);
+    const scale = Math.min(1, 640 / Math.max(decoded.width, decoded.height));
+    const w = Math.max(1, Math.round(decoded.width * scale));
+    const h = Math.max(1, Math.round(decoded.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('no 2d context');
+    ctx.drawImage(decoded.bitmap, 0, 0, w, h);
+    const { data } = ctx.getImageData(0, 0, w, h);
+    decoded.bitmap.close();
+
+    const result = detectDocument(data, w, h);
+    if (result) {
+      const xs = result.quad.map((p) => p.x / w);
+      const ys = result.quad.map((p) => p.y / h);
+      const box: FracBox = {
+        x: clamp01(Math.min(...xs)),
+        y: clamp01(Math.min(...ys)),
+        w: Math.max(...xs) - Math.min(...xs),
+        h: Math.max(...ys) - Math.min(...ys),
+      };
+      setState((prev) => (prev.boxSource === 'manual' ? prev : { ...prev, box, boxSource: 'detected', detecting: false }));
+      return;
+    }
+  } catch {
+    /* detection is best-effort — fall through to the full-image default */
+  }
+  setState((prev) => (prev.boxSource === 'manual' ? prev : { ...prev, detecting: false }));
+}
+
 interface PhotoState {
   file: File | null;
   previewUrl: string | null;
-  /** Fraction of the photo to keep — defaults to the whole image (no crop). */
+  /** Fraction of the photo to keep. */
   box: FracBox;
+  /** Where `box` came from — drives the caption; 'manual' once the user drags a handle. */
+  boxSource: BoxSource;
+  detecting: boolean;
 }
-const EMPTY_PHOTO: PhotoState = { file: null, previewUrl: null, box: FULL_BOX };
+const EMPTY_PHOTO: PhotoState = { file: null, previewUrl: null, box: FULL_BOX, boxSource: 'full', detecting: false };
 
-/** A photo of one side of the card: optional trim box (defaults to the full photo), then contain-fit to CR80. */
+const BOX_CAPTION: Record<BoxSource, string> = {
+  full: 'No card edges were detected, so the whole photo is used. Drag the corners in if there\'s background around the card to trim off.',
+  detected: 'The card\'s edges were detected automatically. Drag the corners if this isn\'t quite right.',
+  manual: 'Drag the corners to adjust which part of the photo is used.',
+};
+
+/** A photo of one side of the card: an auto-detected (or full-image) trim box, then fit to CR80. */
 function PhotoPanel({
   title,
   state,
@@ -191,7 +248,7 @@ function PhotoPanel({
             <RegionBox stageRef={stageRef} box={state.box} onChange={onBoxChange} color="#0d9089" label="Card" />
           </div>
           <p className="mt-2 text-center text-xs text-ink-400">
-            The whole photo is used by default. Drag the corners in only if there's background around the card to trim off.
+            {state.detecting ? 'Finding the card\'s edges…' : BOX_CAPTION[state.boxSource]}
           </p>
         </>
       )}
@@ -285,8 +342,9 @@ export function IdCardPvcTool() {
     const f = files[0];
     if (!f) return;
     const setState = which === 'front' ? setFrontPhoto : setBackPhoto;
-    setState({ file: f, previewUrl: URL.createObjectURL(f), box: FULL_BOX });
+    setState({ file: f, previewUrl: URL.createObjectURL(f), box: FULL_BOX, boxSource: 'full', detecting: true });
     clearOutputs();
+    void detectCardBox(f, setState);
   };
 
   /**
@@ -493,8 +551,8 @@ export function IdCardPvcTool() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          <PhotoPanel title="Front photo" state={frontPhoto} onFiles={addPhoto('front')} onBoxChange={(b) => setFrontPhoto((p) => ({ ...p, box: b }))} />
-          <PhotoPanel title="Back photo" state={backPhoto} onFiles={addPhoto('back')} onBoxChange={(b) => setBackPhoto((p) => ({ ...p, box: b }))} />
+          <PhotoPanel title="Front photo" state={frontPhoto} onFiles={addPhoto('front')} onBoxChange={(b) => setFrontPhoto((p) => ({ ...p, box: b, boxSource: 'manual' }))} />
+          <PhotoPanel title="Back photo" state={backPhoto} onFiles={addPhoto('back')} onBoxChange={(b) => setBackPhoto((p) => ({ ...p, box: b, boxSource: 'manual' }))} />
           <div className="flex justify-center sm:col-span-2">
             <ProcessButton onClick={extractFromPhotos} busy={!!busy} disabled={!canExtractPhotos}>
               Process front &amp; back
