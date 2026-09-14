@@ -313,20 +313,28 @@ export function IdCardPvcTool() {
     setBackBox(preset.back);
     clearOutputs();
     setError(null);
+    void loadPage(undefined, f);
   };
 
-  const loadPage = async (pw?: string) => {
-    if (!pdfFile) return;
+  // Takes an explicit file rather than only reading the `pdfFile` state, since
+  // the very first call happens from onPdfFile right after setPdfFile() — a
+  // state update that hasn't landed yet in this closure.
+  const loadPage = async (pw: string | undefined, fileOverride?: File) => {
+    const file = fileOverride ?? pdfFile;
+    if (!file) return;
     setBusy('Reading PDF…');
     setError(null);
     try {
-      const { renderPdfPage1 } = await import('@/lib/idcard/pdf-page');
       const timeout = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error(
           'This is taking much longer than it should. Please reload this page (a fresh tab, not just this one) and try again — if it still gets stuck, the PDF itself may be the problem.',
         )), 25000);
       });
-      const outcome = await Promise.race([renderPdfPage1(pdfFile, { password: pw }), timeout]);
+      const work = (async () => {
+        const { renderPdfPage1 } = await import('@/lib/idcard/pdf-page');
+        return renderPdfPage1(file, { password: pw });
+      })();
+      const outcome = await Promise.race([work, timeout]);
       if (outcome.status === 'password') {
         setPasswordState(outcome.kind);
         return;
