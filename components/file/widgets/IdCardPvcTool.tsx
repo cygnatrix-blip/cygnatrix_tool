@@ -189,25 +189,11 @@ async function detectCardBox(file: File, setState: (updater: (prev: PhotoState) 
     if (result) {
       const xs = result.quad.map((p) => p.x / w);
       const ys = result.quad.map((p) => p.y / h);
-      const rawX = Math.min(...xs);
-      const rawY = Math.min(...ys);
-      const rawW = Math.max(...xs) - Math.min(...xs);
-      const rawH = Math.max(...ys) - Math.min(...ys);
-      // Detected edges sit right at the card's boundary, sometimes with a
-      // sliver of background still inside due to blur/anti-aliasing at the
-      // edge. Every fit mode (including "stretch") draws exactly what's
-      // inside this box, so that sliver would otherwise get stretched into a
-      // visible band across the whole card. Biasing a couple of percent
-      // inward trades an imperceptible edge trim for guaranteeing no
-      // background ever shows on the final card.
-      const inset = 0.02;
-      const insetX = rawW * inset;
-      const insetY = rawH * inset;
       const box: FracBox = {
-        x: clamp01(rawX + insetX),
-        y: clamp01(rawY + insetY),
-        w: Math.max(0.01, rawW - insetX * 2),
-        h: Math.max(0.01, rawH - insetY * 2),
+        x: clamp01(Math.min(...xs)),
+        y: clamp01(Math.min(...ys)),
+        w: Math.max(...xs) - Math.min(...xs),
+        h: Math.max(...ys) - Math.min(...ys),
       };
       setState((prev) => (prev.boxSource === 'manual' ? prev : { ...prev, box, boxSource: 'detected', detecting: false }));
       return;
@@ -375,18 +361,18 @@ export function IdCardPvcTool() {
   };
 
   /**
-   * The whole photo is used by default (box = full image) — contain-fit into
-   * CR80, never a forced-aspect crop. A real card's proportions rarely match
-   * CR80's exactly, so cropping to that shape can cut pieces of the card off;
-   * padding with a thin white margin instead keeps the whole card intact.
+   * The selection only has to be roughly right: any blank margin left inside
+   * it is trimmed off before the card is fitted, so the card itself — not the
+   * background around it — is what reaches the card's edges.
    */
   const processPhoto = async (photo: PhotoState): Promise<HTMLCanvasElement> => {
     if (!photo.file) throw new Error('Add both photos first.');
     const { decodeImage } = await import('@/lib/image/canvas');
     const { cropRegion } = await import('@/lib/idcard/region');
+    const { trimBlankBorder } = await import('@/lib/idcard/trim');
     const { renderToCr80 } = await import('@/lib/idcard/compose');
     const decoded = await decodeImage(photo.file);
-    const cropped = cropRegion(decoded.bitmap, decoded.width, decoded.height, photo.box);
+    const cropped = trimBlankBorder(cropRegion(decoded.bitmap, decoded.width, decoded.height, photo.box));
     decoded.bitmap.close();
     return renderToCr80(cropped, cropped.width, cropped.height, fitMode);
   };
@@ -398,9 +384,10 @@ export function IdCardPvcTool() {
     setSheet(null);
     try {
       const { cropRegion } = await import('@/lib/idcard/region');
+      const { trimBlankBorder } = await import('@/lib/idcard/trim');
       const { renderToCr80 } = await import('@/lib/idcard/compose');
-      const frontCrop = cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, frontBox);
-      const backCrop = cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, backBox);
+      const frontCrop = trimBlankBorder(cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, frontBox));
+      const backCrop = trimBlankBorder(cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, backBox));
       const [frontOut, backOut] = await Promise.all([
         canvasToOutput(renderToCr80(frontCrop, frontCrop.width, frontCrop.height, fitMode)),
         canvasToOutput(renderToCr80(backCrop, backCrop.width, backCrop.height, fitMode)),
