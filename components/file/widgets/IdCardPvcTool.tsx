@@ -321,7 +321,12 @@ export function IdCardPvcTool() {
     setError(null);
     try {
       const { renderPdfPage1 } = await import('@/lib/idcard/pdf-page');
-      const outcome = await renderPdfPage1(pdfFile, { password: pw });
+      const timeout = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(
+          'This is taking much longer than it should. Please reload this page (a fresh tab, not just this one) and try again — if it still gets stuck, the PDF itself may be the problem.',
+        )), 25000);
+      });
+      const outcome = await Promise.race([renderPdfPage1(pdfFile, { password: pw }), timeout]);
       if (outcome.status === 'password') {
         setPasswordState(outcome.kind);
         return;
