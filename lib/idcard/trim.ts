@@ -21,35 +21,37 @@ function pixelIsBlank(data: Uint8ClampedArray, i: number, threshold: number): bo
   return Math.min(r, g, b) >= threshold;
 }
 
-function rowIsBlank(data: Uint8ClampedArray, width: number, y: number, x0: number, x1: number, threshold: number): boolean {
+function rowIsBlank(data: Uint8ClampedArray, width: number, y: number, threshold: number): boolean {
   let blank = 0;
-  for (let x = x0; x <= x1; x += 1) {
+  for (let x = 0; x < width; x += 1) {
     if (pixelIsBlank(data, (y * width + x) * 4, threshold)) blank += 1;
   }
-  return blank >= (x1 - x0 + 1) * BLANK_LINE_RATIO;
+  return blank >= width * BLANK_LINE_RATIO;
 }
 
-function colIsBlank(data: Uint8ClampedArray, width: number, x: number, y0: number, y1: number, threshold: number): boolean {
+function colIsBlank(data: Uint8ClampedArray, width: number, height: number, x: number, threshold: number): boolean {
   let blank = 0;
-  for (let y = y0; y <= y1; y += 1) {
+  for (let y = 0; y < height; y += 1) {
     if (pixelIsBlank(data, (y * width + x) * 4, threshold)) blank += 1;
   }
-  return blank >= (y1 - y0 + 1) * BLANK_LINE_RATIO;
+  return blank >= height * BLANK_LINE_RATIO;
 }
 
 /**
- * Pure: the bounds of the actual content inside an RGBA raster, found by
- * shaving off blank (near-white) rows and columns from each edge.
+ * Pure: the region worth keeping inside an RGBA raster.
  *
- * This is what lets a rough selection still fill the card exactly. Every fit
- * mode draws precisely what it is given, so a blank margin left inside a crop
- * box — page white around a card printed on a PDF, or desk/background around a
- * photographed card — would otherwise be stretched right along with the card
- * and show up as a white band. Trimming it first means the card itself is what
- * gets stretched to the card's edges.
+ * Only removes **letterboxing** — blank bands on one axis with the content
+ * running edge to edge on the other. That is the shape background padding
+ * takes when a card of one proportion is placed in a frame of another, and
+ * stretching it along with the card is what produced visible white bands.
  *
- * Falls back to the full rect when the scan collapses (an entirely blank
- * image), so a misfire can never produce a sliver.
+ * A blank margin on all four sides is deliberately left alone: that is a
+ * border, and a card's own design often has one (the Ayushman back is white
+ * with a quiet margin around its text and QR code). Shaving it off and then
+ * stretching makes the card bleed off every edge, which reads as the content
+ * being cropped. Background can look identical to a design margin pixel for
+ * pixel, so when it is ambiguous the card is left intact — a visible border
+ * the user can crop away beats silently destroying the card's own layout.
  */
 export function findContentBounds(
   data: Uint8ClampedArray,
@@ -62,17 +64,25 @@ export function findContentBounds(
 
   let top = 0;
   let bottom = height - 1;
-  while (top < bottom && rowIsBlank(data, width, top, 0, width - 1, threshold)) top += 1;
-  while (bottom > top && rowIsBlank(data, width, bottom, 0, width - 1, threshold)) bottom -= 1;
+  while (top < bottom && rowIsBlank(data, width, top, threshold)) top += 1;
+  while (bottom > top && rowIsBlank(data, width, bottom, threshold)) bottom -= 1;
 
   let left = 0;
   let right = width - 1;
-  while (left < right && colIsBlank(data, width, left, top, bottom, threshold)) left += 1;
-  while (right > left && colIsBlank(data, width, right, top, bottom, threshold)) right -= 1;
+  while (left < right && colIsBlank(data, width, height, left, threshold)) left += 1;
+  while (right > left && colIsBlank(data, width, height, right, threshold)) right -= 1;
 
-  const kept: PixelRect = { x: left, y: top, width: right - left + 1, height: bottom - top + 1 };
-  if (kept.width < width * MIN_KEPT_FRACTION || kept.height < height * MIN_KEPT_FRACTION) return full;
-  return kept;
+  const banded = { top: top > 0, bottom: bottom < height - 1, left: left > 0, right: right < width - 1 };
+
+  if (banded.top && banded.bottom && !banded.left && !banded.right) {
+    const kept: PixelRect = { x: 0, y: top, width, height: bottom - top + 1 };
+    return kept.height < height * MIN_KEPT_FRACTION ? full : kept;
+  }
+  if (banded.left && banded.right && !banded.top && !banded.bottom) {
+    const kept: PixelRect = { x: left, y: 0, width: right - left + 1, height };
+    return kept.width < width * MIN_KEPT_FRACTION ? full : kept;
+  }
+  return full;
 }
 
 /** Returns the source untouched when there is no blank margin to remove. */

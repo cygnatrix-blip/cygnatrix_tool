@@ -34,15 +34,40 @@ describe('findContentBounds', () => {
     expect(bounds.width).toBe(width);
   });
 
-  it('trims a margin on all four sides', () => {
+  it('trims blank bands on the left and right when content spans the full height', () => {
+    const width = 60;
+    const height = 40;
+    const data = raster(width, height, (y, x) => (x < 5 || x >= width - 8 ? WHITE : ORANGE));
+
+    const bounds = findContentBounds(data, width, height);
+    expect(bounds).toEqual({ x: 5, y: 0, width: width - 8 - 5, height });
+  });
+
+  it("leaves a border on all four sides alone — that is the card's own margin", () => {
+    // The Ayushman back: white card with a quiet margin around its content.
+    // Shaving this off and stretching makes the text and QR bleed off every
+    // edge, which reads as the card being cropped.
     const width = 60;
     const height = 40;
     const data = raster(width, height, (y, x) =>
       y >= 4 && y < height - 5 && x >= 3 && x < width - 7 ? ORANGE : WHITE,
     );
 
-    const bounds = findContentBounds(data, width, height);
-    expect(bounds).toEqual({ x: 3, y: 4, width: width - 7 - 3, height: height - 5 - 4 });
+    expect(findContentBounds(data, width, height)).toEqual({ x: 0, y: 0, width, height });
+  });
+
+  it("keeps the real back card's margin profile intact (58/63px sides, 19px bottom)", () => {
+    // Measured from the reported file: blank on left, right and bottom but not
+    // top — a border, not letterboxing, so nothing should be removed.
+    const width = 200;
+    const height = 100;
+    const data = raster(width, height, (y, x) => {
+      if (y === 0 && x > 90 && x < 110) return [20, 20, 20]; // the dark sliver along the top edge
+      const inset = x >= 9 && x < width - 10 && y < height - 3;
+      return inset ? ORANGE : WHITE;
+    });
+
+    expect(findContentBounds(data, width, height)).toEqual({ x: 0, y: 0, width, height });
   });
 
   it('never eats a coloured band — bright orange is not margin', () => {
@@ -68,10 +93,12 @@ describe('findContentBounds', () => {
     const height = 40;
     const data = raster(width, height, (y, x) => {
       if (y === 2 && x === 120) return [40, 40, 40]; // a single dark noise pixel
-      return y < 5 ? WHITE : ORANGE;
+      return y < 5 || y >= height - 6 ? WHITE : ORANGE;
     });
 
-    expect(findContentBounds(data, width, height).y).toBe(5);
+    const bounds = findContentBounds(data, width, height);
+    expect(bounds.y).toBe(5);
+    expect(bounds.height).toBe(height - 6 - 5);
   });
 
   it('falls back to the full rect for an entirely blank image', () => {
