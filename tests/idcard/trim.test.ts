@@ -44,11 +44,11 @@ describe('findContentBounds', () => {
     expect(bounds).toEqual({ x: 5, y: 0, width: width - 8 - 5, height });
   });
 
-  it("leaves a sparse text boundary alone — that is the card's own margin", () => {
-    // The Ayushman back: a white card whose content is text and a QR code, with
-    // a quiet margin around it. Measured on the real file, the first inked line
-    // inside that margin covers only 1–5% of the edge. Pulling in to it and
-    // stretching makes the content bleed off every edge, reading as cropped.
+  it('trims down to sparse text content too, leaving no white anywhere', () => {
+    // The Ayushman back: a white card whose content is text and a QR code with
+    // a margin around it. That margin is removed as well — filling completely
+    // is preferred over keeping it, even though it means the text ends up
+    // flush with the card's edge.
     const width = 200;
     const height = 100;
     const data = raster(width, height, (y, x) => {
@@ -58,24 +58,27 @@ describe('findContentBounds', () => {
       return insideMargin && isTextRow && isGlyph ? INK : WHITE;
     });
 
-    expect(findContentBounds(data, width, height)).toEqual({ x: 0, y: 0, width, height });
+    // Pulled in on all four sides, down to the glyphs themselves.
+    const bounds = findContentBounds(data, width, height);
+    expect(bounds.y).toBeGreaterThanOrEqual(8);
+    expect(bounds.x).toBeGreaterThanOrEqual(10);
+    expect(bounds.x + bounds.width).toBeLessThan(width);
+    expect(bounds.y + bounds.height).toBeLessThan(height);
   });
 
-  it('still trims when only one side has a dense card edge', () => {
-    // Each side is judged on its own: a solid band at the bottom is the card's
-    // edge, while the sparse text boundary at the top is not.
+  it('trims each side independently', () => {
     const width = 200;
     const height = 100;
-    const data = raster(width, height, (y, x) => {
-      if (y >= height - 12 && y < height - 4) return ORANGE; // full-width band
-      if (y >= height - 4) return WHITE; // blank below the band
-      const isText = y >= 20 && y % 6 < 2 && x % 7 < 3 && x >= 10 && x < width - 10;
-      return isText ? INK : WHITE;
-    });
+    const data = raster(width, height, (y, x) =>
+      y >= 6 && y < height - 4 && x >= 3 && x < width - 9 ? ORANGE : WHITE,
+    );
 
-    const bounds = findContentBounds(data, width, height);
-    expect(bounds.y).toBe(0); // sparse top boundary — left alone
-    expect(bounds.height).toBe(height - 4); // dense bottom band — trimmed to it
+    expect(findContentBounds(data, width, height)).toEqual({
+      x: 3,
+      y: 6,
+      width: width - 9 - 3,
+      height: height - 4 - 6,
+    });
   });
 
   it('never eats a coloured band — bright orange is not margin', () => {

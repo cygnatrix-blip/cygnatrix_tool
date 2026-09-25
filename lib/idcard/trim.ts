@@ -11,14 +11,6 @@ import type { PixelRect } from './region';
 const BLANK_CHANNEL_MIN = 244;
 /** A stray speck or JPEG noise shouldn't save an otherwise-blank line. */
 const BLANK_MAX_INK = 0.01;
-/**
- * How much of a line must be inked for it to read as the card's own edge.
- * Measured on real cards: an Ayushman front's coloured band runs the full
- * width (~100%), while the back's first inked line inside its margin is text
- * or a QR code (1–5%). Anything sparse is content, and the blank around it is
- * the card's own quiet margin, not background.
- */
-const EDGE_DENSITY_MIN = 0.5;
 /** Below this the trim is treated as a misfire (e.g. an all-blank image). */
 const MIN_KEPT_FRACTION = 0.1;
 
@@ -37,25 +29,28 @@ function rowInk(data: Uint8ClampedArray, width: number, y: number, threshold: nu
   return ink / width;
 }
 
-function colInk(data: Uint8ClampedArray, width: number, height: number, x: number, threshold: number): number {
+function colInk(data: Uint8ClampedArray, width: number, x: number, y0: number, y1: number, threshold: number): number {
   let ink = 0;
-  for (let y = 0; y < height; y += 1) {
+  for (let y = y0; y <= y1; y += 1) {
     if (!pixelIsBlank(data, (y * width + x) * 4, threshold)) ink += 1;
   }
-  return ink / height;
+  return ink / (y1 - y0 + 1);
 }
 
 /**
- * Pure: the region worth keeping inside an RGBA raster.
+ * Pure: the bounds of the inked content inside an RGBA raster.
  *
- * Blank background and a card's own quiet margin are identical pixel for
- * pixel, so the two are told apart by what the trim would stop *at*. A side is
- * only pulled in when the first inked line there spans most of that edge —
- * the signature of the card's own boundary, like the coloured band running the
- * full width of an Ayushman front. When the boundary is sparse it is text or a
- * QR code, meaning the blank around it belongs to the card's design; pulling
- * in to it and then stretching would make the content bleed off the edge and
- * read as cropped. Each side is decided independently.
+ * Every blank edge is removed, so the content reaches the card's edges with no
+ * white left anywhere — the explicitly chosen behaviour, preferred over
+ * keeping a print-safe margin. The consequence is accepted rather than
+ * overlooked: content ends up flush with the edge, so a card printed and cut
+ * from this can lose a hair of whatever sits at the boundary.
+ *
+ * Note this cannot distinguish background from a card's own quiet margin —
+ * they are identical pixel for pixel — so a design margin is removed too.
+ * Attempts to tell them apart by shape, and by how densely the boundary line
+ * is inked, both misfired on real cards; filling completely is what was asked
+ * for and is at least predictable.
  */
 export function findContentBounds(
   data: Uint8ClampedArray,
@@ -73,13 +68,8 @@ export function findContentBounds(
 
   let left = 0;
   let right = width - 1;
-  while (left < right && colInk(data, width, height, left, threshold) <= BLANK_MAX_INK) left += 1;
-  while (right > left && colInk(data, width, height, right, threshold) <= BLANK_MAX_INK) right -= 1;
-
-  if (top > 0 && rowInk(data, width, top, threshold) < EDGE_DENSITY_MIN) top = 0;
-  if (bottom < height - 1 && rowInk(data, width, bottom, threshold) < EDGE_DENSITY_MIN) bottom = height - 1;
-  if (left > 0 && colInk(data, width, height, left, threshold) < EDGE_DENSITY_MIN) left = 0;
-  if (right < width - 1 && colInk(data, width, height, right, threshold) < EDGE_DENSITY_MIN) right = width - 1;
+  while (left < right && colInk(data, width, left, top, bottom, threshold) <= BLANK_MAX_INK) left += 1;
+  while (right > left && colInk(data, width, right, top, bottom, threshold) <= BLANK_MAX_INK) right -= 1;
 
   const kept: PixelRect = { x: left, y: top, width: right - left + 1, height: bottom - top + 1 };
   if (kept.width < width * MIN_KEPT_FRACTION || kept.height < height * MIN_KEPT_FRACTION) return full;
