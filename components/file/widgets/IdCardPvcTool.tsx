@@ -30,8 +30,8 @@ const FIT_MODES: { id: Cr80FitMode; label: string; help: string }[] = [
   },
   {
     id: 'contain',
-    label: 'Fit whole card',
-    help: 'Keeps the whole card visible with no cropping or distortion — if its shape doesn\'t exactly match a PVC card, you\'ll see a thin white border.',
+    label: 'Fit whole card (adds white bands)',
+    help: 'The only mode that adds white. Keeps the whole card visible with no cropping or distortion, but pads the difference in shape with white — on a typical card that is a band of roughly 10% of the height above and below, not a hair-thin edge. Pick "Stretch to fit" if you want no white at all.',
   },
 ];
 

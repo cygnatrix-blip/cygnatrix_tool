@@ -112,6 +112,37 @@ describe('findContentBounds', () => {
     expect(bounds.height).toBe(height - 6 - 5);
   });
 
+  it('trims a JPEG-noisy near-white band, not just a flat white one', () => {
+    // Measured on a real card JPEG: the white band averages 250, but only ~98%
+    // of its pixels are flat white — the rest is compression ringing just under
+    // white. Counting that as content is what left the band in the output.
+    const width = 200;
+    const height = 100;
+    const noisy = (x: number): [number, number, number] => {
+      if (x % 50 === 0) return [228, 230, 231]; // ringing
+      if (x % 17 === 0) return [247, 248, 248];
+      return [255, 255, 255];
+    };
+    const data = raster(width, height, (y, x) =>
+      y < 20 || y >= height - 15 ? noisy(x) : ORANGE,
+    );
+
+    const bounds = findContentBounds(data, width, height);
+    expect(bounds.y).toBe(20);
+    expect(bounds.height).toBe(height - 15 - 20);
+  });
+
+  it('still treats genuinely dark pixels in a margin as content', () => {
+    const width = 200;
+    const height = 100;
+    const data = raster(width, height, (y, x) => {
+      if (y === 4 && x >= 20 && x < 120) return INK; // a real line of content
+      return y < 20 || y >= height - 15 ? WHITE : ORANGE;
+    });
+
+    expect(findContentBounds(data, width, height).y).toBe(4);
+  });
+
   it('falls back to the full rect for an entirely blank image', () => {
     const width = 25;
     const height = 25;

@@ -3,36 +3,41 @@
 import type { PixelRect } from './region';
 
 /**
- * A pixel counts as blank when every channel is near-white. Checking the
- * darkest channel (rather than average brightness) is what keeps a coloured
- * band out of it — the orange header on an Ayushman card is bright overall,
- * but its blue channel is low, so it is never mistaken for margin.
+ * Only a pixel clearly darker than paper counts as content. Measured on a real
+ * white band from a card JPEG: it averages 250 but only 98% of its pixels are
+ * a flat 255 — the rest is compression ringing and anti-aliasing sitting just
+ * under white. Treating any non-white pixel as content left those bands in
+ * place, so the gap between this and white is read as noise, not ink.
+ *
+ * Judged on the darkest channel rather than overall brightness, which is what
+ * keeps a coloured band out of it — an Ayushman front's orange is bright, but
+ * its blue channel is low, so it always registers as ink.
  */
-const BLANK_CHANNEL_MIN = 244;
-/** A stray speck or JPEG noise shouldn't save an otherwise-blank line. */
+const INK_CHANNEL_MAX = 200;
+/** A stray speck shouldn't save an otherwise-blank line. */
 const BLANK_MAX_INK = 0.01;
 /** Below this the trim is treated as a misfire (e.g. an all-blank image). */
 const MIN_KEPT_FRACTION = 0.1;
 
-function pixelIsBlank(data: Uint8ClampedArray, i: number, threshold: number): boolean {
+function pixelIsInk(data: Uint8ClampedArray, i: number, inkMax: number): boolean {
   const r = data[i] ?? 0;
   const g = data[i + 1] ?? 0;
   const b = data[i + 2] ?? 0;
-  return Math.min(r, g, b) >= threshold;
+  return Math.min(r, g, b) < inkMax;
 }
 
-function rowInk(data: Uint8ClampedArray, width: number, y: number, threshold: number): number {
+function rowInk(data: Uint8ClampedArray, width: number, y: number, inkMax: number): number {
   let ink = 0;
   for (let x = 0; x < width; x += 1) {
-    if (!pixelIsBlank(data, (y * width + x) * 4, threshold)) ink += 1;
+    if (pixelIsInk(data, (y * width + x) * 4, inkMax)) ink += 1;
   }
   return ink / width;
 }
 
-function colInk(data: Uint8ClampedArray, width: number, x: number, y0: number, y1: number, threshold: number): number {
+function colInk(data: Uint8ClampedArray, width: number, x: number, y0: number, y1: number, inkMax: number): number {
   let ink = 0;
   for (let y = y0; y <= y1; y += 1) {
-    if (!pixelIsBlank(data, (y * width + x) * 4, threshold)) ink += 1;
+    if (pixelIsInk(data, (y * width + x) * 4, inkMax)) ink += 1;
   }
   return ink / (y1 - y0 + 1);
 }
@@ -56,20 +61,20 @@ export function findContentBounds(
   data: Uint8ClampedArray,
   width: number,
   height: number,
-  threshold = BLANK_CHANNEL_MIN,
+  inkMax = INK_CHANNEL_MAX,
 ): PixelRect {
   const full: PixelRect = { x: 0, y: 0, width, height };
   if (width < 1 || height < 1) return full;
 
   let top = 0;
   let bottom = height - 1;
-  while (top < bottom && rowInk(data, width, top, threshold) <= BLANK_MAX_INK) top += 1;
-  while (bottom > top && rowInk(data, width, bottom, threshold) <= BLANK_MAX_INK) bottom -= 1;
+  while (top < bottom && rowInk(data, width, top, inkMax) <= BLANK_MAX_INK) top += 1;
+  while (bottom > top && rowInk(data, width, bottom, inkMax) <= BLANK_MAX_INK) bottom -= 1;
 
   let left = 0;
   let right = width - 1;
-  while (left < right && colInk(data, width, left, top, bottom, threshold) <= BLANK_MAX_INK) left += 1;
-  while (right > left && colInk(data, width, right, top, bottom, threshold) <= BLANK_MAX_INK) right -= 1;
+  while (left < right && colInk(data, width, left, top, bottom, inkMax) <= BLANK_MAX_INK) left += 1;
+  while (right > left && colInk(data, width, right, top, bottom, inkMax) <= BLANK_MAX_INK) right -= 1;
 
   const kept: PixelRect = { x: left, y: top, width: right - left + 1, height: bottom - top + 1 };
   if (kept.width < width * MIN_KEPT_FRACTION || kept.height < height * MIN_KEPT_FRACTION) return full;
