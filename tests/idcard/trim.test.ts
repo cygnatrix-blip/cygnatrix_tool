@@ -19,6 +19,7 @@ function raster(width: number, height: number, rowColour: (y: number, x: number)
 
 const WHITE: [number, number, number] = [255, 255, 255];
 const ORANGE: [number, number, number] = [240, 130, 30];
+const INK: [number, number, number] = [20, 20, 20];
 
 describe('findContentBounds', () => {
   it('trims white bands above and below a card that already spans the full width', () => {
@@ -43,31 +44,38 @@ describe('findContentBounds', () => {
     expect(bounds).toEqual({ x: 5, y: 0, width: width - 8 - 5, height });
   });
 
-  it("leaves a border on all four sides alone — that is the card's own margin", () => {
-    // The Ayushman back: white card with a quiet margin around its content.
-    // Shaving this off and stretching makes the text and QR bleed off every
-    // edge, which reads as the card being cropped.
-    const width = 60;
-    const height = 40;
-    const data = raster(width, height, (y, x) =>
-      y >= 4 && y < height - 5 && x >= 3 && x < width - 7 ? ORANGE : WHITE,
-    );
+  it("leaves a sparse text boundary alone — that is the card's own margin", () => {
+    // The Ayushman back: a white card whose content is text and a QR code, with
+    // a quiet margin around it. Measured on the real file, the first inked line
+    // inside that margin covers only 1–5% of the edge. Pulling in to it and
+    // stretching makes the content bleed off every edge, reading as cropped.
+    const width = 200;
+    const height = 100;
+    const data = raster(width, height, (y, x) => {
+      const insideMargin = y >= 8 && y < height - 8 && x >= 10 && x < width - 10;
+      const isTextRow = y % 6 < 2; // sparse lines of "text"
+      const isGlyph = x % 7 < 3;
+      return insideMargin && isTextRow && isGlyph ? INK : WHITE;
+    });
 
     expect(findContentBounds(data, width, height)).toEqual({ x: 0, y: 0, width, height });
   });
 
-  it("keeps the real back card's margin profile intact (58/63px sides, 19px bottom)", () => {
-    // Measured from the reported file: blank on left, right and bottom but not
-    // top — a border, not letterboxing, so nothing should be removed.
+  it('still trims when only one side has a dense card edge', () => {
+    // Each side is judged on its own: a solid band at the bottom is the card's
+    // edge, while the sparse text boundary at the top is not.
     const width = 200;
     const height = 100;
     const data = raster(width, height, (y, x) => {
-      if (y === 0 && x > 90 && x < 110) return [20, 20, 20]; // the dark sliver along the top edge
-      const inset = x >= 9 && x < width - 10 && y < height - 3;
-      return inset ? ORANGE : WHITE;
+      if (y >= height - 12 && y < height - 4) return ORANGE; // full-width band
+      if (y >= height - 4) return WHITE; // blank below the band
+      const isText = y >= 20 && y % 6 < 2 && x % 7 < 3 && x >= 10 && x < width - 10;
+      return isText ? INK : WHITE;
     });
 
-    expect(findContentBounds(data, width, height)).toEqual({ x: 0, y: 0, width, height });
+    const bounds = findContentBounds(data, width, height);
+    expect(bounds.y).toBe(0); // sparse top boundary — left alone
+    expect(bounds.height).toBe(height - 4); // dense bottom band — trimmed to it
   });
 
   it('never eats a coloured band — bright orange is not margin', () => {
