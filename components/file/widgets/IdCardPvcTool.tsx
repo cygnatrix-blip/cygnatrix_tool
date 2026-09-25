@@ -28,11 +28,6 @@ const FIT_MODES: { id: Cr80FitMode; label: string; help: string }[] = [
     label: 'Fill the frame',
     help: 'Fills the card edge to edge with no distortion, by trimming a thin sliver off two opposite sides if the shapes don\'t match. Check the preview to make sure nothing important (the photo or QR code) got trimmed.',
   },
-  {
-    id: 'contain',
-    label: 'Fit whole card (adds white bands)',
-    help: 'The only mode that adds white. Keeps the whole card visible with no cropping or distortion, but pads the difference in shape with white — on a typical card that is a band of roughly 10% of the height above and below, not a hair-thin edge. Pick "Stretch to fit" if you want no white at all.',
-  },
 ];
 
 type CornerId = 'tl' | 'tr' | 'br' | 'bl';
@@ -260,10 +255,9 @@ export function IdCardPvcTool() {
   const [docType, setDocType] = useState<IdCardKind>('aadhaar');
   const preset = IDCARD_PDF_PRESETS[docType];
   const [inputMode, setInputMode] = useState<'pdf' | 'photos'>('pdf');
-  // "Stretch" is the best default for a small ID card: no white border (like
-  // "contain") and no risk of cropping into edge content like a QR code or a
-  // line of text (like "cover") — just a mild, even squeeze, which stays
-  // fully legible. The other two stay one click away.
+  // "Stretch" is the best default for a small ID card: no risk of cropping
+  // into edge content like a QR code (unlike "cover") — just a mild, even
+  // squeeze, which stays fully legible.
   const [fitMode, setFitMode] = useState<Cr80FitMode>('stretch');
 
   const [busy, setBusy] = useState<string | null>(null);

@@ -3,30 +3,29 @@
 import { CR80, A4_SHEET } from '@/config/cr80';
 import type { PixelRect } from './region';
 
-export type Cr80FitMode = 'contain' | 'cover' | 'stretch';
+export type Cr80FitMode = 'cover' | 'stretch';
 
 /**
- * Pure: where a `srcW × srcH` image lands inside a CR80 canvas.
- *  - "contain": scales to fit entirely inside the card, padding with a thin
- *    white margin if the source's own proportions don't exactly match CR80 —
- *    nothing is ever cropped off, but a border can show.
- *  - "cover": scales to fill the card completely, cropping a sliver off two
- *    opposite edges if needed — no white margin, but risks trimming into
- *    edge content (a QR code or a line of text near the border).
+ * Pure: where a `srcW × srcH` image lands inside a CR80 canvas. Every mode
+ * covers the card completely — a white band can never appear, which is a hard
+ * requirement here. (A "contain" mode existed and was removed: it padded the
+ * difference in shape with white, ~69px top and bottom on a real card, and its
+ * reassuring name made it easy to pick by mistake.)
  *  - "stretch" (default): scales width and height independently to fill the
- *    card exactly — no margin and nothing cropped, at the cost of a mild,
- *    even squeeze/stretch when the source's proportions don't match CR80.
- *    For a small ID card (a face photo plus mostly text and a QR code, both
- *    still fully legible when evenly stretched) this is usually the best
- *    trade-off — never losing information beats a perfectly-proportioned
- *    photo on a card this size.
+ *    card exactly — nothing cropped and nothing padded, at the cost of a mild,
+ *    even squeeze when the source's proportions don't match CR80. For a small
+ *    ID card (a face photo plus mostly text and a QR code, all still legible
+ *    when evenly stretched) that beats losing information.
+ *  - "cover": fills the card with no distortion, cropping a sliver off two
+ *    opposite edges instead — which risks trimming into edge content like a
+ *    QR code.
  * No canvas — testable.
  */
 export function computeCr80Fit(srcW: number, srcH: number, mode: Cr80FitMode = 'stretch'): PixelRect {
   if (mode === 'stretch') {
     return { x: 0, y: 0, width: CR80.width, height: CR80.height };
   }
-  const scale = mode === 'cover' ? Math.max(CR80.width / srcW, CR80.height / srcH) : Math.min(CR80.width / srcW, CR80.height / srcH);
+  const scale = Math.max(CR80.width / srcW, CR80.height / srcH);
   const width = srcW * scale;
   const height = srcH * scale;
   return { x: (CR80.width - width) / 2, y: (CR80.height - height) / 2, width, height };
