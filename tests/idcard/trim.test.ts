@@ -143,6 +143,35 @@ describe('findContentBounds', () => {
     expect(findContentBounds(data, width, height).y).toBe(4);
   });
 
+  it('sees past a hairline frame drawn on the outer edge', () => {
+    // Real card exports carry a 1px border line right at the edge. Stopping on
+    // it leaves the whole blank margin just inside untouched, so the card keeps
+    // a white border however it is fitted.
+    const width = 200;
+    const height = 100;
+    const data = raster(width, height, (y, x) => {
+      const onFrame = y === 0 || y === height - 1 || x === 0 || x === width - 1;
+      if (onFrame) return INK;
+      return y >= 18 && y < height - 14 && x >= 12 && x < width - 16 ? ORANGE : WHITE;
+    });
+
+    expect(findContentBounds(data, width, height)).toEqual({
+      x: 12,
+      y: 18,
+      width: width - 16 - 12,
+      height: height - 14 - 18,
+    });
+  });
+
+  it('keeps content that genuinely runs to the edge', () => {
+    // A thick inked run at the edge is the card itself, not a frame.
+    const width = 200;
+    const height = 100;
+    const data = raster(width, height, () => ORANGE);
+
+    expect(findContentBounds(data, width, height)).toEqual({ x: 0, y: 0, width, height });
+  });
+
   it('falls back to the full rect for an entirely blank image', () => {
     const width = 25;
     const height = 25;

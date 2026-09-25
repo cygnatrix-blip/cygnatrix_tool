@@ -16,6 +16,8 @@ import type { PixelRect } from './region';
 const INK_CHANNEL_MAX = 200;
 /** A stray speck shouldn't save an otherwise-blank line. */
 const BLANK_MAX_INK = 0.01;
+/** An inked run this thin at the very edge is a border line, not content. */
+const FRAME_MAX_PX = 6;
 /** Below this the trim is treated as a misfire (e.g. an all-blank image). */
 const MIN_KEPT_FRACTION = 0.1;
 
@@ -57,6 +59,24 @@ function colInk(data: Uint8ClampedArray, width: number, x: number, y0: number, y
  * is inked, both misfired on real cards; filling completely is what was asked
  * for and is at least predictable.
  */
+/**
+ * Walks in from one edge and returns how many lines to drop.
+ *
+ * A card image often carries a hairline frame drawn right on its outer edge.
+ * Stopping at the first inked line would stop on that frame, leaving the whole
+ * blank margin just inside it untouched — the card then keeps a white border no
+ * matter what. So a thin inked run at the very edge is stepped over when blank
+ * follows it. Ink that keeps going past `FRAME_MAX_PX` is real content sitting
+ * at the edge, and nothing is dropped.
+ */
+function edgeOffset(lineInk: (i: number) => number, limit: number): number {
+  let i = 0;
+  while (i < limit && lineInk(i) > BLANK_MAX_INK && i < FRAME_MAX_PX) i += 1;
+  if (i > 0 && (i >= limit || lineInk(i) > BLANK_MAX_INK)) return 0;
+  while (i < limit && lineInk(i) <= BLANK_MAX_INK) i += 1;
+  return i;
+}
+
 export function findContentBounds(
   data: Uint8ClampedArray,
   width: number,
@@ -66,15 +86,15 @@ export function findContentBounds(
   const full: PixelRect = { x: 0, y: 0, width, height };
   if (width < 1 || height < 1) return full;
 
-  let top = 0;
-  let bottom = height - 1;
-  while (top < bottom && rowInk(data, width, top, inkMax) <= BLANK_MAX_INK) top += 1;
-  while (bottom > top && rowInk(data, width, bottom, inkMax) <= BLANK_MAX_INK) bottom -= 1;
+  const top = edgeOffset((i) => rowInk(data, width, i, inkMax), height);
+  const bottomDrop = edgeOffset((i) => rowInk(data, width, height - 1 - i, inkMax), height);
+  const bottom = height - 1 - bottomDrop;
+  if (bottom <= top) return full;
 
-  let left = 0;
-  let right = width - 1;
-  while (left < right && colInk(data, width, left, top, bottom, inkMax) <= BLANK_MAX_INK) left += 1;
-  while (right > left && colInk(data, width, right, top, bottom, inkMax) <= BLANK_MAX_INK) right -= 1;
+  const left = edgeOffset((i) => colInk(data, width, i, top, bottom, inkMax), width);
+  const rightDrop = edgeOffset((i) => colInk(data, width, width - 1 - i, top, bottom, inkMax), width);
+  const right = width - 1 - rightDrop;
+  if (right <= left) return full;
 
   const kept: PixelRect = { x: left, y: top, width: right - left + 1, height: bottom - top + 1 };
   if (kept.width < width * MIN_KEPT_FRACTION || kept.height < height * MIN_KEPT_FRACTION) return full;
