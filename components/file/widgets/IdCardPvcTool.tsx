@@ -221,6 +221,12 @@ interface PhotoState {
 }
 const EMPTY_PHOTO: PhotoState = { file: null, previewUrl: null, box: FULL_BOX, boxSource: 'full', detecting: false };
 
+interface PageInfo {
+  url: string;
+  width: number;
+  height: number;
+}
+
 const BOX_CAPTION: Record<BoxSource, string> = {
   full: 'No card edges were detected, so the whole photo is used. Drag the corners in if there\'s background around the card to trim off.',
   detected: 'The card\'s edges were detected automatically. Drag the corners if this isn\'t quite right.',
@@ -276,13 +282,17 @@ export function IdCardPvcTool() {
 
   /* ---------- PDF path ---------- */
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const pageCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [pageInfo, setPageInfo] = useState<{ url: string; width: number; height: number } | null>(null);
+  const pageCanvasesRef = useRef<HTMLCanvasElement[]>([]);
+  const [pages, setPages] = useState<PageInfo[] | null>(null);
   const [passwordState, setPasswordState] = useState<'none' | 'required' | 'incorrect'>('none');
   const [password, setPassword] = useState('');
   const [frontBox, setFrontBox] = useState<FracBox>(preset.front);
   const [backBox, setBackBox] = useState<FracBox>(preset.back);
-  const stageRef = useRef<HTMLDivElement>(null);
+  const frontStageRef = useRef<HTMLDivElement>(null);
+  const backStageRef = useRef<HTMLDivElement>(null);
+  // Two pages means one side per page (an official Ayushman download); a single
+  // page carries both, side by side, the way an e-Aadhaar does.
+  const sidesOnSeparatePages = (pages?.length ?? 0) > 1;
 
   /* ---------- Photos path ---------- */
   const [frontPhoto, setFrontPhoto] = useState<PhotoState>(EMPTY_PHOTO);
@@ -310,8 +320,8 @@ export function IdCardPvcTool() {
     const f = files[0];
     if (!f) return;
     setPdfFile(f);
-    pageCanvasRef.current = null;
-    setPageInfo(null);
+    pageCanvasesRef.current = [];
+    setPages(null);
     setPasswordState('none');
     setPassword('');
     setFrontBox(preset.front);
@@ -336,8 +346,8 @@ export function IdCardPvcTool() {
         )), 25000);
       });
       const work = (async () => {
-        const { renderPdfPage1 } = await import('@/lib/idcard/pdf-page');
-        return renderPdfPage1(file, { password: pw });
+        const { renderPdfPages } = await import('@/lib/idcard/pdf-page');
+        return renderPdfPages(file, { password: pw });
       })();
       const outcome = await Promise.race([work, timeout]);
       if (outcome.status === 'password') {
@@ -345,10 +355,20 @@ export function IdCardPvcTool() {
         return;
       }
       setPasswordState('none');
-      pageCanvasRef.current = outcome.page.canvas;
-      const blob = await new Promise<Blob | null>((r) => outcome.page.canvas.toBlob(r, 'image/jpeg', 0.85));
-      if (!blob) throw new Error('Could not preview this page.');
-      setPageInfo({ url: URL.createObjectURL(blob), width: outcome.page.width, height: outcome.page.height });
+      pageCanvasesRef.current = outcome.pages.map((p) => p.canvas);
+      const rendered: PageInfo[] = [];
+      for (const p of outcome.pages) {
+        const blob = await new Promise<Blob | null>((r) => p.canvas.toBlob(r, 'image/jpeg', 0.85));
+        if (!blob) throw new Error('Could not preview this page.');
+        rendered.push({ url: URL.createObjectURL(blob), width: p.width, height: p.height });
+      }
+      setPages(rendered);
+      // With a side per page each card already fills its own page, so the
+      // preset's split-one-page-in-half guess doesn't apply.
+      if (rendered.length > 1) {
+        setFrontBox(FULL_BOX);
+        setBackBox(FULL_BOX);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'That PDF could not be read.');
     } finally {
@@ -388,7 +408,13 @@ export function IdCardPvcTool() {
   };
 
   const extractFromPdf = async () => {
-    if (!pageCanvasRef.current || !pageInfo) return;
+    const frontPage = pages?.[0];
+    const frontCanvas = pageCanvasesRef.current[0];
+    // The back comes off page 2 when the PDF has one, otherwise off page 1
+    // alongside the front.
+    const backPage = sidesOnSeparatePages ? pages?.[1] : frontPage;
+    const backCanvas = sidesOnSeparatePages ? pageCanvasesRef.current[1] : frontCanvas;
+    if (!frontPage || !frontCanvas || !backPage || !backCanvas) return;
     setBusy('Extracting front & back…');
     setError(null);
     setSheet(null);
@@ -396,8 +422,8 @@ export function IdCardPvcTool() {
       const { cropRegion } = await import('@/lib/idcard/region');
       const { trimBlankBorder } = await import('@/lib/idcard/trim');
       const { renderToCr80 } = await import('@/lib/idcard/compose');
-      const frontCrop = trimBlankBorder(cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, frontBox));
-      const backCrop = cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, backBox);
+      const frontCrop = trimBlankBorder(cropRegion(frontCanvas, frontPage.width, frontPage.height, frontBox));
+      const backCrop = cropRegion(backCanvas, backPage.width, backPage.height, backBox);
       const [frontOut, backOut] = await Promise.all([
         canvasToOutput(renderToCr80(frontCrop, frontCrop.width, frontCrop.height, fitMode, true)),
         canvasToOutput(renderToCr80(backCrop, backCrop.width, backCrop.height, fitMode, false)),
@@ -555,19 +581,35 @@ export function IdCardPvcTool() {
             </div>
           )}
 
-          {pdfFile && passwordState === 'none' && !pageInfo && !error && (
+          {pdfFile && passwordState === 'none' && !pages && !error && (
             <ProgressIndicator value={40} label="Reading PDF…" />
           )}
 
-          {pageInfo && (
+          {pages && pages[0] && (
             <div className="space-y-3">
-              <p className="text-center text-xs text-ink-400">{preset.note}</p>
-              <div ref={stageRef} className="relative mx-auto max-w-2xl select-none rounded-xl border border-ink-200 dark:border-ink-800">
+              <p className="text-center text-xs text-ink-400">
+                {sidesOnSeparatePages
+                  ? 'This PDF has the front on page 1 and the back on page 2, so each box covers its own page. Drag them in if you need a tighter crop.'
+                  : preset.note}
+              </p>
+
+              <div ref={frontStageRef} className="relative mx-auto max-w-2xl select-none rounded-xl border border-ink-200 dark:border-ink-800">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={pageInfo.url} alt="PDF page preview" className="block w-full touch-none rounded-xl" draggable={false} />
-                <RegionBox stageRef={stageRef} box={frontBox} onChange={setFrontBox} color="#0d9089" label="Front" />
-                <RegionBox stageRef={stageRef} box={backBox} onChange={setBackBox} color="#d97706" label="Back" />
+                <img src={pages[0].url} alt="PDF page 1" className="block w-full touch-none rounded-xl" draggable={false} />
+                <RegionBox stageRef={frontStageRef} box={frontBox} onChange={setFrontBox} color="#0d9089" label="Front" />
+                {!sidesOnSeparatePages && (
+                  <RegionBox stageRef={frontStageRef} box={backBox} onChange={setBackBox} color="#d97706" label="Back" />
+                )}
               </div>
+
+              {sidesOnSeparatePages && pages[1] && (
+                <div ref={backStageRef} className="relative mx-auto max-w-2xl select-none rounded-xl border border-ink-200 dark:border-ink-800">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={pages[1].url} alt="PDF page 2" className="block w-full touch-none rounded-xl" draggable={false} />
+                  <RegionBox stageRef={backStageRef} box={backBox} onChange={setBackBox} color="#d97706" label="Back" />
+                </div>
+              )}
+
               <div className="flex justify-center">
                 <ProcessButton onClick={extractFromPdf} busy={!!busy}>
                   Extract front &amp; back
