@@ -172,6 +172,32 @@ describe('findContentBounds', () => {
     expect(findContentBounds(data, width, height)).toEqual({ x: 0, y: 0, width, height });
   });
 
+  it('trims transparent padding, which renders as white on the finished card', () => {
+    // A PNG exported with see-through margins. Raw RGB there is (0,0,0), so
+    // reading the pixel directly makes it look like solid black ink and it is
+    // never trimmed — then it composites onto the white card as a white bar.
+    const width = 200;
+    const height = 100;
+    const data = new Uint8ClampedArray(width * height * 4);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const i = (y * width + x) * 4;
+        const inCard = y >= 15 && y < height - 20;
+        data[i] = inCard ? 240 : 0;
+        data[i + 1] = inCard ? 130 : 0;
+        data[i + 2] = inCard ? 30 : 0;
+        data[i + 3] = inCard ? 255 : 0; // transparent outside the card
+      }
+    }
+
+    expect(findContentBounds(data, width, height)).toEqual({
+      x: 0,
+      y: 15,
+      width,
+      height: height - 20 - 15,
+    });
+  });
+
   it('falls back to the full rect for an entirely blank image', () => {
     const width = 25;
     const height = 25;

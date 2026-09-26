@@ -21,10 +21,18 @@ const FRAME_MAX_PX = 6;
 /** Below this the trim is treated as a misfire (e.g. an all-blank image). */
 const MIN_KEPT_FRACTION = 0.1;
 
+/**
+ * Judges the pixel as it will actually look once drawn, by compositing it onto
+ * the white card first. This is what a transparent margin needs: its raw RGB is
+ * (0,0,0), so reading it directly makes fully see-through padding look like
+ * solid black ink — untrimmable — and it then renders as a white bar on the
+ * finished card. Against white it correctly reads as blank.
+ */
 function pixelIsInk(data: Uint8ClampedArray, i: number, inkMax: number): boolean {
-  const r = data[i] ?? 0;
-  const g = data[i + 1] ?? 0;
-  const b = data[i + 2] ?? 0;
+  const a = (data[i + 3] ?? 255) / 255;
+  const r = (data[i] ?? 0) * a + 255 * (1 - a);
+  const g = (data[i + 1] ?? 0) * a + 255 * (1 - a);
+  const b = (data[i + 2] ?? 0) * a + 255 * (1 - a);
   return Math.min(r, g, b) < inkMax;
 }
 
@@ -45,21 +53,6 @@ function colInk(data: Uint8ClampedArray, width: number, x: number, y0: number, y
 }
 
 /**
- * Pure: the bounds of the inked content inside an RGBA raster.
- *
- * Every blank edge is removed, so the content reaches the card's edges with no
- * white left anywhere — the explicitly chosen behaviour, preferred over
- * keeping a print-safe margin. The consequence is accepted rather than
- * overlooked: content ends up flush with the edge, so a card printed and cut
- * from this can lose a hair of whatever sits at the boundary.
- *
- * Note this cannot distinguish background from a card's own quiet margin —
- * they are identical pixel for pixel — so a design margin is removed too.
- * Attempts to tell them apart by shape, and by how densely the boundary line
- * is inked, both misfired on real cards; filling completely is what was asked
- * for and is at least predictable.
- */
-/**
  * Walks in from one edge and returns how many lines to drop.
  *
  * A card image often carries a hairline frame drawn right on its outer edge.
@@ -77,6 +70,21 @@ function edgeOffset(lineInk: (i: number) => number, limit: number): number {
   return i;
 }
 
+/**
+ * Pure: the bounds of the inked content inside an RGBA raster.
+ *
+ * Every blank edge is removed, so the content reaches the card's edges with no
+ * white left anywhere — the explicitly chosen behaviour, preferred over keeping
+ * a print-safe margin. The consequence is accepted rather than overlooked:
+ * content ends up flush with the edge, so a card printed and cut from this can
+ * lose a hair of whatever sits at the boundary.
+ *
+ * Note this cannot distinguish background from a card's own quiet margin — they
+ * are identical pixel for pixel — so a design margin is removed too. Attempts to
+ * tell them apart by shape, and by how densely the boundary line is inked, both
+ * misfired on real cards; filling completely is what was asked for and is at
+ * least predictable.
+ */
 export function findContentBounds(
   data: Uint8ClampedArray,
   width: number,
