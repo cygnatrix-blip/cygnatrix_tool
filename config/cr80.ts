@@ -19,5 +19,13 @@ export const A4_SHEET = {
   width: mmToPx(210), // 2480
   height: mmToPx(297), // 3508
   /** Gap between the front and back cards on the sheet. */
+  gapMM: 5,
   gapPx: mmToPx(5),
+  /**
+   * Cards sit at the top of the sheet rather than the middle, which leaves the
+   * rest of the page free and puts them within reach of a guillotine. Kept
+   * clear of the ~5mm most printers can't reach.
+   */
+  topMarginMM: 12,
+  topMarginPx: mmToPx(12),
 } as const;

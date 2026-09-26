@@ -154,6 +154,8 @@ interface OutputCard {
   blob: Blob;
   url: string;
   bytes: number;
+  /** The print sheet also carries a PDF, which is what gets downloaded. */
+  pdf?: Blob;
 }
 
 async function canvasToOutput(canvas: HTMLCanvasElement): Promise<OutputCard> {
@@ -463,8 +465,15 @@ export function IdCardPvcTool() {
     setBusy('Building print sheet…');
     setError(null);
     try {
-      const { renderA4Sheet } = await import('@/lib/idcard/compose');
-      setSheet(await canvasToOutput(renderA4Sheet(front.canvas, back.canvas)));
+      // The raster is only for the on-page preview; the download is the PDF,
+      // where the cards are placed at their true physical size.
+      const [{ renderA4Sheet }, { buildA4SheetPdf }] = await Promise.all([
+        import('@/lib/idcard/compose'),
+        import('@/lib/idcard/sheet-pdf'),
+      ]);
+      const preview = await canvasToOutput(renderA4Sheet(front.canvas, back.canvas));
+      const pdf = await buildA4SheetPdf(front.canvas, back.canvas);
+      setSheet({ ...preview, pdf });
       track('tool_completed', { toolSlug: 'aadhaar-ayushman-pvc', category: 'pdf', meta: { doc: docType, part: 'sheet' } });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not build the print sheet.');
@@ -668,10 +677,17 @@ export function IdCardPvcTool() {
       {sheet && (
         <div className="card p-5">
           <Alert tone="success" className="mb-4">
-            Print sheet ready — front and back side by side on A4 at 300 DPI. Print at 100% scale (not "fit to page").
+            Print sheet ready — a PDF with the front and back side by side at the top of an A4 page, each at its exact
+            85.6 × 54 mm size. Print at 100% scale (not &quot;fit to page&quot;), then cut along the dashed guides.
           </Alert>
-          <DownloadButton onClick={() => downloadBlob(sheet.blob, `${docType}-pvc-sheet-${stamp()}.jpg`)}>
-            Download print-ready sheet
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={sheet.url}
+            alt="A4 print sheet preview"
+            className="mx-auto mb-4 w-full max-w-xs rounded-lg border border-ink-200 dark:border-ink-800"
+          />
+          <DownloadButton onClick={() => sheet.pdf && downloadBlob(sheet.pdf, `${docType}-pvc-sheet-${stamp()}.pdf`)}>
+            Download print-ready PDF
           </DownloadButton>
         </div>
       )}

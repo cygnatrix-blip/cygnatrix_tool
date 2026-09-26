@@ -86,11 +86,14 @@ export interface A4Layout {
   back: { x: number; y: number };
 }
 
-/** Pure: front + back CR80 cards centred side by side on the A4 sheet. Testable. */
+/**
+ * Pure: front + back CR80 cards side by side at the top of the A4 sheet,
+ * centred across the width. Testable.
+ */
 export function computeA4Layout(): A4Layout {
   const totalW = CR80.width * 2 + A4_SHEET.gapPx;
   const x0 = (A4_SHEET.width - totalW) / 2;
-  const y0 = (A4_SHEET.height - CR80.height) / 2;
+  const y0 = A4_SHEET.topMarginPx;
   return {
     front: { x: x0, y: y0 },
     back: { x: x0 + CR80.width + A4_SHEET.gapPx, y: y0 },

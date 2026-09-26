@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fracBoxToPixels } from '@/lib/idcard/region';
 import { computeCr80Fit, computeA4Layout } from '@/lib/idcard/compose';
+import { computeA4PdfLayout } from '@/lib/idcard/sheet-pdf';
 import { CR80, A4_SHEET } from '@/config/cr80';
 
 describe('CR80 / A4 pixel dimensions', () => {
@@ -71,5 +72,49 @@ describe('computeA4Layout', () => {
     expect(layout.front.x).toBeGreaterThanOrEqual(0);
     expect(layout.back.x + CR80.width).toBeLessThanOrEqual(A4_SHEET.width);
     expect(layout.front.y + CR80.height).toBeLessThanOrEqual(A4_SHEET.height);
+  });
+
+  it('sits the cards at the top of the sheet, not the middle', () => {
+    const layout = computeA4Layout();
+    expect(layout.front.y).toBe(A4_SHEET.topMarginPx);
+    // well above the centre, leaving the rest of the page free
+    expect(layout.front.y + CR80.height).toBeLessThan(A4_SHEET.height / 2);
+  });
+
+  it('centres the pair across the width', () => {
+    const layout = computeA4Layout();
+    const leftGap = layout.front.x;
+    const rightGap = A4_SHEET.width - (layout.back.x + CR80.width);
+    expect(leftGap).toBeCloseTo(rightGap, 5);
+  });
+});
+
+describe('computeA4PdfLayout', () => {
+  it('uses A4 in points', () => {
+    const l = computeA4PdfLayout();
+    expect(l.pageWidth).toBeCloseTo(595.28, 1);
+    expect(l.pageHeight).toBeCloseTo(841.89, 1);
+  });
+
+  it('sizes each card to a true 85.6 × 54 mm so it prints at the real size', () => {
+    const l = computeA4PdfLayout();
+    expect(l.cardWidth).toBeCloseTo((85.6 / 25.4) * 72, 3);
+    expect(l.cardHeight).toBeCloseTo((54 / 25.4) * 72, 3);
+  });
+
+  it('places the cards at the top of the page in PDF coordinates', () => {
+    const l = computeA4PdfLayout();
+    // PDF's origin is bottom-left, so "at the top" means a high y.
+    const topGap = l.pageHeight - (l.front.y + l.cardHeight);
+    expect(topGap).toBeCloseTo((A4_SHEET.topMarginMM / 25.4) * 72, 3);
+    expect(l.front.y).toBeGreaterThan(l.pageHeight / 2);
+    expect(l.front.y).toBe(l.back.y);
+  });
+
+  it('keeps both cards inside the page with the pair centred', () => {
+    const l = computeA4PdfLayout();
+    expect(l.front.x).toBeGreaterThan(0);
+    expect(l.back.x + l.cardWidth).toBeLessThanOrEqual(l.pageWidth);
+    expect(l.front.x).toBeCloseTo(l.pageWidth - (l.back.x + l.cardWidth), 5);
   });
 });
