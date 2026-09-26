@@ -2,6 +2,7 @@
 
 import { CR80, A4_SHEET } from '@/config/cr80';
 import type { PixelRect } from './region';
+import { trimBlankBorder } from './trim';
 
 export type Cr80FitMode = 'cover' | 'stretch';
 
@@ -31,7 +32,7 @@ export function computeCr80Fit(srcW: number, srcH: number, mode: Cr80FitMode = '
   return { x: (CR80.width - width) / 2, y: (CR80.height - height) / 2, width, height };
 }
 
-export function renderToCr80(source: CanvasImageSource, srcW: number, srcH: number, mode: Cr80FitMode = 'stretch'): HTMLCanvasElement {
+function drawCr80(source: CanvasImageSource, srcW: number, srcH: number, mode: Cr80FitMode): HTMLCanvasElement {
   const fit = computeCr80Fit(srcW, srcH, mode);
   const canvas = document.createElement('canvas');
   canvas.width = CR80.width;
@@ -46,6 +47,25 @@ export function renderToCr80(source: CanvasImageSource, srcW: number, srcH: numb
   // which is a non-uniform scale whenever the source aspect isn't 1011:638.
   ctx.drawImage(source, fit.x, fit.y, fit.width, fit.height);
   return canvas;
+}
+
+/**
+ * Renders the card, then checks the finished result and re-renders once if a
+ * blank band still reached an edge.
+ *
+ * Trimming the source cannot anticipate every way padding hides in a file —
+ * transparency, a border line, compression noise near white — and each one that
+ * slipped through showed up as a white bar on the card. Judging the rendered
+ * result instead needs no such foresight: whatever the cause, a blank edge is
+ * visible at this point and gets cut away, and the card is refilled from what's
+ * left. One extra pass is enough, since the second render starts from a raster
+ * with no blank edge.
+ */
+export function renderToCr80(source: CanvasImageSource, srcW: number, srcH: number, mode: Cr80FitMode = 'stretch'): HTMLCanvasElement {
+  const first = drawCr80(source, srcW, srcH, mode);
+  const trimmed = trimBlankBorder(first);
+  if (trimmed === first) return first;
+  return drawCr80(trimmed, trimmed.width, trimmed.height, mode);
 }
 
 export interface A4Layout {

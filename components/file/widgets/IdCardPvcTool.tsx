@@ -15,6 +15,17 @@ import { formatBytes } from '@/lib/format';
 import { track } from '@/lib/analytics/client';
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+/**
+ * Every download used to carry the same filename, so a browser saved each new
+ * one as "(1)", "(2)"… and the plain name in the folder stayed the very first
+ * file — making it easy to reopen a stale card and think nothing had changed.
+ */
+function stamp(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+}
 const FULL_BOX: FracBox = { x: 0, y: 0, w: 1, h: 1 };
 
 const FIT_MODES: { id: Cr80FitMode; label: string; help: string }[] = [
@@ -595,8 +606,8 @@ export function IdCardPvcTool() {
             "Fill the frame" there shouldn't be one.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            <DownloadButton onClick={() => downloadBlob(front.blob, `${docType}-front.jpg`)}>Download front</DownloadButton>
-            <DownloadButton onClick={() => downloadBlob(back.blob, `${docType}-back.jpg`)}>Download back</DownloadButton>
+            <DownloadButton onClick={() => downloadBlob(front.blob, `${docType}-front-${stamp()}.jpg`)}>Download front</DownloadButton>
+            <DownloadButton onClick={() => downloadBlob(back.blob, `${docType}-back-${stamp()}.jpg`)}>Download back</DownloadButton>
             <Button variant="secondary" onClick={makeSheet} disabled={!!busy}>
               <Printer className="h-4 w-4" /> Build A4 print sheet
             </Button>
@@ -609,7 +620,7 @@ export function IdCardPvcTool() {
           <Alert tone="success" className="mb-4">
             Print sheet ready — front and back side by side on A4 at 300 DPI. Print at 100% scale (not "fit to page").
           </Alert>
-          <DownloadButton onClick={() => downloadBlob(sheet.blob, `${docType}-pvc-sheet.jpg`)}>
+          <DownloadButton onClick={() => downloadBlob(sheet.blob, `${docType}-pvc-sheet-${stamp()}.jpg`)}>
             Download print-ready sheet
           </DownloadButton>
         </div>
