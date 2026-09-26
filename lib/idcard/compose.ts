@@ -50,8 +50,8 @@ function drawCr80(source: CanvasImageSource, srcW: number, srcH: number, mode: C
 }
 
 /**
- * Renders the card, then checks the finished result and re-renders once if a
- * blank band still reached an edge.
+ * Renders the card. With `trimBlankEdges`, the finished result is inspected and
+ * re-rendered once if a blank band still reached an edge.
  *
  * Trimming the source cannot anticipate every way padding hides in a file —
  * transparency, a border line, compression noise near white — and each one that
@@ -60,9 +60,22 @@ function drawCr80(source: CanvasImageSource, srcW: number, srcH: number, mode: C
  * visible at this point and gets cut away, and the card is refilled from what's
  * left. One extra pass is enough, since the second render starts from a raster
  * with no blank edge.
+ *
+ * Pass `trimBlankEdges: false` for a card whose face is mostly paper, like an
+ * Ayushman back. There the outermost ink is a line of text rather than the
+ * card's own boundary, so pulling in to it and refilling enlarges the content
+ * until it runs off the edges — the card reads as cropped. Such a card is
+ * better left whole, margin and all.
  */
-export function renderToCr80(source: CanvasImageSource, srcW: number, srcH: number, mode: Cr80FitMode = 'stretch'): HTMLCanvasElement {
+export function renderToCr80(
+  source: CanvasImageSource,
+  srcW: number,
+  srcH: number,
+  mode: Cr80FitMode = 'stretch',
+  trimBlankEdges = true,
+): HTMLCanvasElement {
   const first = drawCr80(source, srcW, srcH, mode);
+  if (!trimBlankEdges) return first;
   const trimmed = trimBlankBorder(first);
   if (trimmed === first) return first;
   return drawCr80(trimmed, trimmed.width, trimmed.height, mode);

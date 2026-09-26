@@ -366,20 +366,25 @@ export function IdCardPvcTool() {
   };
 
   /**
-   * The selection only has to be roughly right: any blank margin left inside
-   * it is trimmed off before the card is fitted, so the card itself — not the
-   * background around it — is what reaches the card's edges.
+   * The front is edge-to-edge artwork, so any blank margin around it is
+   * background and gets trimmed away — the card itself reaches the card's
+   * edges. The back is mostly paper, where the outermost ink is a line of text
+   * rather than the card's boundary; trimming to that and refilling enlarges
+   * the content until it runs off the edges, so the back is kept whole,
+   * margin and all.
    */
-  const processPhoto = async (photo: PhotoState): Promise<HTMLCanvasElement> => {
+  const processPhoto = async (photo: PhotoState, side: 'front' | 'back'): Promise<HTMLCanvasElement> => {
     if (!photo.file) throw new Error('Add both photos first.');
+    const fill = side === 'front';
     const { decodeImage } = await import('@/lib/image/canvas');
     const { cropRegion } = await import('@/lib/idcard/region');
     const { trimBlankBorder } = await import('@/lib/idcard/trim');
     const { renderToCr80 } = await import('@/lib/idcard/compose');
     const decoded = await decodeImage(photo.file);
-    const cropped = trimBlankBorder(cropRegion(decoded.bitmap, decoded.width, decoded.height, photo.box));
+    const region = cropRegion(decoded.bitmap, decoded.width, decoded.height, photo.box);
+    const cropped = fill ? trimBlankBorder(region) : region;
     decoded.bitmap.close();
-    return renderToCr80(cropped, cropped.width, cropped.height, fitMode);
+    return renderToCr80(cropped, cropped.width, cropped.height, fitMode, fill);
   };
 
   const extractFromPdf = async () => {
@@ -392,10 +397,10 @@ export function IdCardPvcTool() {
       const { trimBlankBorder } = await import('@/lib/idcard/trim');
       const { renderToCr80 } = await import('@/lib/idcard/compose');
       const frontCrop = trimBlankBorder(cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, frontBox));
-      const backCrop = trimBlankBorder(cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, backBox));
+      const backCrop = cropRegion(pageCanvasRef.current, pageInfo.width, pageInfo.height, backBox);
       const [frontOut, backOut] = await Promise.all([
-        canvasToOutput(renderToCr80(frontCrop, frontCrop.width, frontCrop.height, fitMode)),
-        canvasToOutput(renderToCr80(backCrop, backCrop.width, backCrop.height, fitMode)),
+        canvasToOutput(renderToCr80(frontCrop, frontCrop.width, frontCrop.height, fitMode, true)),
+        canvasToOutput(renderToCr80(backCrop, backCrop.width, backCrop.height, fitMode, false)),
       ]);
       setFront(frontOut);
       setBack(backOut);
@@ -412,7 +417,10 @@ export function IdCardPvcTool() {
     setError(null);
     setSheet(null);
     try {
-      const [frontCanvas, backCanvas] = await Promise.all([processPhoto(frontPhoto), processPhoto(backPhoto)]);
+      const [frontCanvas, backCanvas] = await Promise.all([
+        processPhoto(frontPhoto, 'front'),
+        processPhoto(backPhoto, 'back'),
+      ]);
       const [frontOut, backOut] = await Promise.all([canvasToOutput(frontCanvas), canvasToOutput(backCanvas)]);
       setFront(frontOut);
       setBack(backOut);
@@ -601,9 +609,9 @@ export function IdCardPvcTool() {
             </div>
           </div>
           <p className="mb-4 text-center text-xs text-ink-400">
-            This preview is shown at the card's true 1011×638px shape — the frame is CR80's own proportions, narrower
-            relative to its height than most card graphics. Look for a white bar at any edge: with "Stretch to fit" or
-            "Fill the frame" there shouldn't be one.
+            Shown at the card's true 1011×638px shape. The front is filled edge to edge with no white left anywhere.
+            The back is kept whole instead, since its face is mostly paper and cropping to the outermost line of text
+            would push the rest off the edges — so a thin white margin there is the card's own.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             <DownloadButton onClick={() => downloadBlob(front.blob, `${docType}-front-${stamp()}.jpg`)}>Download front</DownloadButton>
