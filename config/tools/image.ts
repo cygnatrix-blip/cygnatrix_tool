@@ -753,4 +753,118 @@ export const IMAGE_TOOLS: ToolConfig[] = [
     ],
     relatedTools: ['exam-photo-signature', 'passport-photo', 'compress-to-size', 'resize-image'],
   },
+  {
+    ...base,
+    id: 'image-to-stl',
+    name: 'Image to STL Converter',
+    slug: 'image-to-stl',
+    path: '/image/image-to-stl',
+    icon: 'box',
+    toolType: 'converter',
+    featured: true,
+    popular: false,
+    sortOrder: 11,
+    updatedAt: '2026-10-09',
+    shortDescription: 'Turn a photo or logo into a 3D-printable STL — lithophane, relief or cylinder.',
+    description:
+      'Convert any image into a watertight STL model for 3D printing. Make a backlit lithophane, an embossed relief or a full cylinder lamp shade, set the exact millimetre size and thickness, tune the tones, and preview the result in 3D before you download.',
+    keywords: [
+      'image to stl',
+      'photo to stl',
+      'lithophane generator',
+      'png to stl',
+      'jpg to stl',
+      'image to 3d model',
+      'heightmap to stl',
+      'stl converter',
+      'lithophane maker',
+      '3d print photo',
+    ],
+    seoTitle: 'Image to STL Converter — Photo to 3D Print & Lithophane Maker',
+    seoDescription:
+      'Free image to STL converter. Turn a JPG or PNG into a watertight 3D-printable model — lithophane, relief or cylinder — with millimetre sizing, thickness control and a live 3D preview. Runs in your browser, no upload.',
+    content: {
+      howItWorks: [
+        { title: 'Upload an image', body: 'Any JPG, PNG or WebP. Portraits, logos, line art and greyscale heightmaps all work.' },
+        { title: 'Pick what you are making', body: 'A backlit lithophane, or an embossed relief. Then choose a flat panel, a curved panel or a full cylinder.' },
+        { title: 'Set size and thickness', body: 'Enter the real width in millimetres and the thinnest and thickest material. A live thickness map shows exactly what will be carved.' },
+        { title: 'Build and download', body: 'The mesh is generated in a background worker, shown in a 3D preview you can rotate, and saved as a binary STL.' },
+      ],
+      features: [
+        'Lithophane and relief modes',
+        'Flat panel, curved panel and full cylinder',
+        'Exact millimetre width, height and thickness',
+        'Brightness, contrast, gamma and smoothing with a live thickness map',
+        'Solid border option to stop thin panels curling',
+        'Watertight, manifold mesh — every edge closed and every face outward',
+        'Binary or ASCII STL output',
+        'Rotatable 3D preview, triangle count, volume and filament estimate',
+        'Runs entirely in your browser — the image never leaves your device',
+      ],
+      sections: [
+        {
+          heading: 'What a lithophane actually is',
+          paragraphs: [
+            'A lithophane is a thin plate whose thickness varies with the image. Where the picture is dark the plate is thick and blocks light; where it is bright the plate is thin and lets light through. Under room lighting it looks like a plain grey slab — the image only appears once you put a light behind it. That surprises people the first time, so it is worth knowing before you judge the print.',
+            'The usual range is about 0.6 mm at the thinnest and 3 mm at the thickest. Go thinner than roughly 0.6 mm and most printers leave gaps; go much past 4 mm and almost no light gets through the dark areas, so the picture loses its highlights. Those are the defaults here, and they are a sensible starting point for white or natural PLA.',
+          ],
+        },
+        {
+          heading: 'Getting a print that reads well',
+          paragraphs: [
+            'Contrast matters far more than resolution. A photo that looks good on a bright screen often prints muddy, because a screen can show pure black next to pure white while a lithophane only has a couple of millimetres of material to work with. Raising contrast and nudging gamma so the midtones separate usually does more for the result than doubling the triangle count.',
+            'Print at 100% infill. Any gap inside the plate scatters light and shows up as a blotch. Slice with a small layer height, and for a flat lithophane stand the plate upright in your slicer rather than printing it lying down — the layer lines then run across the image instead of along it, which hides them.',
+          ],
+          bullets: [
+            'Crop tightly before uploading — detail outside the subject is wasted material',
+            'Faces work best as head-and-shoulders, not full-body',
+            'Add a solid border of 2–3 mm so the thin middle does not curl as it cools',
+            'Print in white, natural or a very light colour; dark filament blocks everything',
+          ],
+        },
+        {
+          heading: 'Reliefs, signs and heightmaps',
+          paragraphs: [
+            'Relief mode does the opposite of a lithophane: bright areas stand tallest and the whole thing sits on a solid base, so it reads in ordinary light with no backlighting at all. This is the mode for logos, nameplates, coins, moulds, stamps and signage.',
+            'It also handles greyscale heightmaps directly. If you have terrain data, a displacement map or a depth map exported from another tool, feed it in with smoothing at zero and the brightness values become height one-for-one.',
+          ],
+        },
+        {
+          heading: 'Why the mesh is watertight',
+          paragraphs: [
+            'A slicer needs a closed solid. If a model has a hole in its surface, or a face pointing the wrong way, the slicer cannot tell inside from outside and produces nonsense — often a print that looks fine for a few layers and then goes wrong. Many image-to-STL converters emit only the top surface, leaving you to repair it.',
+            'Every model here is generated as a complete solid: the displaced surface, a back or inner wall, and side walls joining them along shared edges. The build is checked automatically against the condition that proves it — in a closed, consistently wound mesh each directed edge appears exactly once, paired with its reverse on the neighbouring facet. That rules out both holes and flipped faces, so the file loads cleanly without a repair step.',
+          ],
+        },
+      ],
+      example: {
+        inputs: [
+          { label: 'Image', value: 'portrait.jpg — 2400×3000' },
+          { label: 'Mode', value: 'Lithophane, flat panel' },
+          { label: 'Width', value: '100 mm' },
+          { label: 'Thickness', value: '0.6–3 mm' },
+        ],
+        result: [
+          { label: 'Model', value: '100 × 125 × 3 mm' },
+          { label: 'Triangles', value: '≈ 257,000' },
+          { label: 'File', value: '12.3 MB binary STL' },
+        ],
+        walkthrough:
+          'The photo is reduced to a 400×500 grid of brightness samples, each averaged from a whole block of source pixels so no detail aliases away. Brightness is inverted — dark becomes thick — and mapped onto the 0.6 to 3 mm range. Those heights become the top surface; a flat back and four side walls close it into a solid, and the result is written as a binary STL.',
+      },
+    },
+    faq: [
+      { q: 'What is an STL file?', a: 'STL is the standard file every 3D printing slicer reads. It describes a model as a mesh of triangles. The files here are binary STL, which is the compact form — about six times smaller than ASCII STL for the same model, and understood by Cura, PrusaSlicer, Bambu Studio, Orca and the rest.' },
+      { q: 'Will the model print without repairing it first?', a: 'Yes. The mesh is generated as a closed, watertight solid with every face pointing outward, and that property is verified automatically rather than assumed. You should not need Meshmixer, Netfabb or your slicer\'s repair step.' },
+      { q: 'Why does my lithophane look like a grey slab?', a: 'Because it is one until it is lit from behind. The image is stored as varying thickness, not as colour, so it only appears when light passes through. Hold it up to a window or put an LED panel behind it.' },
+      { q: 'What size should I make it?', a: 'A 100 mm wide panel is the common choice for a framed photo and prints in a few hours. Bigger is not automatically better — the thickness range stays the same, so a very large lithophane has the same tonal depth spread over more area and can look washed out.' },
+      { q: 'Which filament should I use?', a: 'White or natural PLA is the standard. It diffuses light evenly and is cheap. Avoid dark or strongly coloured filament, and avoid anything with glitter or metallic flake, which blocks and scatters the light unevenly.' },
+      { q: 'Does it work with a photo that has a busy background?', a: 'It works, but the result is usually better if you crop in tight or remove the background first. Every part of the image becomes material, so background clutter competes with your subject for a very limited thickness range.' },
+      { q: 'What is the difference between the curved and cylinder shapes?', a: 'A curved panel is an arc that stands up on its own, good for putting in front of a lamp. A full cylinder wraps the image the whole way round and joins at the seam, which is what you want for a lamp shade or a tealight shroud.' },
+      { q: 'Can I use a greyscale heightmap instead of a photo?', a: 'Yes. Choose relief mode and set smoothing to zero, and brightness maps straight to height — white is tallest, black is the base. That is the right setup for terrain data and depth maps.' },
+      { q: 'How many triangles should I use?', a: 'Standard detail is right for almost everything. Detail finer than your nozzle can print is wasted — a 0.4 mm nozzle cannot reproduce features smaller than about 0.4 mm no matter how many triangles the file has. Ultra is only worth it with a 0.2 mm nozzle and a large model.' },
+      { q: 'Is my image uploaded anywhere?', a: 'No. The image is read, the mesh is built and the STL is written entirely in your browser, using a background Web Worker. Nothing is sent to a server and nothing is stored.' },
+    ],
+    relatedTools: ['compress-image', 'resize-image', 'jpg-to-png', 'png-to-jpg'],
+  },
 ];

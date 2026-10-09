@@ -30,6 +30,7 @@ import {
   Crop,
   CreditCard,
   Layers,
+  Box,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -64,6 +65,7 @@ const MAP: Record<string, LucideIcon> = {
   crop: Crop,
   'credit-card': CreditCard,
   layers: Layers,
+  box: Box,
 };
 
 export function ToolIcon({ name, className }: { name: string; className?: string }) {

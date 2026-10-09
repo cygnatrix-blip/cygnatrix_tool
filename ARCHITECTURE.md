@@ -275,6 +275,7 @@ Disclaimer component is mandatory on every `/finance/*` page and the category pa
 | Image Compressor | `browser-image-compression` (Web Worker). Quality slider, target size, before/after, preview. jpg/jpeg/png/webp. |
 | Image Resizer | Canvas draw. width/height/percent, lock aspect ratio, preview, format preserved. |
 | JPG→PNG / PNG→JPG / WebP Converter | Shared `lib/image/convert.ts` — `createImageBitmap` → canvas → `toBlob(mime, q)`. PNG→JPG: configurable flatten background (default white) for transparency. Converter architecture takes `{from, to}` so new pairs are trivial. |
+| Image → STL | `lib/stl/*`, all pure typed-array maths so it runs the same in a worker and under test. `field.ts` samples RGBA → 0..1 luminance (block-averaged, alpha composited onto white) then tone/blur/invert/border; `mesh.ts` turns that into a **closed solid** for flat / curved / cylinder; `stl.ts` writes binary or ASCII STL. Built in `lib/stl/build.worker.ts` (→ `public/workers/stl-build.js`), which returns the STL plus a coarser preview mesh. 3D preview is `components/file/StlPreview.tsx` — hand-written WebGL (Z-up turntable, flat shading), deliberately not three.js. |
 
 Shared file UI: `DragDropZone` → `FileList` → controls → `ProcessButton` → `ProgressIndicator`
 → result + `DownloadButton`. Object URLs revoked on unmount (`useObjectUrl`).

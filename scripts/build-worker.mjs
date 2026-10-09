@@ -25,6 +25,7 @@ mkdirSync(outDir, { recursive: true });
 const workers = [
   { entry: 'lib/image/compress-to-target.worker.ts', out: 'compress-to-target.js' },
   { entry: 'lib/scanner/detect.worker.ts', out: 'scanner-detect.js' },
+  { entry: 'lib/stl/build.worker.ts', out: 'stl-build.js' },
 ];
 
 for (const w of workers) {
