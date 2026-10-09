@@ -65,6 +65,36 @@ export function countTriangles(shape: StlShape, nx: number, ny: number): number 
   return 2 * (nx - 1) * (ny - 1) + 3 * perimeter;
 }
 
+/** A cell is solid only when all four of its corners are kept. */
+function cellSolid(mask: Uint8Array, nx: number, i: number, j: number): boolean {
+  return (
+    mask[j * nx + i] === 1 &&
+    mask[j * nx + i + 1] === 1 &&
+    mask[(j + 1) * nx + i] === 1 &&
+    mask[(j + 1) * nx + i + 1] === 1
+  );
+}
+
+/**
+ * Triangle count for a masked panel: four per solid cell (top and bottom),
+ * plus two for every cell edge that faces open space.
+ */
+export function countMaskedTriangles(mask: Uint8Array, nx: number, ny: number): number {
+  let cells = 0;
+  let walls = 0;
+  for (let j = 0; j < ny - 1; j += 1) {
+    for (let i = 0; i < nx - 1; i += 1) {
+      if (!cellSolid(mask, nx, i, j)) continue;
+      cells += 1;
+      if (i === 0 || !cellSolid(mask, nx, i - 1, j)) walls += 1;
+      if (i === nx - 2 || !cellSolid(mask, nx, i + 1, j)) walls += 1;
+      if (j === 0 || !cellSolid(mask, nx, i, j - 1)) walls += 1;
+      if (j === ny - 2 || !cellSolid(mask, nx, i, j + 1)) walls += 1;
+    }
+  }
+  return cells * 4 + walls * 2;
+}
+
 /** Physical height in mm, from the explicit value or the grid's aspect ratio. */
 export function resolveHeightMM(field: HeightField, opts: StlOptions): number {
   if (opts.heightMM && opts.heightMM > 0) return opts.heightMM;
@@ -144,7 +174,7 @@ function buildFlat(field: HeightField, opts: StlOptions): Mesh {
  * model stands on the bed the way it has to be printed. The inner wall stays at
  * a constant radius and the image displaces the outer one.
  */
-function buildArc(field: HeightField, opts: StlOptions, closed: boolean): Mesh {
+function buildArc(field: HeightField, opts: StlOptions, closed: boolean, concave = false): Mesh {
   const nx = field.width;
   const ny = field.height;
   const H = resolveHeightMM(field, opts);
@@ -163,7 +193,14 @@ function buildArc(field: HeightField, opts: StlOptions, closed: boolean): Mesh {
   const step = closed ? sweep / nx : sweep / (nx - 1);
   const theta = (i: number) => -sweep / 2 + i * step;
   const zAt = (j: number) => H - (j / (ny - 1)) * H;
-  const outerR = (i: number, j: number) => innerR + thicknessAt(field.data[j * nx + (i % nx)] ?? 0, opts);
+  const thick = (i: number, j: number) => thicknessAt(field.data[j * nx + (i % nx)] ?? 0, opts);
+  // Concave puts the image on the inside of the curve, cupping towards the
+  // viewer, which is how a lithophane is usually stood in front of a lamp.
+  // The displaced face then grows inward from a fixed outer shell.
+  const maxThick = opts.maxThicknessMM + (opts.mode === 'relief' ? Math.max(0, opts.baseThicknessMM) : 0);
+  const shellR = innerR + maxThick;
+  const outerR = (i: number, j: number) => (concave ? shellR : innerR + thick(i, j));
+  const faceR = (i: number, j: number) => (concave ? shellR - thick(i, j) : innerR);
 
   const pt = (r: number, t: number, z: number): [number, number, number] => [r * Math.cos(t), r * Math.sin(t), z];
 
@@ -182,10 +219,10 @@ function buildArc(field: HeightField, opts: StlOptions, closed: boolean): Mesh {
       // Outer skin faces away from the axis.
       sink.quad(oax, oay, oaz, odx, ody, odz, ocx, ocy, ocz, obx, oby, obz);
 
-      const [iax, iay, iaz] = pt(innerR, t1, zTop);
-      const [ibx, iby, ibz] = pt(innerR, t2, zTop);
-      const [icx, icy, icz] = pt(innerR, t2, zBot);
-      const [idx, idy, idz] = pt(innerR, t1, zBot);
+      const [iax, iay, iaz] = pt(faceR(i, j), t1, zTop);
+      const [ibx, iby, ibz] = pt(faceR(i2, j), t2, zTop);
+      const [icx, icy, icz] = pt(faceR(i2, j + 1), t2, zBot);
+      const [idx, idy, idz] = pt(faceR(i, j + 1), t1, zBot);
       // Inner skin faces the axis — the same quad wound the other way.
       sink.quad(iax, iay, iaz, ibx, iby, ibz, icx, icy, icz, idx, idy, idz);
     }
@@ -193,15 +230,15 @@ function buildArc(field: HeightField, opts: StlOptions, closed: boolean): Mesh {
     // Rims close the tube at top and bottom.
     const [otax, otay, otaz] = pt(outerR(i, 0), t1, zAt(0));
     const [otbx, otby, otbz] = pt(outerR(i2, 0), t2, zAt(0));
-    const [itax, itay, itaz] = pt(innerR, t1, zAt(0));
-    const [itbx, itby, itbz] = pt(innerR, t2, zAt(0));
+    const [itax, itay, itaz] = pt(faceR(i, 0), t1, zAt(0));
+    const [itbx, itby, itbz] = pt(faceR(i2, 0), t2, zAt(0));
     sink.quad(otax, otay, otaz, otbx, otby, otbz, itbx, itby, itbz, itax, itay, itaz);
 
     const jb = ny - 1;
     const [obax, obay, obaz] = pt(outerR(i, jb), t1, zAt(jb));
     const [obbx, obby, obbz] = pt(outerR(i2, jb), t2, zAt(jb));
-    const [ibax, ibay, ibaz] = pt(innerR, t1, zAt(jb));
-    const [ibbx, ibby, ibbz] = pt(innerR, t2, zAt(jb));
+    const [ibax, ibay, ibaz] = pt(faceR(i, jb), t1, zAt(jb));
+    const [ibbx, ibby, ibbz] = pt(faceR(i2, jb), t2, zAt(jb));
     sink.quad(obax, obay, obaz, ibax, ibay, ibaz, ibbx, ibby, ibbz, obbx, obby, obbz);
   }
 
@@ -214,15 +251,15 @@ function buildArc(field: HeightField, opts: StlOptions, closed: boolean): Mesh {
       const tStart = theta(0);
       const [s_ot_x, s_ot_y, s_ot_z] = pt(outerR(0, j), tStart, zTop);
       const [s_ob_x, s_ob_y, s_ob_z] = pt(outerR(0, j + 1), tStart, zBot);
-      const [s_it_x, s_it_y, s_it_z] = pt(innerR, tStart, zTop);
-      const [s_ib_x, s_ib_y, s_ib_z] = pt(innerR, tStart, zBot);
+      const [s_it_x, s_it_y, s_it_z] = pt(faceR(0, j), tStart, zTop);
+      const [s_ib_x, s_ib_y, s_ib_z] = pt(faceR(0, j + 1), tStart, zBot);
       sink.quad(s_ot_x, s_ot_y, s_ot_z, s_it_x, s_it_y, s_it_z, s_ib_x, s_ib_y, s_ib_z, s_ob_x, s_ob_y, s_ob_z);
 
       const tEnd = theta(nx - 1);
       const [e_ot_x, e_ot_y, e_ot_z] = pt(outerR(nx - 1, j), tEnd, zTop);
       const [e_ob_x, e_ob_y, e_ob_z] = pt(outerR(nx - 1, j + 1), tEnd, zBot);
-      const [e_it_x, e_it_y, e_it_z] = pt(innerR, tEnd, zTop);
-      const [e_ib_x, e_ib_y, e_ib_z] = pt(innerR, tEnd, zBot);
+      const [e_it_x, e_it_y, e_it_z] = pt(faceR(nx - 1, j), tEnd, zTop);
+      const [e_ib_x, e_ib_y, e_ib_z] = pt(faceR(nx - 1, j + 1), tEnd, zBot);
       sink.quad(e_ot_x, e_ot_y, e_ot_z, e_ob_x, e_ob_y, e_ob_z, e_ib_x, e_ib_y, e_ib_z, e_it_x, e_it_y, e_it_z);
     }
   }
@@ -230,10 +267,85 @@ function buildArc(field: HeightField, opts: StlOptions, closed: boolean): Mesh {
   return sink.finish();
 }
 
+/**
+ * A flat panel of any silhouette, driven by the field's mask.
+ *
+ * Unlike the plain rectangle, the back here is a grid of quads rather than a
+ * fan: a fan needs a convex boundary and a heart is not convex, and a panel
+ * with a hanging hole has two boundaries. Per-cell quads cost more triangles
+ * but close correctly whatever the outline does, and each boundary edge gets
+ * exactly one wall, which is what keeps it watertight.
+ */
+function buildMasked(field: HeightField, opts: StlOptions, mask: Uint8Array): Mesh {
+  const nx = field.width;
+  const ny = field.height;
+  const W = opts.widthMM;
+  const H = resolveHeightMM(field, opts);
+  const sink = new TriangleSink(countMaskedTriangles(mask, nx, ny));
+
+  const xAt = (i: number) => -W / 2 + (i / (nx - 1)) * W;
+  const yAt = (j: number) => H / 2 - (j / (ny - 1)) * H;
+  const zAt = (i: number, j: number) => thicknessAt(field.data[j * nx + i] ?? 0, opts);
+
+  for (let j = 0; j < ny - 1; j += 1) {
+    for (let i = 0; i < nx - 1; i += 1) {
+      if (!cellSolid(mask, nx, i, j)) continue;
+      const x0 = xAt(i), x1 = xAt(i + 1);
+      const y0 = yAt(j), y1 = yAt(j + 1);
+
+      sink.quad(
+        x0, y1, zAt(i, j + 1),
+        x1, y1, zAt(i + 1, j + 1),
+        x1, y0, zAt(i + 1, j),
+        x0, y0, zAt(i, j),
+      );
+      // Back face, wound the other way so it points at -z.
+      sink.quad(x0, y0, 0, x1, y0, 0, x1, y1, 0, x0, y1, 0);
+
+      // One wall per edge that faces open space, wound outward.
+      if (i === 0 || !cellSolid(mask, nx, i - 1, j)) {
+        sink.quad(x0, y0, 0, x0, y1, 0, x0, y1, zAt(i, j + 1), x0, y0, zAt(i, j));
+      }
+      if (i === nx - 2 || !cellSolid(mask, nx, i + 1, j)) {
+        sink.quad(x1, y1, 0, x1, y0, 0, x1, y0, zAt(i + 1, j), x1, y1, zAt(i + 1, j + 1));
+      }
+      if (j === 0 || !cellSolid(mask, nx, i, j - 1)) {
+        sink.quad(x1, y0, 0, x0, y0, 0, x0, y0, zAt(i, j), x1, y0, zAt(i + 1, j));
+      }
+      if (j === ny - 2 || !cellSolid(mask, nx, i, j + 1)) {
+        sink.quad(x0, y1, 0, x1, y1, 0, x1, y1, zAt(i + 1, j + 1), x0, y1, zAt(i, j + 1));
+      }
+    }
+  }
+
+  return sink.finish();
+}
+
+/**
+ * Stands a flat panel on its bottom edge: the orientation a lithophane should
+ * actually be printed in, so the layer lines run across the image rather than
+ * along it. Rotating -90° about X maps +Y to +Z and +Z to -Y; the model is
+ * then lifted back onto the bed.
+ */
+function standUpright(mesh: Mesh): Mesh {
+  const p = mesh.positions;
+  let minZ = Infinity;
+  for (let i = 0; i < mesh.triangleCount * 9; i += 3) {
+    const y = p[i + 1] ?? 0;
+    const z = p[i + 2] ?? 0;
+    p[i + 1] = -z;
+    p[i + 2] = y;
+    if (y < minZ) minZ = y;
+  }
+  for (let i = 0; i < mesh.triangleCount * 9; i += 3) p[i + 2] = (p[i + 2] ?? 0) - minZ;
+  return mesh;
+}
+
 export function buildMesh(field: HeightField, opts: StlOptions): Mesh {
-  if (opts.shape === 'cylinder') return buildArc(field, opts, true);
-  if (opts.shape === 'curved') return buildArc(field, opts, false);
-  return buildFlat(field, opts);
+  if (opts.shape === 'cylinder') return buildArc(field, opts, true, opts.concave);
+  if (opts.shape === 'curved') return buildArc(field, opts, false, opts.concave);
+  const mesh = field.mask ? buildMasked(field, opts, field.mask) : buildFlat(field, opts);
+  return opts.orientUpright ? standUpright(mesh) : mesh;
 }
 
 export interface MeshBounds {
